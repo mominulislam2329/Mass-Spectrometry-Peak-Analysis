@@ -1,0 +1,2567 @@
+---
+title: "Peak Intensity Analysis Part II"
+author: "Mominul Islam"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Background
+
+Using Liquid chromatography-tandem mass spectrometry, a chemist is analyzing the chemical make up of Three pills from three different brands of aspirin. Each Pill has been analyzed in triplicate- this means that we measured the same pill three times for one peak. In our data set, we have data for seven peaks. 
+
+## Objective
+
+Our mission objective is to find out if there is a difference between the the three brands of pills for each peak.
+
+## Data
+
+Our data contains Three pills from three different brands of aspirin with intensities of three aliqouts for each of the 3 pills. It also contains blank time and retention time for which the intensity was measured. 
+
+## Algorithm
+
+First we performed exploratory data analysis for every pills of each brand under every peaks. For the exploratory data analysis, we plotted the Intensity vs Time Plot, QQPlot, Boxplots and SmoothScattered plot. From the the Intensity vs Time Plot, we obeserved the peak formed during the spectrometry, QQplots shows the the type of distribution, from Boxplot we can see the distribution of numerical data and skewness through displaying the data quartiles (or percentiles) and averages.And at last we performed Smoothscatterd plot which produces a smoothed color density representation of a scatterplot, obtained through a (2D) kernel density estimate.
+
+Next, to calculate the area under a peak (AUP)- we took the mean of the intensity values for a given aliqout for each pills of every brand. Then we took the means for 3 aliqout intensities for each type of pills which gave is 9 total averages of intensities for 3 pills of each brand. Then we performed one way anova for each peak. ANOVA tells us if there are differences among group means, but not what the differences are. To find out which groups are statistically different from one another, Later we performed  a Tukey’s Honestly Significant Difference (Tukey’s HSD) post-hoc test for pairwise comparisons.
+
+
+# Analysis Peak 136.5 92.90
+
+```{r, echo= FALSE, warning=FALSE}
+#Loading Data for Peak 136.5 92.90
+library(readxl)
+BP_136 <- read_excel("Bayer Pill 136.5 92.90 new.xlsx")
+PV_136 <- read_excel("P.V Pill 136.5 92.90 New.xlsx") 
+WL_136 <- read_excel("Wal Pill 136.5 92.90 New.xlsx") 
+```
+
+
+```{r, echo= FALSE, warning=FALSE}
+#Ploting Intensity vs Time for Bayer Pill 1 Aliquots 
+par(mfrow = c(1, 3))
+plot(BP_136$`BP1 Aliquot 1 time`,BP_136$`BP1 Aliquot 1 intensity`, type= 'b', col = 'blue', pch = 19, main = 'BP1 Aliquot 1', xlab = 'Time', ylab = 'Intensity' )
+plot(BP_136$`BP1 Ali 2 time`,BP_136$`BP1 Ali 2 intensity`, type= 'b', col = 'blue', pch = 19, main = 'BP1 Aliquot 2', xlab = 'Time', ylab = 'Intensity' )
+plot(BP_136$`BP1 Ali 3 time`,BP_136$`BP1 Ali 3 intensity`, type= 'b', col = 'blue', pch = 19, main = 'BP1 Aliquot 3', xlab = 'Time', ylab = 'Intensity' )
+
+#Ploting QQPlot for Bayer Pill 1 Aliquots
+par(mfrow = c(1, 3))
+qqnorm(BP_136$`BP1 Aliquot 1 intensity`, pch = 1, frame = FALSE, main = 'QQ plot for BP1 Ali1' )
+qqline(BP_136$`BP1 Aliquot 1 intensity`, col = "steelblue", lwd = 2)
+qqnorm(BP_136$`BP1 Ali 2 intensity`, pch = 1, frame = FALSE, main = 'QQ plot for BP1 Ali2' )
+qqline(BP_136$`BP1 Ali 2 intensity`, col = "steelblue", lwd = 2)
+qqnorm(BP_136$`BP1 Ali 3 intensity`, pch = 1, frame = FALSE, main = 'QQ plot for BP1 Ali3' )
+qqline(BP_136$`BP1 Ali 3 intensity`, col = "steelblue", lwd = 2)
+
+#Ploting Boxplots for Individual Bayer Pill 1 Aliquots
+par(mfrow = c(1, 3))
+boxplot(BP_136$`BP1 Aliquot 1 intensity`,main = 'Boxplot for BP1 Ali1')
+boxplot(BP_136$`BP1 Ali 2 intensity`,main = 'Boxplot for BP1 Ali2')
+boxplot(BP_136$`BP1 Ali 3 intensity`,main = 'Boxplot for BP1 Ali3')
+
+#Ploting SmoothScattered Plot for Individual Bayer Pill 1 Aliquots
+par(mfrow = c(1, 3))
+smoothScatter(BP_136$`BP1 Aliquot 1 intensity`,main = 'SmoothScattered Plot for BP1 Ali1')
+smoothScatter(BP_136$`BP1 Ali 2 intensity`,main = 'SmoothScattered Plot for BP1 Ali2')
+smoothScatter(BP_136$`BP1 Ali 3 intensity`,main = 'SmoothScattered Plot for BP1 Ali3')
+
+#Ploting Intensity vs Time for Bayer Pill 2 Aliquots 
+par(mfrow = c(1, 3))
+plot(BP_136$`BP2 Aliquot 1 time`,BP_136$`BP2 Aliquot 1 intensity`, type= 'b', col = 'green', pch = 19, main = 'BP2 Aliquot 1', xlab = 'Time', ylab = 'Intensity' )
+plot(BP_136$`BP2 Ali 2 time`,BP_136$`BP2 Ali 2 intensity`, type= 'b', col = 'green', pch = 19, main = 'BP2 Aliquot 2', xlab = 'Time', ylab = 'Intensity' )
+plot(BP_136$`BP2 Ali 3 time`,BP_136$`BP2 Ali 3 intensity`, type= 'b', col = 'green', pch = 19, main = 'BP2 Aliquot 3', xlab = 'Time', ylab = 'Intensity' )
+
+
+#Ploting QQPlot for Bayer Pill 2 Aliquots
+par(mfrow = c(1, 3))
+qqnorm(BP_136$`BP2 Aliquot 1 intensity`, pch = 1, frame = FALSE, main = 'QQ plot for BP2 Ali1' )
+qqline(BP_136$`BP2 Aliquot 1 intensity`, col = "steelblue", lwd = 2)
+qqnorm(BP_136$`BP2 Ali 2 intensity`, pch = 1, frame = FALSE, main = 'QQ plot for BP2 Ali2' )
+qqline(BP_136$`BP2 Ali 2 intensity`, col = "steelblue", lwd = 2)
+qqnorm(BP_136$`BP2 Ali 3 intensity`, pch = 1, frame = FALSE, main = 'QQ plot for BP2 Ali3' )
+qqline(BP_136$`BP2 Ali 3 intensity`, col = "steelblue", lwd = 2)
+
+#Ploting Boxplots for Individual Bayer Pill 2 Aliquots
+par(mfrow = c(1, 3))
+boxplot(BP_136$`BP2 Aliquot 1 intensity`,main = 'Boxplot for BP2 Ali1')
+boxplot(BP_136$`BP2 Ali 2 intensity`,main = 'Boxplot for BP2 Ali2')
+boxplot(BP_136$`BP2 Ali 3 intensity`,main = 'Boxplot for BP2 Ali3')
+
+#Ploting SmoothScattered Plot for Individual Bayer Pill 2 Aliquots
+par(mfrow = c(1, 3))
+smoothScatter(BP_136$`BP2 Aliquot 1 intensity`,main = 'SmoothScattered Plot for BP2 Ali1')
+smoothScatter(BP_136$`BP2 Ali 2 intensity`,main = 'SmoothScattered Plot for BP2 Ali2')
+smoothScatter(BP_136$`BP2 Ali 3 intensity`,main = 'SmoothScattered Plot for BP2 Ali3')
+
+
+#Ploting Intensity vs Time for Bayer Pill 3 Aliquots 
+par(mfrow = c(1, 3))
+plot(BP_136$`BP3 Aliquot 1 time`,BP_136$`BP3 Aliquot 1 intensity`, type= 'b', col = 'black', pch = 19, main = 'BP3 Aliquot 1', xlab = 'Time', ylab = 'Intensity' )
+plot(BP_136$`BP3 Ali 2 time`,BP_136$`BP3 Ali 2 intensity`, type= 'b', col = 'black', pch = 19, main = 'BP3 Aliquot 2', xlab = 'Time', ylab = 'Intensity' )
+plot(BP_136$`BP3 Ali 3 time`,BP_136$`BP3 Ali 3 intensity`, type= 'b', col = 'black', pch = 19, main = 'BP3 Aliquot 3', xlab = 'Time', ylab = 'Intensity' )
+
+#Ploting QQPlot for Bayer Pill 3 Aliquots
+par(mfrow = c(1, 3))
+qqnorm(BP_136$`BP3 Aliquot 1 intensity`, pch = 1, frame = FALSE, main = 'QQ plot for BP3 Ali1' )
+qqline(BP_136$`BP3 Aliquot 1 intensity`, col = "steelblue", lwd = 2)
+qqnorm(BP_136$`BP3 Ali 2 intensity`, pch = 1, frame = FALSE, main = 'QQ plot for BP3 Ali2' )
+qqline(BP_136$`BP3 Ali 2 intensity`, col = "steelblue", lwd = 2)
+qqnorm(BP_136$`BP3 Ali 3 intensity`, pch = 1, frame = FALSE, main = 'QQ plot for BP3 Ali3' )
+qqline(BP_136$`BP3 Ali 3 intensity`, col = "steelblue", lwd = 2)
+
+#Ploting Boxplots for Individual Bayer Pill 3 Aliquots
+par(mfrow = c(1, 3))
+boxplot(BP_136$`BP3 Aliquot 1 intensity`,main = 'Boxplot for BP3 Ali1')
+boxplot(BP_136$`BP3 Ali 2 intensity`,main = 'Boxplot for BP3 Ali2')
+boxplot(BP_136$`BP3 Ali 3 intensity`,main = 'Boxplot for BP3 Ali3')
+
+#Ploting SmoothScattered Plot for Individual Bayer Pill 3 Aliquots
+par(mfrow = c(1, 3))
+smoothScatter(BP_136$`BP3 Aliquot 1 intensity`,main = 'SmoothScattered Plot for BP3 Ali1')
+smoothScatter(BP_136$`BP3 Ali 2 intensity`,main = 'SmoothScattered Plot for BP3 Ali2')
+smoothScatter(BP_136$`BP3 Ali 3 intensity`,main = 'SmoothScattered Plot for BP3 Ali3')
+
+```
+
+```{r, echo= FALSE, warning=FALSE}
+#Getting Average for Intensities
+
+#Aliquote 1
+BP1_ali1_136 <- mean(na.omit(BP_136$`BP1 Aliquot 1 intensity`))
+BP2_ali1_136 <- mean(na.omit(BP_136$`BP2 Aliquot 1 intensity`))
+BP3_ali1_136 <- mean(na.omit(BP_136$`BP3 Aliquot 1 intensity`))
+#Aliquote 2
+BP1_ali2_136 <- mean(na.omit(BP_136$`BP1 Ali 2 intensity`))
+BP2_ali2_136 <- mean(na.omit(BP_136$`BP2 Ali 2 intensity`))
+BP3_ali2_136 <- mean(na.omit(BP_136$`BP3 Ali 2 intensity`))
+#Aliquote 3
+BP1_ali3_136 <- mean(na.omit(BP_136$`BP1 Ali 3 intensity`))
+BP2_ali3_136 <- mean(na.omit(BP_136$`BP2 Ali 3 intensity`))
+BP3_ali3_136 <- mean(na.omit(BP_136$`BP3 Ali 3 intensity`))
+#Average Intensity for Bayer Pills
+BP1_136 <- mean(BP1_ali1_136, BP1_ali2_136, BP1_ali3_136)
+BP2_136 <- mean(BP2_ali1_136, BP2_ali2_136, BP2_ali3_136)
+BP3_136 <- mean(BP3_ali1_136, BP3_ali2_136, BP3_ali3_136)
+
+```
+
+```{r, echo= FALSE, warning=FALSE}
+#Ploting Intensity vs Time for PV 1 Aliquots 
+par(mfrow = c(1, 3))
+plot(PV_136$`PV1 Aliquot 1 time`,PV_136$`PV1 Aliquot 1 intensity`, type= 'b', col = 'blue', pch = 19, main = 'PV1 Aliquot 1', xlab = 'Time', ylab = 'Intensity' )
+plot(PV_136$`PV1 Ali 2 time`,PV_136$`PV1 Ali 2 intensity`, type= 'b', col = 'blue', pch = 19, main = 'PV1 Aliquot 2', xlab = 'Time', ylab = 'Intensity' )
+plot(PV_136$`PV1 Ali 3 time`,PV_136$`PV1 Ali 3 intensity`, type= 'b', col = 'blue', pch = 19, main = 'PV1 Aliquot 3', xlab = 'Time', ylab = 'Intensity' )
+
+#Ploting QQPlot for PV 1 Aliquots
+par(mfrow = c(1, 3))
+qqnorm(PV_136$`PV1 Aliquot 1 intensity`, pch = 1, frame = FALSE, main = 'QQ plot for PV1 Ali1' )
+qqline(PV_136$`PV1 Aliquot 1 intensity`, col = "steelblue", lwd = 2)
+qqnorm(PV_136$`PV1 Ali 2 intensity`, pch = 1, frame = FALSE, main = 'QQ plot for PV1 Ali2' )
+qqline(PV_136$`PV1 Ali 2 intensity`, col = "steelblue", lwd = 2)
+qqnorm(PV_136$`PV1 Ali 3 intensity`, pch = 1, frame = FALSE, main = 'QQ plot for PV1 Ali3' )
+qqline(PV_136$`PV1 Ali 3 intensity`, col = "steelblue", lwd = 2)
+
+#Ploting Boxplots for Individual PV 1 Aliquots
+par(mfrow = c(1, 3))
+boxplot(PV_136$`PV1 Aliquot 1 intensity`,main = 'Boxplot for PV1 Ali1')
+boxplot(PV_136$`PV1 Ali 2 intensity`,main = 'Boxplot for PV1 Ali2')
+boxplot(PV_136$`PV1 Ali 3 intensity`,main = 'Boxplot for PV1 Ali3')
+
+#Ploting SmoothScattered Plot for Individual PV 1 Aliquots
+par(mfrow = c(1, 3))
+smoothScatter(PV_136$`PV1 Aliquot 1 intensity`,main = 'SmoothScattered Plot for PV1 Ali1')
+smoothScatter(PV_136$`PV1 Ali 2 intensity`,main = 'SmoothScattered Plot for PV1 Ali2')
+smoothScatter(PV_136$`PV1 Ali 3 intensity`,main = 'SmoothScattered Plot for PV1 Ali3')
+
+
+#Ploting Intensity vs Time for PV 2 Aliquots 
+par(mfrow = c(1, 3))
+plot(PV_136$`PV2 Aliquot 1 time`,PV_136$`PV2 Aliquot 1 intensity`, type= 'b', col = 'green', pch = 19, main = 'PV2 Aliquot 1', xlab = 'Time', ylab = 'Intensity' )
+plot(PV_136$`PV2 Ali 2 time`,PV_136$`PV2 Ali 2 intensity`, type= 'b', col = 'green', pch = 19, main = 'PV2 Aliquot 2', xlab = 'Time', ylab = 'Intensity' )
+plot(PV_136$`PV2 Ali 3 time`,PV_136$`PV2 Ali 3 intensity`, type= 'b', col = 'green', pch = 19, main = 'PV2 Aliquot 3', xlab = 'Time', ylab = 'Intensity' )
+
+#Ploting QQPlot for PV 2 Aliquots
+par(mfrow = c(1, 3))
+qqnorm(PV_136$`PV2 Aliquot 1 intensity`, pch = 1, frame = FALSE, main = 'QQ plot for PV2 Ali1' )
+qqline(PV_136$`PV2 Aliquot 1 intensity`, col = "steelblue", lwd = 2)
+qqnorm(PV_136$`PV2 Ali 2 intensity`, pch = 1, frame = FALSE, main = 'QQ plot for PV2 Ali2' )
+qqline(PV_136$`PV2 Ali 2 intensity`, col = "steelblue", lwd = 2)
+qqnorm(PV_136$`PV2 Ali 3 intensity`, pch = 1, frame = FALSE, main = 'QQ plot for PV2 Ali3' )
+qqline(PV_136$`PV2 Ali 3 intensity`, col = "steelblue", lwd = 2)
+
+#Ploting Boxplots for Individual PV 2 Aliquots
+par(mfrow = c(1, 3))
+boxplot(PV_136$`PV2 Aliquot 1 intensity`,main = 'Boxplot for PV2 Ali1')
+boxplot(PV_136$`PV2 Ali 2 intensity`,main = 'Boxplot for PV2 Ali2')
+boxplot(PV_136$`PV2 Ali 3 intensity`,main = 'Boxplot for PV2 Ali3')
+
+#Ploting SmoothScattered Plot for Individual PV 2 Aliquots
+par(mfrow = c(1, 3))
+smoothScatter(PV_136$`PV2 Aliquot 1 intensity`,main = 'SmoothScattered Plot for PV2 Ali1')
+smoothScatter(PV_136$`PV2 Ali 2 intensity`,main = 'SmoothScattered Plot for PV2 Ali2')
+smoothScatter(PV_136$`PV2 Ali 3 intensity`,main = 'SmoothScattered Plot for PV2 Ali3')
+
+
+#Ploting Intensity vs Time for PV 3 Aliquots 
+par(mfrow = c(1, 3))
+plot(PV_136$`PV3 Aliquot 1 time`,PV_136$`PV3 Aliquot 1 intensity`, type= 'b', col = 'black', pch = 19, main = 'PV3 Aliquot 1', xlab = 'Time', ylab = 'Intensity' )
+plot(PV_136$`PV3 Ali 2 time`,PV_136$`PV3 Ali 2 intensity`, type= 'b', col = 'black', pch = 19, main = 'PV3 Aliquot 2', xlab = 'Time', ylab = 'Intensity' )
+plot(PV_136$`PV3 Ali 3 time`,PV_136$`PV3 Ali 3 intensity`, type= 'b', col = 'black', pch = 19, main = 'PV3 Aliquot 3', xlab = 'Time', ylab = 'Intensity' )
+
+#Ploting QQPlot for PV 3 Aliquots
+par(mfrow = c(1, 3))
+qqnorm(PV_136$`PV3 Aliquot 1 intensity`, pch = 1, frame = FALSE, main = 'QQ plot for PV3 Ali1' )
+qqline(PV_136$`PV3 Aliquot 1 intensity`, col = "steelblue", lwd = 2)
+qqnorm(PV_136$`PV3 Ali 2 intensity`, pch = 1, frame = FALSE, main = 'QQ plot for PV3 Ali2' )
+qqline(PV_136$`PV3 Ali 2 intensity`, col = "steelblue", lwd = 2)
+qqnorm(PV_136$`PV3 Ali 3 intensity`, pch = 1, frame = FALSE, main = 'QQ plot for PV3 Ali3' )
+qqline(PV_136$`PV3 Ali 3 intensity`, col = "steelblue", lwd = 2)
+
+#Ploting Boxplots for Individual PV 3 Aliquots
+par(mfrow = c(1, 3))
+boxplot(PV_136$`PV3 Aliquot 1 intensity`,main = 'Boxplot for PV3 Ali1')
+boxplot(PV_136$`PV3 Ali 2 intensity`,main = 'Boxplot for PV3 Ali2')
+boxplot(PV_136$`PV3 Ali 3 intensity`,main = 'Boxplot for PV3 Ali3')
+
+#Ploting SmoothScattered Plot for Individual PV 3 Aliquots
+par(mfrow = c(1, 3))
+smoothScatter(PV_136$`PV3 Aliquot 1 intensity`,main = 'SmoothScattered Plot for PV3 Ali1')
+smoothScatter(PV_136$`PV3 Ali 2 intensity`,main = 'SmoothScattered Plot for PV3 Ali2')
+smoothScatter(PV_136$`PV3 Ali 3 intensity`,main = 'SmoothScattered Plot for PV3 Ali3')
+```
+
+
+```{r, echo= FALSE, warning=FALSE}
+#Getting Average for Intensities
+
+#Aliquote 1
+PV1_ali1_136 <- mean(na.omit(PV_136$`PV1 Aliquot 1 intensity`))
+PV2_ali1_136 <- mean(na.omit(PV_136$`PV2 Aliquot 1 intensity`))
+PV3_ali1_136 <- mean(na.omit(PV_136$`PV3 Aliquot 1 intensity`))
+#Aliquote 2
+PV1_ali2_136 <- mean(na.omit(PV_136$`PV1 Ali 2 intensity`))
+PV2_ali2_136 <- mean(na.omit(PV_136$`PV2 Ali 2 intensity`))
+PV3_ali2_136 <- mean(na.omit(PV_136$`PV3 Ali 2 intensity`))
+#Aliquote 3
+PV1_ali3_136 <- mean(na.omit(PV_136$`PV1 Ali 3 intensity`))
+PV2_ali3_136 <- mean(na.omit(PV_136$`PV2 Ali 3 intensity`))
+PV3_ali3_136 <- mean(na.omit(PV_136$`PV3 Ali 3 intensity`))
+
+#Average Intensity for PV pills
+PV1_136 <- mean(PV1_ali1_136, PV1_ali2_136, PV1_ali3_136)
+PV2_136 <- mean(PV2_ali1_136, PV2_ali2_136, PV2_ali3_136)
+PV3_136 <- mean(PV3_ali1_136, PV3_ali2_136, PV3_ali3_136)
+```
+
+```{r, echo= FALSE, warning=FALSE}
+#Ploting Intensity vs Time for WL 1 Aliquots 
+par(mfrow = c(1, 3))
+plot(WL_136$`WL1 Aliquot 1 time`,WL_136$`WL1 Aliquot 1 intensity`, type= 'b', col = 'blue', pch = 19, main = 'WL1 Aliquot 1', xlab = 'Time', ylab = 'Intensity' )
+plot(WL_136$`WL1 Ali 2 time`,WL_136$`WL1 Ali 2 intensity`, type= 'b', col = 'blue', pch = 19, main = 'WL1 Aliquot 2', xlab = 'Time', ylab = 'Intensity' )
+plot(WL_136$`WL1 Ali 3 time`,WL_136$`WL1 Ali 3 intensity`, type= 'b', col = 'blue', pch = 19, main = 'WL1 Aliquot 3', xlab = 'Time', ylab = 'Intensity' )
+
+#Ploting QQPlot for WL 1 Aliquots
+par(mfrow = c(1, 3))
+qqnorm(WL_136$`WL1 Aliquot 1 intensity`, pch = 1, frame = FALSE, main = 'QQ plot for WL1 Ali1' )
+qqline(WL_136$`WL1 Aliquot 1 intensity`, col = "steelblue", lwd = 2)
+qqnorm(WL_136$`WL1 Ali 2 intensity`, pch = 1, frame = FALSE, main = 'QQ plot for WL1 Ali2' )
+qqline(WL_136$`WL1 Ali 2 intensity`, col = "steelblue", lwd = 2)
+qqnorm(WL_136$`WL1 Ali 3 intensity`, pch = 1, frame = FALSE, main = 'QQ plot for WL1 Ali3' )
+qqline(WL_136$`WL1 Ali 3 intensity`, col = "steelblue", lwd = 2)
+
+#Ploting Boxplots for Individual WL 1 Aliquots
+par(mfrow = c(1, 3))
+boxplot(WL_136$`WL1 Aliquot 1 intensity`,main = 'Boxplot for WL1 Ali1')
+boxplot(WL_136$`WL1 Ali 2 intensity`,main = 'Boxplot for WL1 Ali2')
+boxplot(WL_136$`WL1 Ali 3 intensity`,main = 'Boxplot for WL1 Ali3')
+
+#Ploting SmoothScattered Plot for Individual WL 1 Aliquots
+par(mfrow = c(1, 3))
+smoothScatter(WL_136$`WL1 Aliquot 1 intensity`,main = 'SmoothScattered Plot for WL1 Ali1')
+smoothScatter(WL_136$`WL1 Ali 2 intensity`,main = 'SmoothScattered Plot for WL1 Ali2')
+smoothScatter(WL_136$`WL1 Ali 3 intensity`,main = 'SmoothScattered Plot for WL1 Ali3')
+
+
+
+#Ploting Intensity vs Time for WL 2 Aliquots 
+par(mfrow = c(1, 3))
+plot(WL_136$`WL2 Aliquot 1 time`,WL_136$`WL2 Aliquot 1 intensity`, type= 'b', col = 'green', pch = 19, main = 'WL2 Aliquot 1', xlab = 'Time', ylab = 'Intensity' )
+plot(WL_136$`WL2 Ali 2 time`,WL_136$`WL2 Ali 2 intensity`, type= 'b', col = 'green', pch = 19, main = 'WL2 Aliquot 2', xlab = 'Time', ylab = 'Intensity' )
+plot(WL_136$`WL2 Ali 3 time`,WL_136$`WL2 Ali 3 intensity`, type= 'b', col = 'green', pch = 19, main = 'WL2 Aliquot 3', xlab = 'Time', ylab = 'Intensity' )
+
+#Ploting QQPlot for WL 2 Aliquots
+par(mfrow = c(1, 3))
+qqnorm(WL_136$`WL2 Aliquot 1 intensity`, pch = 1, frame = FALSE, main = 'QQ plot for WL2 Ali1' )
+qqline(WL_136$`WL2 Aliquot 1 intensity`, col = "steelblue", lwd = 2)
+qqnorm(WL_136$`WL2 Ali 2 intensity`, pch = 1, frame = FALSE, main = 'QQ plot for WL2 Ali2' )
+qqline(WL_136$`WL2 Ali 2 intensity`, col = "steelblue", lwd = 2)
+qqnorm(WL_136$`WL2 Ali 3 intensity`, pch = 1, frame = FALSE, main = 'QQ plot for WL2 Ali3' )
+qqline(WL_136$`WL2 Ali 3 intensity`, col = "steelblue", lwd = 2)
+
+#Ploting Boxplots for Individual WL 2 Aliquots
+par(mfrow = c(1, 3))
+boxplot(WL_136$`WL2 Aliquot 1 intensity`,main = 'Boxplot for WL2 Ali1')
+boxplot(WL_136$`WL2 Ali 2 intensity`,main = 'Boxplot for WL2 Ali2')
+boxplot(WL_136$`WL2 Ali 3 intensity`,main = 'Boxplot for WL2 Ali3')
+
+#Ploting SmoothScattered Plot for Individual WL 2 Aliquots
+par(mfrow = c(1, 3))
+smoothScatter(WL_136$`WL2 Aliquot 1 intensity`,main = 'SmoothScattered Plot for WL2 Ali1')
+smoothScatter(WL_136$`WL2 Ali 2 intensity`,main = 'SmoothScattered Plot for WL2 Ali2')
+smoothScatter(WL_136$`WL2 Ali 3 intensity`,main = 'SmoothScattered Plot for WL2 Ali3')
+
+
+
+#Ploting Intensity vs Time for WL 3 Aliquots 
+par(mfrow = c(1, 3))
+plot(WL_136$`WL3 Aliquot 1 time`,WL_136$`WL3 Aliquot 1 intensity`, type= 'b', col = 'black', pch = 19, main = 'WL3 Aliquot 1', xlab = 'Time', ylab = 'Intensity' )
+plot(WL_136$`WL3 Ali 2 time`,WL_136$`WL3 Ali 2 intensity`, type= 'b', col = 'black', pch = 19, main = 'WL3 Aliquot 2', xlab = 'Time', ylab = 'Intensity' )
+plot(WL_136$`WL3 Ali 3 time`,WL_136$`WL3 Ali 3 intensity`, type= 'b', col = 'black', pch = 19, main = 'WL3 Aliquot 3', xlab = 'Time', ylab = 'Intensity' )
+
+#Ploting QQPlot for WL 3 Aliquots
+par(mfrow = c(1, 3))
+qqnorm(WL_136$`WL3 Aliquot 1 intensity`, pch = 1, frame = FALSE, main = 'QQ plot for WL3 Ali1' )
+qqline(WL_136$`WL3 Aliquot 1 intensity`, col = "steelblue", lwd = 2)
+qqnorm(WL_136$`WL3 Ali 2 intensity`, pch = 1, frame = FALSE, main = 'QQ plot for WL3 Ali2' )
+qqline(WL_136$`WL3 Ali 2 intensity`, col = "steelblue", lwd = 2)
+qqnorm(WL_136$`WL3 Ali 3 intensity`, pch = 1, frame = FALSE, main = 'QQ plot for WL3 Ali3' )
+qqline(WL_136$`WL3 Ali 3 intensity`, col = "steelblue", lwd = 2)
+
+#Ploting Boxplots for Individual WL 3 Aliquots
+par(mfrow = c(1, 3))
+boxplot(WL_136$`WL3 Aliquot 1 intensity`,main = 'Boxplot for WL3 Ali1')
+boxplot(WL_136$`WL3 Ali 2 intensity`,main = 'Boxplot for WL3 Ali2')
+boxplot(WL_136$`WL3 Ali 3 intensity`,main = 'Boxplot for WL3 Ali3')
+
+#Ploting SmoothScattered Plot for Individual WL 3 Aliquots
+par(mfrow = c(1, 3))
+smoothScatter(WL_136$`WL3 Aliquot 1 intensity`,main = 'SmoothScattered Plot for WL3 Ali1')
+smoothScatter(WL_136$`WL3 Ali 2 intensity`,main = 'SmoothScattered Plot for WL3 Ali2')
+smoothScatter(WL_136$`WL3 Ali 3 intensity`,main = 'SmoothScattered Plot for WL3 Ali3')
+```
+
+
+```{r, echo= FALSE, warning=FALSE}
+#Getting Average for Intensities
+
+#Aliquote 1
+WL1_ali1_136 <- mean(na.omit(WL_136$`WL1 Aliquot 1 intensity`))
+WL2_ali1_136 <- mean(na.omit(WL_136$`WL2 Aliquot 1 intensity`))
+WL3_ali1_136 <- mean(na.omit(WL_136$`WL3 Aliquot 1 intensity`))
+#Aliquote 2
+WL1_ali2_136 <- mean(na.omit(WL_136$`WL1 Ali 2 intensity`))
+WL2_ali2_136 <- mean(na.omit(WL_136$`WL2 Ali 2 intensity`))
+WL3_ali2_136 <- mean(na.omit(WL_136$`WL3 Ali 2 intensity`))
+#Aliquote 3
+WL1_ali3_136 <- mean(na.omit(WL_136$`WL1 Ali 3 intensity`))
+WL2_ali3_136 <- mean(na.omit(WL_136$`WL2 Ali 3 intensity`))
+WL3_ali3_136 <- mean(na.omit(WL_136$`WL3 Ali 3 intensity`))
+
+
+#Average Intensity for Walgreen pills
+WL1_136 <- mean(WL1_ali1_136, WL1_ali2_136, WL1_ali3_136)
+WL2_136 <- mean(WL2_ali1_136, WL2_ali2_136, WL2_ali3_136)
+WL3_136 <- mean(WL3_ali1_136, WL3_ali2_136, WL3_ali3_136)
+
+```
+
+```{r, echo= FALSE, warning=FALSE}
+#Analysis of Variance
+Intensity <- c(BP1_136, BP2_136, BP3_136, PV1_136, PV2_136, PV3_136,WL1_136, WL2_136, WL3_136)
+Brands <- c('BP1', 'BP2', 'BP3', 'PV1', 'PV2', 'PV3', 'WL1', 'WL2', 'WL3')
+Pills <- c(1,1,1,2,2,2,3,3,3)
+data_136 <- cbind( Brands, Pills, Intensity)
+data_136 <- as.data.frame(data_136)
+data_136
+one.way <- aov( Intensity ~ Pills, data = data_136)
+summary(one.way)
+#Ploting ANOVA
+par(mfrow=c(2,2))
+#plot(one.way)
+par(mfrow=c(1,1))
+#Post-hoc test
+tukey.one.way<-TukeyHSD(one.way)
+tukey.one.way
+plot(tukey.one.way, las = 1)
+```
+
+
+The p-value of the pills variable is low (p > 0.05), so it appears that there are no significant differences between the pills for this peak region. From the post-hoc test results, we see that there are no statistically significant differences (p > 0.05) among pill groups.
+
+
+
+================================================================================
+
+# Analysis Peak 178.7 93.00
+
+```{r, echo= FALSE, warning=FALSE}
+#Loading Data for Peak 178.7 93.00
+library(readxl)
+BP_178 <- read_excel("178.7 93.00 Bayer Pill New.xlsx")
+PV_178 <- read_excel("178.7 93.00 P.V Pill New.xlsx") 
+WL_178 <- read_excel("178.7 93.00 Wal Pill New.xlsx") 
+```
+
+
+```{r, echo= FALSE, warning=FALSE}
+#Ploting Intensity vs Time for Bayer Pill 1 Aliquots 
+par(mfrow = c(1, 3))
+plot(BP_178$`BP1 Aliquot 1 time`,BP_178$`BP1 Aliquot 1 intensity`, type= 'b', col = 'blue', pch = 19, main = 'BP1 Aliquot 1', xlab = 'Time', ylab = 'Intensity' )
+plot(BP_178$`BP1 Ali 2 time`,BP_178$`BP1 Ali 2 intensity`, type= 'b', col = 'blue', pch = 19, main = 'BP1 Aliquot 2', xlab = 'Time', ylab = 'Intensity' )
+plot(BP_178$`BP1 Ali 3 time`,BP_178$`BP1 Ali 3 intensity`, type= 'b', col = 'blue', pch = 19, main = 'BP1 Aliquot 3', xlab = 'Time', ylab = 'Intensity' )
+
+#Ploting QQPlot for Bayer Pill 1 Aliquots
+par(mfrow = c(1, 3))
+qqnorm(BP_178$`BP1 Aliquot 1 intensity`, pch = 1, frame = FALSE, main = 'QQ plot for BP1 Ali1' )
+qqline(BP_178$`BP1 Aliquot 1 intensity`, col = "steelblue", lwd = 2)
+qqnorm(BP_178$`BP1 Ali 2 intensity`, pch = 1, frame = FALSE, main = 'QQ plot for BP1 Ali2' )
+qqline(BP_178$`BP1 Ali 2 intensity`, col = "steelblue", lwd = 2)
+qqnorm(BP_178$`BP1 Ali 3 intensity`, pch = 1, frame = FALSE, main = 'QQ plot for BP1 Ali3' )
+qqline(BP_178$`BP1 Ali 3 intensity`, col = "steelblue", lwd = 2)
+
+#Ploting Boxplots for Individual Bayer Pill 1 Aliquots
+par(mfrow = c(1, 3))
+boxplot(BP_178$`BP1 Aliquot 1 intensity`,main = 'Boxplot for BP1 Ali1')
+boxplot(BP_178$`BP1 Ali 2 intensity`,main = 'Boxplot for BP1 Ali2')
+boxplot(BP_178$`BP1 Ali 3 intensity`,main = 'Boxplot for BP1 Ali3')
+
+#Ploting SmoothScattered Plot for Individual Bayer Pill 1 Aliquots
+par(mfrow = c(1, 3))
+smoothScatter(BP_178$`BP1 Aliquot 1 intensity`,main = 'SmoothScattered Plot for BP1 Ali1')
+smoothScatter(BP_178$`BP1 Ali 2 intensity`,main = 'SmoothScattered Plot for BP1 Ali2')
+smoothScatter(BP_178$`BP1 Ali 3 intensity`,main = 'SmoothScattered Plot for BP1 Ali3')
+
+#Ploting Intensity vs Time for Bayer Pill 2 Aliquots 
+par(mfrow = c(1, 3))
+plot(BP_178$`BP2 Aliquot 1 time`,BP_178$`BP2 Aliquot 1 intensity`, type= 'b', col = 'green', pch = 19, main = 'BP2 Aliquot 1', xlab = 'Time', ylab = 'Intensity' )
+plot(BP_178$`BP2 Ali 2 time`,BP_178$`BP2 Ali 2 intensity`, type= 'b', col = 'green', pch = 19, main = 'BP2 Aliquot 2', xlab = 'Time', ylab = 'Intensity' )
+plot(BP_178$`BP2 Ali 3 time`,BP_178$`BP2 Ali 3 intensity`, type= 'b', col = 'green', pch = 19, main = 'BP2 Aliquot 3', xlab = 'Time', ylab = 'Intensity' )
+
+
+#Ploting QQPlot for Bayer Pill 2 Aliquots
+par(mfrow = c(1, 3))
+qqnorm(BP_178$`BP2 Aliquot 1 intensity`, pch = 1, frame = FALSE, main = 'QQ plot for BP2 Ali1' )
+qqline(BP_178$`BP2 Aliquot 1 intensity`, col = "steelblue", lwd = 2)
+qqnorm(BP_178$`BP2 Ali 2 intensity`, pch = 1, frame = FALSE, main = 'QQ plot for BP2 Ali2' )
+qqline(BP_178$`BP2 Ali 2 intensity`, col = "steelblue", lwd = 2)
+qqnorm(BP_178$`BP2 Ali 3 intensity`, pch = 1, frame = FALSE, main = 'QQ plot for BP2 Ali3' )
+qqline(BP_178$`BP2 Ali 3 intensity`, col = "steelblue", lwd = 2)
+
+#Ploting Boxplots for Individual Bayer Pill 2 Aliquots
+par(mfrow = c(1, 3))
+boxplot(BP_178$`BP2 Aliquot 1 intensity`,main = 'Boxplot for BP2 Ali1')
+boxplot(BP_178$`BP2 Ali 2 intensity`,main = 'Boxplot for BP2 Ali2')
+boxplot(BP_178$`BP2 Ali 3 intensity`,main = 'Boxplot for BP2 Ali3')
+
+#Ploting SmoothScattered Plot for Individual Bayer Pill 2 Aliquots
+par(mfrow = c(1, 3))
+smoothScatter(BP_178$`BP2 Aliquot 1 intensity`,main = 'SmoothScattered Plot for BP2 Ali1')
+smoothScatter(BP_178$`BP2 Ali 2 intensity`,main = 'SmoothScattered Plot for BP2 Ali2')
+smoothScatter(BP_178$`BP2 Ali 3 intensity`,main = 'SmoothScattered Plot for BP2 Ali3')
+
+
+#Ploting Intensity vs Time for Bayer Pill 3 Aliquots 
+par(mfrow = c(1, 3))
+plot(BP_178$`BP3 Aliquot 1 time`,BP_178$`BP3 Aliquot 1 intensity`, type= 'b', col = 'black', pch = 19, main = 'BP3 Aliquot 1', xlab = 'Time', ylab = 'Intensity' )
+plot(BP_178$`BP3 Ali 2 time`,BP_178$`BP3 Ali 2 intensity`, type= 'b', col = 'black', pch = 19, main = 'BP3 Aliquot 2', xlab = 'Time', ylab = 'Intensity' )
+plot(BP_178$`BP3 Ali 3 time`,BP_178$`BP3 Ali 3 intensity`, type= 'b', col = 'black', pch = 19, main = 'BP3 Aliquot 3', xlab = 'Time', ylab = 'Intensity' )
+
+#Ploting QQPlot for Bayer Pill 3 Aliquots
+par(mfrow = c(1, 3))
+qqnorm(BP_178$`BP3 Aliquot 1 intensity`, pch = 1, frame = FALSE, main = 'QQ plot for BP3 Ali1' )
+qqline(BP_178$`BP3 Aliquot 1 intensity`, col = "steelblue", lwd = 2)
+qqnorm(BP_178$`BP3 Ali 2 intensity`, pch = 1, frame = FALSE, main = 'QQ plot for BP3 Ali2' )
+qqline(BP_178$`BP3 Ali 2 intensity`, col = "steelblue", lwd = 2)
+qqnorm(BP_178$`BP3 Ali 3 intensity`, pch = 1, frame = FALSE, main = 'QQ plot for BP3 Ali3' )
+qqline(BP_178$`BP3 Ali 3 intensity`, col = "steelblue", lwd = 2)
+
+#Ploting Boxplots for Individual Bayer Pill 3 Aliquots
+par(mfrow = c(1, 3))
+boxplot(BP_178$`BP3 Aliquot 1 intensity`,main = 'Boxplot for BP3 Ali1')
+boxplot(BP_178$`BP3 Ali 2 intensity`,main = 'Boxplot for BP3 Ali2')
+boxplot(BP_178$`BP3 Ali 3 intensity`,main = 'Boxplot for BP3 Ali3')
+
+#Ploting SmoothScattered Plot for Individual Bayer Pill 3 Aliquots
+par(mfrow = c(1, 3))
+smoothScatter(BP_178$`BP3 Aliquot 1 intensity`,main = 'SmoothScattered Plot for BP3 Ali1')
+smoothScatter(BP_178$`BP3 Ali 2 intensity`,main = 'SmoothScattered Plot for BP3 Ali2')
+smoothScatter(BP_178$`BP3 Ali 3 intensity`,main = 'SmoothScattered Plot for BP3 Ali3')
+
+```
+
+```{r, echo= FALSE, warning=FALSE}
+#Getting Average for Intensities
+
+#Aliquote 1
+BP1_ali1_178 <- mean(na.omit(BP_178$`BP1 Aliquot 1 intensity`))
+BP2_ali1_178 <- mean(na.omit(BP_178$`BP2 Aliquot 1 intensity`))
+BP3_ali1_178 <- mean(na.omit(BP_178$`BP3 Aliquot 1 intensity`))
+#Aliquote 2
+BP1_ali2_178 <- mean(na.omit(BP_178$`BP1 Ali 2 intensity`))
+BP2_ali2_178 <- mean(na.omit(BP_178$`BP2 Ali 2 intensity`))
+BP3_ali2_178 <- mean(na.omit(BP_178$`BP3 Ali 2 intensity`))
+#Aliquote 3
+BP1_ali3_178 <- mean(na.omit(BP_178$`BP1 Ali 3 intensity`))
+BP2_ali3_178 <- mean(na.omit(BP_178$`BP2 Ali 3 intensity`))
+BP3_ali3_178 <- mean(na.omit(BP_178$`BP3 Ali 3 intensity`))
+#Average Intensity for Bayer Pills
+BP1_178 <- mean(BP1_ali1_178, BP1_ali2_178, BP1_ali3_178)
+BP2_178 <- mean(BP2_ali1_178, BP2_ali2_178, BP2_ali3_178)
+BP3_178 <- mean(BP3_ali1_178, BP3_ali2_178, BP3_ali3_178)
+
+```
+
+```{r, echo= FALSE, warning=FALSE}
+#Ploting Intensity vs Time for PV 1 Aliquots 
+par(mfrow = c(1, 3))
+plot(PV_178$`PV1 Aliquot 1 time`,PV_178$`PV1 Aliquot 1 intensity`, type= 'b', col = 'blue', pch = 19, main = 'PV1 Aliquot 1', xlab = 'Time', ylab = 'Intensity' )
+plot(PV_178$`PV1 Ali 2 time`,PV_178$`PV1 Ali 2 intensity`, type= 'b', col = 'blue', pch = 19, main = 'PV1 Aliquot 2', xlab = 'Time', ylab = 'Intensity' )
+plot(PV_178$`PV1 Ali 3 time`,PV_178$`PV1 Ali 3 intensity`, type= 'b', col = 'blue', pch = 19, main = 'PV1 Aliquot 3', xlab = 'Time', ylab = 'Intensity' )
+
+#Ploting QQPlot for PV 1 Aliquots
+par(mfrow = c(1, 3))
+qqnorm(PV_178$`PV1 Aliquot 1 intensity`, pch = 1, frame = FALSE, main = 'QQ plot for PV1 Ali1' )
+qqline(PV_178$`PV1 Aliquot 1 intensity`, col = "steelblue", lwd = 2)
+qqnorm(PV_178$`PV1 Ali 2 intensity`, pch = 1, frame = FALSE, main = 'QQ plot for PV1 Ali2' )
+qqline(PV_178$`PV1 Ali 2 intensity`, col = "steelblue", lwd = 2)
+qqnorm(PV_178$`PV1 Ali 3 intensity`, pch = 1, frame = FALSE, main = 'QQ plot for PV1 Ali3' )
+qqline(PV_178$`PV1 Ali 3 intensity`, col = "steelblue", lwd = 2)
+
+#Ploting Boxplots for Individual PV 1 Aliquots
+par(mfrow = c(1, 3))
+boxplot(PV_178$`PV1 Aliquot 1 intensity`,main = 'Boxplot for PV1 Ali1')
+boxplot(PV_178$`PV1 Ali 2 intensity`,main = 'Boxplot for PV1 Ali2')
+boxplot(PV_178$`PV1 Ali 3 intensity`,main = 'Boxplot for PV1 Ali3')
+
+#Ploting SmoothScattered Plot for Individual PV 1 Aliquots
+par(mfrow = c(1, 3))
+smoothScatter(PV_178$`PV1 Aliquot 1 intensity`,main = 'SmoothScattered Plot for PV1 Ali1')
+smoothScatter(PV_178$`PV1 Ali 2 intensity`,main = 'SmoothScattered Plot for PV1 Ali2')
+smoothScatter(PV_178$`PV1 Ali 3 intensity`,main = 'SmoothScattered Plot for PV1 Ali3')
+
+
+#Ploting Intensity vs Time for PV 2 Aliquots 
+par(mfrow = c(1, 3))
+plot(PV_178$`PV2 Aliquot 1 time`,PV_178$`PV2 Aliquot 1 intensity`, type= 'b', col = 'green', pch = 19, main = 'PV2 Aliquot 1', xlab = 'Time', ylab = 'Intensity' )
+plot(PV_178$`PV2 Ali 2 time`,PV_178$`PV2 Ali 2 intensity`, type= 'b', col = 'green', pch = 19, main = 'PV2 Aliquot 2', xlab = 'Time', ylab = 'Intensity' )
+plot(PV_178$`PV2 Ali 3 time`,PV_178$`PV2 Ali 3 intensity`, type= 'b', col = 'green', pch = 19, main = 'PV2 Aliquot 3', xlab = 'Time', ylab = 'Intensity' )
+
+#Ploting QQPlot for PV 2 Aliquots
+par(mfrow = c(1, 3))
+qqnorm(PV_178$`PV2 Aliquot 1 intensity`, pch = 1, frame = FALSE, main = 'QQ plot for PV2 Ali1' )
+qqline(PV_178$`PV2 Aliquot 1 intensity`, col = "steelblue", lwd = 2)
+qqnorm(PV_178$`PV2 Ali 2 intensity`, pch = 1, frame = FALSE, main = 'QQ plot for PV2 Ali2' )
+qqline(PV_178$`PV2 Ali 2 intensity`, col = "steelblue", lwd = 2)
+qqnorm(PV_178$`PV2 Ali 3 intensity`, pch = 1, frame = FALSE, main = 'QQ plot for PV2 Ali3' )
+qqline(PV_178$`PV2 Ali 3 intensity`, col = "steelblue", lwd = 2)
+
+#Ploting Boxplots for Individual PV 2 Aliquots
+par(mfrow = c(1, 3))
+boxplot(PV_178$`PV2 Aliquot 1 intensity`,main = 'Boxplot for PV2 Ali1')
+boxplot(PV_178$`PV2 Ali 2 intensity`,main = 'Boxplot for PV2 Ali2')
+boxplot(PV_178$`PV2 Ali 3 intensity`,main = 'Boxplot for PV2 Ali3')
+
+#Ploting SmoothScattered Plot for Individual PV 2 Aliquots
+par(mfrow = c(1, 3))
+smoothScatter(PV_178$`PV2 Aliquot 1 intensity`,main = 'SmoothScattered Plot for PV2 Ali1')
+smoothScatter(PV_178$`PV2 Ali 2 intensity`,main = 'SmoothScattered Plot for PV2 Ali2')
+smoothScatter(PV_178$`PV2 Ali 3 intensity`,main = 'SmoothScattered Plot for PV2 Ali3')
+
+
+#Ploting Intensity vs Time for PV 3 Aliquots 
+par(mfrow = c(1, 3))
+plot(PV_178$`PV3 Aliquot 1 time`,PV_178$`PV3 Aliquot 1 intensity`, type= 'b', col = 'black', pch = 19, main = 'PV3 Aliquot 1', xlab = 'Time', ylab = 'Intensity' )
+plot(PV_178$`PV3 Ali 2 time`,PV_178$`PV3 Ali 2 intensity`, type= 'b', col = 'black', pch = 19, main = 'PV3 Aliquot 2', xlab = 'Time', ylab = 'Intensity' )
+plot(PV_178$`PV3 Ali 3 time`,PV_178$`PV3 Ali 3 intensity`, type= 'b', col = 'black', pch = 19, main = 'PV3 Aliquot 3', xlab = 'Time', ylab = 'Intensity' )
+
+#Ploting QQPlot for PV 3 Aliquots
+par(mfrow = c(1, 3))
+qqnorm(PV_178$`PV3 Aliquot 1 intensity`, pch = 1, frame = FALSE, main = 'QQ plot for PV3 Ali1' )
+qqline(PV_178$`PV3 Aliquot 1 intensity`, col = "steelblue", lwd = 2)
+qqnorm(PV_178$`PV3 Ali 2 intensity`, pch = 1, frame = FALSE, main = 'QQ plot for PV3 Ali2' )
+qqline(PV_178$`PV3 Ali 2 intensity`, col = "steelblue", lwd = 2)
+qqnorm(PV_178$`PV3 Ali 3 intensity`, pch = 1, frame = FALSE, main = 'QQ plot for PV3 Ali3' )
+qqline(PV_178$`PV3 Ali 3 intensity`, col = "steelblue", lwd = 2)
+
+#Ploting Boxplots for Individual PV 3 Aliquots
+par(mfrow = c(1, 3))
+boxplot(PV_178$`PV3 Aliquot 1 intensity`,main = 'Boxplot for PV3 Ali1')
+boxplot(PV_178$`PV3 Ali 2 intensity`,main = 'Boxplot for PV3 Ali2')
+boxplot(PV_178$`PV3 Ali 3 intensity`,main = 'Boxplot for PV3 Ali3')
+
+#Ploting SmoothScattered Plot for Individual PV 3 Aliquots
+par(mfrow = c(1, 3))
+smoothScatter(PV_178$`PV3 Aliquot 1 intensity`,main = 'SmoothScattered Plot for PV3 Ali1')
+smoothScatter(PV_178$`PV3 Ali 2 intensity`,main = 'SmoothScattered Plot for PV3 Ali2')
+smoothScatter(PV_178$`PV3 Ali 3 intensity`,main = 'SmoothScattered Plot for PV3 Ali3')
+```
+
+
+```{r, echo= FALSE, warning=FALSE}
+#Getting Average for Intensities
+
+#Aliquote 1
+PV1_ali1_178 <- mean(na.omit(PV_178$`PV1 Aliquot 1 intensity`))
+PV2_ali1_178 <- mean(na.omit(PV_178$`PV2 Aliquot 1 intensity`))
+PV3_ali1_178 <- mean(na.omit(PV_178$`PV3 Aliquot 1 intensity`))
+#Aliquote 2
+PV1_ali2_178 <- mean(na.omit(PV_178$`PV1 Ali 2 intensity`))
+PV2_ali2_178 <- mean(na.omit(PV_178$`PV2 Ali 2 intensity`))
+PV3_ali2_178 <- mean(na.omit(PV_178$`PV3 Ali 2 intensity`))
+#Aliquote 3
+PV1_ali3_178 <- mean(na.omit(PV_178$`PV1 Ali 3 intensity`))
+PV2_ali3_178 <- mean(na.omit(PV_178$`PV2 Ali 3 intensity`))
+PV3_ali3_178 <- mean(na.omit(PV_178$`PV3 Ali 3 intensity`))
+
+#Average Intensity for PV pills
+PV1_178 <- mean(PV1_ali1_178, PV1_ali2_178, PV1_ali3_178)
+PV2_178 <- mean(PV2_ali1_178, PV2_ali2_178, PV2_ali3_178)
+PV3_178 <- mean(PV3_ali1_178, PV3_ali2_178, PV3_ali3_178)
+```
+
+```{r, echo= FALSE, warning=FALSE}
+#Ploting Intensity vs Time for WL 1 Aliquots 
+par(mfrow = c(1, 3))
+plot(WL_178$`WL1 Aliquot 1 time`,WL_178$`WL1 Aliquot 1 intensity`, type= 'b', col = 'blue', pch = 19, main = 'WL1 Aliquot 1', xlab = 'Time', ylab = 'Intensity' )
+plot(WL_178$`WL1 Ali 2 time`,WL_178$`WL1 Ali 2 intensity`, type= 'b', col = 'blue', pch = 19, main = 'WL1 Aliquot 2', xlab = 'Time', ylab = 'Intensity' )
+plot(WL_178$`WL1 Ali 3 time`,WL_178$`WL1 Ali 3 intensity`, type= 'b', col = 'blue', pch = 19, main = 'WL1 Aliquot 3', xlab = 'Time', ylab = 'Intensity' )
+
+#Ploting QQPlot for WL 1 Aliquots
+par(mfrow = c(1, 3))
+qqnorm(WL_178$`WL1 Aliquot 1 intensity`, pch = 1, frame = FALSE, main = 'QQ plot for WL1 Ali1' )
+qqline(WL_178$`WL1 Aliquot 1 intensity`, col = "steelblue", lwd = 2)
+qqnorm(WL_178$`WL1 Ali 2 intensity`, pch = 1, frame = FALSE, main = 'QQ plot for WL1 Ali2' )
+qqline(WL_178$`WL1 Ali 2 intensity`, col = "steelblue", lwd = 2)
+qqnorm(WL_178$`WL1 Ali 3 intensity`, pch = 1, frame = FALSE, main = 'QQ plot for WL1 Ali3' )
+qqline(WL_178$`WL1 Ali 3 intensity`, col = "steelblue", lwd = 2)
+
+#Ploting Boxplots for Individual WL 1 Aliquots
+par(mfrow = c(1, 3))
+boxplot(WL_178$`WL1 Aliquot 1 intensity`,main = 'Boxplot for WL1 Ali1')
+boxplot(WL_178$`WL1 Ali 2 intensity`,main = 'Boxplot for WL1 Ali2')
+boxplot(WL_178$`WL1 Ali 3 intensity`,main = 'Boxplot for WL1 Ali3')
+
+#Ploting SmoothScattered Plot for Individual WL 1 Aliquots
+par(mfrow = c(1, 3))
+smoothScatter(WL_178$`WL1 Aliquot 1 intensity`,main = 'SmoothScattered Plot for WL1 Ali1')
+smoothScatter(WL_178$`WL1 Ali 2 intensity`,main = 'SmoothScattered Plot for WL1 Ali2')
+smoothScatter(WL_178$`WL1 Ali 3 intensity`,main = 'SmoothScattered Plot for WL1 Ali3')
+
+
+
+#Ploting Intensity vs Time for WL 2 Aliquots 
+par(mfrow = c(1, 3))
+plot(WL_178$`WL2 Aliquot 1 time`,WL_178$`WL2 Aliquot 1 intensity`, type= 'b', col = 'green', pch = 19, main = 'WL2 Aliquot 1', xlab = 'Time', ylab = 'Intensity' )
+plot(WL_178$`WL2 Ali 2 time`,WL_178$`WL2 Ali 2 intensity`, type= 'b', col = 'green', pch = 19, main = 'WL2 Aliquot 2', xlab = 'Time', ylab = 'Intensity' )
+plot(WL_178$`WL2 Ali 3 time`,WL_178$`WL2 Ali 3 intensity`, type= 'b', col = 'green', pch = 19, main = 'WL2 Aliquot 3', xlab = 'Time', ylab = 'Intensity' )
+
+#Ploting QQPlot for WL 2 Aliquots
+par(mfrow = c(1, 3))
+qqnorm(WL_178$`WL2 Aliquot 1 intensity`, pch = 1, frame = FALSE, main = 'QQ plot for WL2 Ali1' )
+qqline(WL_178$`WL2 Aliquot 1 intensity`, col = "steelblue", lwd = 2)
+qqnorm(WL_178$`WL2 Ali 2 intensity`, pch = 1, frame = FALSE, main = 'QQ plot for WL2 Ali2' )
+qqline(WL_178$`WL2 Ali 2 intensity`, col = "steelblue", lwd = 2)
+qqnorm(WL_178$`WL2 Ali 3 intensity`, pch = 1, frame = FALSE, main = 'QQ plot for WL2 Ali3' )
+qqline(WL_178$`WL2 Ali 3 intensity`, col = "steelblue", lwd = 2)
+
+#Ploting Boxplots for Individual WL 2 Aliquots
+par(mfrow = c(1, 3))
+boxplot(WL_178$`WL2 Aliquot 1 intensity`,main = 'Boxplot for WL2 Ali1')
+boxplot(WL_178$`WL2 Ali 2 intensity`,main = 'Boxplot for WL2 Ali2')
+boxplot(WL_178$`WL2 Ali 3 intensity`,main = 'Boxplot for WL2 Ali3')
+
+#Ploting SmoothScattered Plot for Individual WL 2 Aliquots
+par(mfrow = c(1, 3))
+smoothScatter(WL_178$`WL2 Aliquot 1 intensity`,main = 'SmoothScattered Plot for WL2 Ali1')
+smoothScatter(WL_178$`WL2 Ali 2 intensity`,main = 'SmoothScattered Plot for WL2 Ali2')
+smoothScatter(WL_178$`WL2 Ali 3 intensity`,main = 'SmoothScattered Plot for WL2 Ali3')
+
+
+
+#Ploting Intensity vs Time for WL 3 Aliquots 
+par(mfrow = c(1, 3))
+plot(WL_178$`WL3 Aliquot 1 time`,WL_178$`WL3 Aliquot 1 intensity`, type= 'b', col = 'black', pch = 19, main = 'WL3 Aliquot 1', xlab = 'Time', ylab = 'Intensity' )
+plot(WL_178$`WL3 Ali 2 time`,WL_178$`WL3 Ali 2 intensity`, type= 'b', col = 'black', pch = 19, main = 'WL3 Aliquot 2', xlab = 'Time', ylab = 'Intensity' )
+plot(WL_178$`WL3 Ali 3 time`,WL_178$`WL3 Ali 3 intensity`, type= 'b', col = 'black', pch = 19, main = 'WL3 Aliquot 3', xlab = 'Time', ylab = 'Intensity' )
+
+#Ploting QQPlot for WL 3 Aliquots
+par(mfrow = c(1, 3))
+qqnorm(WL_178$`WL3 Aliquot 1 intensity`, pch = 1, frame = FALSE, main = 'QQ plot for WL3 Ali1' )
+qqline(WL_178$`WL3 Aliquot 1 intensity`, col = "steelblue", lwd = 2)
+qqnorm(WL_178$`WL3 Ali 2 intensity`, pch = 1, frame = FALSE, main = 'QQ plot for WL3 Ali2' )
+qqline(WL_178$`WL3 Ali 2 intensity`, col = "steelblue", lwd = 2)
+qqnorm(WL_178$`WL3 Ali 3 intensity`, pch = 1, frame = FALSE, main = 'QQ plot for WL3 Ali3' )
+qqline(WL_178$`WL3 Ali 3 intensity`, col = "steelblue", lwd = 2)
+
+#Ploting Boxplots for Individual WL 3 Aliquots
+par(mfrow = c(1, 3))
+boxplot(WL_178$`WL3 Aliquot 1 intensity`,main = 'Boxplot for WL3 Ali1')
+boxplot(WL_178$`WL3 Ali 2 intensity`,main = 'Boxplot for WL3 Ali2')
+boxplot(WL_178$`WL3 Ali 3 intensity`,main = 'Boxplot for WL3 Ali3')
+
+#Ploting SmoothScattered Plot for Individual WL 3 Aliquots
+par(mfrow = c(1, 3))
+smoothScatter(WL_178$`WL3 Aliquot 1 intensity`,main = 'SmoothScattered Plot for WL3 Ali1')
+smoothScatter(WL_178$`WL3 Ali 2 intensity`,main = 'SmoothScattered Plot for WL3 Ali2')
+smoothScatter(WL_178$`WL3 Ali 3 intensity`,main = 'SmoothScattered Plot for WL3 Ali3')
+```
+
+
+```{r, echo= FALSE, warning=FALSE}
+#Getting Average for Intensities
+
+#Aliquote 1
+WL1_ali1_178 <- mean(na.omit(WL_178$`WL1 Aliquot 1 intensity`))
+WL2_ali1_178 <- mean(na.omit(WL_178$`WL2 Aliquot 1 intensity`))
+WL3_ali1_178 <- mean(na.omit(WL_178$`WL3 Aliquot 1 intensity`))
+#Aliquote 2
+WL1_ali2_178 <- mean(na.omit(WL_178$`WL1 Ali 2 intensity`))
+WL2_ali2_178 <- mean(na.omit(WL_178$`WL2 Ali 2 intensity`))
+WL3_ali2_178 <- mean(na.omit(WL_178$`WL3 Ali 2 intensity`))
+#Aliquote 3
+WL1_ali3_178 <- mean(na.omit(WL_178$`WL1 Ali 3 intensity`))
+WL2_ali3_178 <- mean(na.omit(WL_178$`WL2 Ali 3 intensity`))
+WL3_ali3_178 <- mean(na.omit(WL_178$`WL3 Ali 3 intensity`))
+
+
+#Average Intensity for Walgreen pills
+WL1_178 <- mean(WL1_ali1_178, WL1_ali2_178, WL1_ali3_178)
+WL2_178 <- mean(WL2_ali1_178, WL2_ali2_178, WL2_ali3_178)
+WL3_178 <- mean(WL3_ali1_178, WL3_ali2_178, WL3_ali3_178)
+
+```
+
+```{r, echo= FALSE, warning=FALSE}
+#Analysis of Variance
+Intensity <- c(BP1_178, BP2_178, BP3_178, PV1_178, PV2_178, PV3_178,WL1_178, WL2_178, WL3_178)
+Brands <- c('BP1', 'BP2', 'BP3', 'PV1', 'PV2', 'PV3', 'WL1', 'WL2', 'WL3')
+Pills <- c(1,1,1,2,2,2,3,3,3)
+data_178 <- cbind( Brands, Pills, Intensity)
+data_178 <- as.data.frame(data_178)
+one.way <- aov( Intensity ~ Pills, data = data_178)
+summary(one.way)
+#Ploting ANOVA
+par(mfrow=c(2,2))
+#plot(one.way)
+par(mfrow=c(1,1))
+#Post-hoc test
+tukey.one.way<-TukeyHSD(one.way)
+tukey.one.way
+plot(tukey.one.way, las = 1)
+```
+
+The p-value of the pills variable is low (p > 0.05), so it appears that there are no significant differences between the pills for this peak region. From the post-hoc test results, we see that there are no statistically significant differences (p > 0.05) among pill groups.
+
+
+
+# Analysis Peak 199.10 91.90
+
+```{r, echo= FALSE, warning=FALSE}
+#Loading Data for Peak 199.10 91.90
+library(readxl)
+BP_199_91 <- read_excel("Bay Pill 199.10 91.90 New.xlsx")
+PV_199_91 <- read_excel("P.V Pill 199.10 91.90 New.xlsx") 
+WL_199_91 <- read_excel("Wal Pill 199.10 91.90 New.xlsx") 
+```
+
+
+```{r, echo= FALSE, warning=FALSE}
+#Ploting Intensity vs Time for Bayer Pill 1 Aliquots 
+par(mfrow = c(1, 3))
+plot(BP_199_91$`BP1 Aliquot 1 time`,BP_199_91$`BP1 Aliquot 1 intensity`, type= 'b', col = 'blue', pch = 19, main = 'BP1 Aliquot 1', xlab = 'Time', ylab = 'Intensity' )
+plot(BP_199_91$`BP1 Ali 2 time`,BP_199_91$`BP1 Ali 2 intensity`, type= 'b', col = 'blue', pch = 19, main = 'BP1 Aliquot 2', xlab = 'Time', ylab = 'Intensity' )
+plot(BP_199_91$`BP1 Ali 3 time`,BP_199_91$`BP1 Ali 3 intensity`, type= 'b', col = 'blue', pch = 19, main = 'BP1 Aliquot 3', xlab = 'Time', ylab = 'Intensity' )
+
+#Ploting QQPlot for Bayer Pill 1 Aliquots
+par(mfrow = c(1, 3))
+qqnorm(BP_199_91$`BP1 Aliquot 1 intensity`, pch = 1, frame = FALSE, main = 'QQ plot for BP1 Ali1' )
+qqline(BP_199_91$`BP1 Aliquot 1 intensity`, col = "steelblue", lwd = 2)
+qqnorm(BP_199_91$`BP1 Ali 2 intensity`, pch = 1, frame = FALSE, main = 'QQ plot for BP1 Ali2' )
+qqline(BP_199_91$`BP1 Ali 2 intensity`, col = "steelblue", lwd = 2)
+qqnorm(BP_199_91$`BP1 Ali 3 intensity`, pch = 1, frame = FALSE, main = 'QQ plot for BP1 Ali3' )
+qqline(BP_199_91$`BP1 Ali 3 intensity`, col = "steelblue", lwd = 2)
+
+#Ploting Boxplots for Individual Bayer Pill 1 Aliquots
+par(mfrow = c(1, 3))
+boxplot(BP_199_91$`BP1 Aliquot 1 intensity`,main = 'Boxplot for BP1 Ali1')
+boxplot(BP_199_91$`BP1 Ali 2 intensity`,main = 'Boxplot for BP1 Ali2')
+boxplot(BP_199_91$`BP1 Ali 3 intensity`,main = 'Boxplot for BP1 Ali3')
+
+#Ploting SmoothScattered Plot for Individual Bayer Pill 1 Aliquots
+par(mfrow = c(1, 3))
+smoothScatter(BP_199_91$`BP1 Aliquot 1 intensity`,main = 'SmoothScattered Plot for BP1 Ali1')
+smoothScatter(BP_199_91$`BP1 Ali 2 intensity`,main = 'SmoothScattered Plot for BP1 Ali2')
+smoothScatter(BP_199_91$`BP1 Ali 3 intensity`,main = 'SmoothScattered Plot for BP1 Ali3')
+
+#Ploting Intensity vs Time for Bayer Pill 2 Aliquots 
+par(mfrow = c(1, 3))
+plot(BP_199_91$`BP2 Aliquot 1 time`,BP_199_91$`BP2 Aliquot 1 intensity`, type= 'b', col = 'green', pch = 19, main = 'BP2 Aliquot 1', xlab = 'Time', ylab = 'Intensity' )
+plot(BP_199_91$`BP2 Ali 2 time`,BP_199_91$`BP2 Ali 2 intensity`, type= 'b', col = 'green', pch = 19, main = 'BP2 Aliquot 2', xlab = 'Time', ylab = 'Intensity' )
+plot(BP_199_91$`BP2 Ali 3 time`,BP_199_91$`BP2 Ali 3 intensity`, type= 'b', col = 'green', pch = 19, main = 'BP2 Aliquot 3', xlab = 'Time', ylab = 'Intensity' )
+
+
+#Ploting QQPlot for Bayer Pill 2 Aliquots
+par(mfrow = c(1, 3))
+qqnorm(BP_199_91$`BP2 Aliquot 1 intensity`, pch = 1, frame = FALSE, main = 'QQ plot for BP2 Ali1' )
+qqline(BP_199_91$`BP2 Aliquot 1 intensity`, col = "steelblue", lwd = 2)
+qqnorm(BP_199_91$`BP2 Ali 2 intensity`, pch = 1, frame = FALSE, main = 'QQ plot for BP2 Ali2' )
+qqline(BP_199_91$`BP2 Ali 2 intensity`, col = "steelblue", lwd = 2)
+qqnorm(BP_199_91$`BP2 Ali 3 intensity`, pch = 1, frame = FALSE, main = 'QQ plot for BP2 Ali3' )
+qqline(BP_199_91$`BP2 Ali 3 intensity`, col = "steelblue", lwd = 2)
+
+#Ploting Boxplots for Individual Bayer Pill 2 Aliquots
+par(mfrow = c(1, 3))
+boxplot(BP_199_91$`BP2 Aliquot 1 intensity`,main = 'Boxplot for BP2 Ali1')
+boxplot(BP_199_91$`BP2 Ali 2 intensity`,main = 'Boxplot for BP2 Ali2')
+boxplot(BP_199_91$`BP2 Ali 3 intensity`,main = 'Boxplot for BP2 Ali3')
+
+#Ploting SmoothScattered Plot for Individual Bayer Pill 2 Aliquots
+par(mfrow = c(1, 3))
+smoothScatter(BP_199_91$`BP2 Aliquot 1 intensity`,main = 'SmoothScattered Plot for BP2 Ali1')
+smoothScatter(BP_199_91$`BP2 Ali 2 intensity`,main = 'SmoothScattered Plot for BP2 Ali2')
+smoothScatter(BP_199_91$`BP2 Ali 3 intensity`,main = 'SmoothScattered Plot for BP2 Ali3')
+
+
+#Ploting Intensity vs Time for Bayer Pill 3 Aliquots 
+par(mfrow = c(1, 3))
+plot(BP_199_91$`BP3 Aliquot 1 time`,BP_199_91$`BP3 Aliquot 1 intensity`, type= 'b', col = 'black', pch = 19, main = 'BP3 Aliquot 1', xlab = 'Time', ylab = 'Intensity' )
+plot(BP_199_91$`BP3 Ali 2 time`,BP_199_91$`BP3 Ali 2 intensity`, type= 'b', col = 'black', pch = 19, main = 'BP3 Aliquot 2', xlab = 'Time', ylab = 'Intensity' )
+plot(BP_199_91$`BP3 Ali 3 time`,BP_199_91$`BP3 Ali 3 intensity`, type= 'b', col = 'black', pch = 19, main = 'BP3 Aliquot 3', xlab = 'Time', ylab = 'Intensity' )
+
+#Ploting QQPlot for Bayer Pill 3 Aliquots
+par(mfrow = c(1, 3))
+qqnorm(BP_199_91$`BP3 Aliquot 1 intensity`, pch = 1, frame = FALSE, main = 'QQ plot for BP3 Ali1' )
+qqline(BP_199_91$`BP3 Aliquot 1 intensity`, col = "steelblue", lwd = 2)
+qqnorm(BP_199_91$`BP3 Ali 2 intensity`, pch = 1, frame = FALSE, main = 'QQ plot for BP3 Ali2' )
+qqline(BP_199_91$`BP3 Ali 2 intensity`, col = "steelblue", lwd = 2)
+qqnorm(BP_199_91$`BP3 Ali 3 intensity`, pch = 1, frame = FALSE, main = 'QQ plot for BP3 Ali3' )
+qqline(BP_199_91$`BP3 Ali 3 intensity`, col = "steelblue", lwd = 2)
+
+#Ploting Boxplots for Individual Bayer Pill 3 Aliquots
+par(mfrow = c(1, 3))
+boxplot(BP_199_91$`BP3 Aliquot 1 intensity`,main = 'Boxplot for BP3 Ali1')
+boxplot(BP_199_91$`BP3 Ali 2 intensity`,main = 'Boxplot for BP3 Ali2')
+boxplot(BP_199_91$`BP3 Ali 3 intensity`,main = 'Boxplot for BP3 Ali3')
+
+#Ploting SmoothScattered Plot for Individual Bayer Pill 3 Aliquots
+par(mfrow = c(1, 3))
+smoothScatter(BP_199_91$`BP3 Aliquot 1 intensity`,main = 'SmoothScattered Plot for BP3 Ali1')
+smoothScatter(BP_199_91$`BP3 Ali 2 intensity`,main = 'SmoothScattered Plot for BP3 Ali2')
+smoothScatter(BP_199_91$`BP3 Ali 3 intensity`,main = 'SmoothScattered Plot for BP3 Ali3')
+
+```
+
+```{r, echo= FALSE, warning=FALSE}
+#Getting Average for Intensities
+
+#Aliquote 1
+BP1_ali1_199_91 <- mean(na.omit(BP_199_91$`BP1 Aliquot 1 intensity`))
+BP2_ali1_199_91 <- mean(na.omit(BP_199_91$`BP2 Aliquot 1 intensity`))
+BP3_ali1_199_91 <- mean(na.omit(BP_199_91$`BP3 Aliquot 1 intensity`))
+#Aliquote 2
+BP1_ali2_199_91 <- mean(na.omit(BP_199_91$`BP1 Ali 2 intensity`))
+BP2_ali2_199_91 <- mean(na.omit(BP_199_91$`BP2 Ali 2 intensity`))
+BP3_ali2_199_91 <- mean(na.omit(BP_199_91$`BP3 Ali 2 intensity`))
+#Aliquote 3
+BP1_ali3_199_91 <- mean(na.omit(BP_199_91$`BP1 Ali 3 intensity`))
+BP2_ali3_199_91 <- mean(na.omit(BP_199_91$`BP2 Ali 3 intensity`))
+BP3_ali3_199_91 <- mean(na.omit(BP_199_91$`BP3 Ali 3 intensity`))
+#Average Intensity for Bayer Pills
+BP1_199_91 <- mean(BP1_ali1_199_91, BP1_ali2_199_91, BP1_ali3_199_91)
+BP2_199_91 <- mean(BP2_ali1_199_91, BP2_ali2_199_91, BP2_ali3_199_91)
+BP3_199_91 <- mean(BP3_ali1_199_91, BP3_ali2_199_91, BP3_ali3_199_91)
+
+```
+
+```{r, echo= FALSE, warning=FALSE}
+#Ploting Intensity vs Time for PV 1 Aliquots 
+par(mfrow = c(1, 3))
+plot(PV_199_91$`PV1 Aliquot 1 time`,PV_199_91$`PV1 Aliquot 1 intensity`, type= 'b', col = 'blue', pch = 19, main = 'PV1 Aliquot 1', xlab = 'Time', ylab = 'Intensity' )
+plot(PV_199_91$`PV1 Ali 2 time`,PV_199_91$`PV1 Ali 2 intensity`, type= 'b', col = 'blue', pch = 19, main = 'PV1 Aliquot 2', xlab = 'Time', ylab = 'Intensity' )
+plot(PV_199_91$`PV1 Ali 3 time`,PV_199_91$`PV1 Ali 3 intensity`, type= 'b', col = 'blue', pch = 19, main = 'PV1 Aliquot 3', xlab = 'Time', ylab = 'Intensity' )
+
+#Ploting QQPlot for PV 1 Aliquots
+par(mfrow = c(1, 3))
+qqnorm(PV_199_91$`PV1 Aliquot 1 intensity`, pch = 1, frame = FALSE, main = 'QQ plot for PV1 Ali1' )
+qqline(PV_199_91$`PV1 Aliquot 1 intensity`, col = "steelblue", lwd = 2)
+qqnorm(PV_199_91$`PV1 Ali 2 intensity`, pch = 1, frame = FALSE, main = 'QQ plot for PV1 Ali2' )
+qqline(PV_199_91$`PV1 Ali 2 intensity`, col = "steelblue", lwd = 2)
+qqnorm(PV_199_91$`PV1 Ali 3 intensity`, pch = 1, frame = FALSE, main = 'QQ plot for PV1 Ali3' )
+qqline(PV_199_91$`PV1 Ali 3 intensity`, col = "steelblue", lwd = 2)
+
+#Ploting Boxplots for Individual PV 1 Aliquots
+par(mfrow = c(1, 3))
+boxplot(PV_199_91$`PV1 Aliquot 1 intensity`,main = 'Boxplot for PV1 Ali1')
+boxplot(PV_199_91$`PV1 Ali 2 intensity`,main = 'Boxplot for PV1 Ali2')
+boxplot(PV_199_91$`PV1 Ali 3 intensity`,main = 'Boxplot for PV1 Ali3')
+
+#Ploting SmoothScattered Plot for Individual PV 1 Aliquots
+par(mfrow = c(1, 3))
+smoothScatter(PV_199_91$`PV1 Aliquot 1 intensity`,main = 'SmoothScattered Plot for PV1 Ali1')
+smoothScatter(PV_199_91$`PV1 Ali 2 intensity`,main = 'SmoothScattered Plot for PV1 Ali2')
+smoothScatter(PV_199_91$`PV1 Ali 3 intensity`,main = 'SmoothScattered Plot for PV1 Ali3')
+
+
+#Ploting Intensity vs Time for PV 2 Aliquots 
+par(mfrow = c(1, 3))
+plot(PV_199_91$`PV2 Aliquot 1 time`,PV_199_91$`PV2 Aliquot 1 intensity`, type= 'b', col = 'green', pch = 19, main = 'PV2 Aliquot 1', xlab = 'Time', ylab = 'Intensity' )
+plot(PV_199_91$`PV2 Ali 2 time`,PV_199_91$`PV2 Ali 2 intensity`, type= 'b', col = 'green', pch = 19, main = 'PV2 Aliquot 2', xlab = 'Time', ylab = 'Intensity' )
+plot(PV_199_91$`PV2 Ali 3 time`,PV_199_91$`PV2 Ali 3 intensity`, type= 'b', col = 'green', pch = 19, main = 'PV2 Aliquot 3', xlab = 'Time', ylab = 'Intensity' )
+
+#Ploting QQPlot for PV 2 Aliquots
+par(mfrow = c(1, 3))
+qqnorm(PV_199_91$`PV2 Aliquot 1 intensity`, pch = 1, frame = FALSE, main = 'QQ plot for PV2 Ali1' )
+qqline(PV_199_91$`PV2 Aliquot 1 intensity`, col = "steelblue", lwd = 2)
+qqnorm(PV_199_91$`PV2 Ali 2 intensity`, pch = 1, frame = FALSE, main = 'QQ plot for PV2 Ali2' )
+qqline(PV_199_91$`PV2 Ali 2 intensity`, col = "steelblue", lwd = 2)
+qqnorm(PV_199_91$`PV2 Ali 3 intensity`, pch = 1, frame = FALSE, main = 'QQ plot for PV2 Ali3' )
+qqline(PV_199_91$`PV2 Ali 3 intensity`, col = "steelblue", lwd = 2)
+
+#Ploting Boxplots for Individual PV 2 Aliquots
+par(mfrow = c(1, 3))
+boxplot(PV_199_91$`PV2 Aliquot 1 intensity`,main = 'Boxplot for PV2 Ali1')
+boxplot(PV_199_91$`PV2 Ali 2 intensity`,main = 'Boxplot for PV2 Ali2')
+boxplot(PV_199_91$`PV2 Ali 3 intensity`,main = 'Boxplot for PV2 Ali3')
+
+#Ploting SmoothScattered Plot for Individual PV 2 Aliquots
+par(mfrow = c(1, 3))
+smoothScatter(PV_199_91$`PV2 Aliquot 1 intensity`,main = 'SmoothScattered Plot for PV2 Ali1')
+smoothScatter(PV_199_91$`PV2 Ali 2 intensity`,main = 'SmoothScattered Plot for PV2 Ali2')
+smoothScatter(PV_199_91$`PV2 Ali 3 intensity`,main = 'SmoothScattered Plot for PV2 Ali3')
+
+
+#Ploting Intensity vs Time for PV 3 Aliquots 
+par(mfrow = c(1, 3))
+plot(PV_199_91$`PV3 Aliquot 1 time`,PV_199_91$`PV3 Aliquot 1 intensity`, type= 'b', col = 'black', pch = 19, main = 'PV3 Aliquot 1', xlab = 'Time', ylab = 'Intensity' )
+plot(PV_199_91$`PV3 Ali 2 time`,PV_199_91$`PV3 Ali 2 intensity`, type= 'b', col = 'black', pch = 19, main = 'PV3 Aliquot 2', xlab = 'Time', ylab = 'Intensity' )
+plot(PV_199_91$`PV3 Ali 3 time`,PV_199_91$`PV3 Ali 3 intensity`, type= 'b', col = 'black', pch = 19, main = 'PV3 Aliquot 3', xlab = 'Time', ylab = 'Intensity' )
+
+#Ploting QQPlot for PV 3 Aliquots
+par(mfrow = c(1, 3))
+qqnorm(PV_199_91$`PV3 Aliquot 1 intensity`, pch = 1, frame = FALSE, main = 'QQ plot for PV3 Ali1' )
+qqline(PV_199_91$`PV3 Aliquot 1 intensity`, col = "steelblue", lwd = 2)
+qqnorm(PV_199_91$`PV3 Ali 2 intensity`, pch = 1, frame = FALSE, main = 'QQ plot for PV3 Ali2' )
+qqline(PV_199_91$`PV3 Ali 2 intensity`, col = "steelblue", lwd = 2)
+qqnorm(PV_199_91$`PV3 Ali 3 intensity`, pch = 1, frame = FALSE, main = 'QQ plot for PV3 Ali3' )
+qqline(PV_199_91$`PV3 Ali 3 intensity`, col = "steelblue", lwd = 2)
+
+#Ploting Boxplots for Individual PV 3 Aliquots
+par(mfrow = c(1, 3))
+boxplot(PV_199_91$`PV3 Aliquot 1 intensity`,main = 'Boxplot for PV3 Ali1')
+boxplot(PV_199_91$`PV3 Ali 2 intensity`,main = 'Boxplot for PV3 Ali2')
+boxplot(PV_199_91$`PV3 Ali 3 intensity`,main = 'Boxplot for PV3 Ali3')
+
+#Ploting SmoothScattered Plot for Individual PV 3 Aliquots
+par(mfrow = c(1, 3))
+smoothScatter(PV_199_91$`PV3 Aliquot 1 intensity`,main = 'SmoothScattered Plot for PV3 Ali1')
+smoothScatter(PV_199_91$`PV3 Ali 2 intensity`,main = 'SmoothScattered Plot for PV3 Ali2')
+smoothScatter(PV_199_91$`PV3 Ali 3 intensity`,main = 'SmoothScattered Plot for PV3 Ali3')
+```
+
+
+```{r, echo= FALSE, warning=FALSE}
+#Getting Average for Intensities
+
+#Aliquote 1
+PV1_ali1_199_91 <- mean(na.omit(PV_199_91$`PV1 Aliquot 1 intensity`))
+PV2_ali1_199_91 <- mean(na.omit(PV_199_91$`PV2 Aliquot 1 intensity`))
+PV3_ali1_199_91 <- mean(na.omit(PV_199_91$`PV3 Aliquot 1 intensity`))
+#Aliquote 2
+PV1_ali2_199_91 <- mean(na.omit(PV_199_91$`PV1 Ali 2 intensity`))
+PV2_ali2_199_91 <- mean(na.omit(PV_199_91$`PV2 Ali 2 intensity`))
+PV3_ali2_199_91 <- mean(na.omit(PV_199_91$`PV3 Ali 2 intensity`))
+#Aliquote 3
+PV1_ali3_199_91 <- mean(na.omit(PV_199_91$`PV1 Ali 3 intensity`))
+PV2_ali3_199_91 <- mean(na.omit(PV_199_91$`PV2 Ali 3 intensity`))
+PV3_ali3_199_91 <- mean(na.omit(PV_199_91$`PV3 Ali 3 intensity`))
+
+#Average Intensity for PV pills
+PV1_199_91 <- mean(PV1_ali1_199_91, PV1_ali2_199_91, PV1_ali3_199_91)
+PV2_199_91 <- mean(PV2_ali1_199_91, PV2_ali2_199_91, PV2_ali3_199_91)
+PV3_199_91 <- mean(PV3_ali1_199_91, PV3_ali2_199_91, PV3_ali3_199_91)
+```
+
+```{r, echo= FALSE, warning=FALSE}
+#Ploting Intensity vs Time for WL 1 Aliquots 
+par(mfrow = c(1, 3))
+plot(WL_199_91$`WL1 Aliquot 1 time`,WL_199_91$`WL1 Aliquot 1 intensity`, type= 'b', col = 'blue', pch = 19, main = 'WL1 Aliquot 1', xlab = 'Time', ylab = 'Intensity' )
+plot(WL_199_91$`WL1 Ali 2 time`,WL_199_91$`WL1 Ali 2 intensity`, type= 'b', col = 'blue', pch = 19, main = 'WL1 Aliquot 2', xlab = 'Time', ylab = 'Intensity' )
+plot(WL_199_91$`WL1 Ali 3 time`,WL_199_91$`WL1 Ali 3 intensity`, type= 'b', col = 'blue', pch = 19, main = 'WL1 Aliquot 3', xlab = 'Time', ylab = 'Intensity' )
+
+#Ploting QQPlot for WL 1 Aliquots
+par(mfrow = c(1, 3))
+qqnorm(WL_199_91$`WL1 Aliquot 1 intensity`, pch = 1, frame = FALSE, main = 'QQ plot for WL1 Ali1' )
+qqline(WL_199_91$`WL1 Aliquot 1 intensity`, col = "steelblue", lwd = 2)
+qqnorm(WL_199_91$`WL1 Ali 2 intensity`, pch = 1, frame = FALSE, main = 'QQ plot for WL1 Ali2' )
+qqline(WL_199_91$`WL1 Ali 2 intensity`, col = "steelblue", lwd = 2)
+qqnorm(WL_199_91$`WL1 Ali 3 intensity`, pch = 1, frame = FALSE, main = 'QQ plot for WL1 Ali3' )
+qqline(WL_199_91$`WL1 Ali 3 intensity`, col = "steelblue", lwd = 2)
+
+#Ploting Boxplots for Individual WL 1 Aliquots
+par(mfrow = c(1, 3))
+boxplot(WL_199_91$`WL1 Aliquot 1 intensity`,main = 'Boxplot for WL1 Ali1')
+boxplot(WL_199_91$`WL1 Ali 2 intensity`,main = 'Boxplot for WL1 Ali2')
+boxplot(WL_199_91$`WL1 Ali 3 intensity`,main = 'Boxplot for WL1 Ali3')
+
+#Ploting SmoothScattered Plot for Individual WL 1 Aliquots
+par(mfrow = c(1, 3))
+smoothScatter(WL_199_91$`WL1 Aliquot 1 intensity`,main = 'SmoothScattered Plot for WL1 Ali1')
+smoothScatter(WL_199_91$`WL1 Ali 2 intensity`,main = 'SmoothScattered Plot for WL1 Ali2')
+smoothScatter(WL_199_91$`WL1 Ali 3 intensity`,main = 'SmoothScattered Plot for WL1 Ali3')
+
+
+
+#Ploting Intensity vs Time for WL 2 Aliquots 
+par(mfrow = c(1, 3))
+plot(WL_199_91$`WL2 Aliquot 1 time`,WL_199_91$`WL2 Aliquot 1 intensity`, type= 'b', col = 'green', pch = 19, main = 'WL2 Aliquot 1', xlab = 'Time', ylab = 'Intensity' )
+plot(WL_199_91$`WL2 Ali 2 time`,WL_199_91$`WL2 Ali 2 intensity`, type= 'b', col = 'green', pch = 19, main = 'WL2 Aliquot 2', xlab = 'Time', ylab = 'Intensity' )
+plot(WL_199_91$`WL2 Ali 3 time`,WL_199_91$`WL2 Ali 3 intensity`, type= 'b', col = 'green', pch = 19, main = 'WL2 Aliquot 3', xlab = 'Time', ylab = 'Intensity' )
+
+#Ploting QQPlot for WL 2 Aliquots
+par(mfrow = c(1, 3))
+qqnorm(WL_199_91$`WL2 Aliquot 1 intensity`, pch = 1, frame = FALSE, main = 'QQ plot for WL2 Ali1' )
+qqline(WL_199_91$`WL2 Aliquot 1 intensity`, col = "steelblue", lwd = 2)
+qqnorm(WL_199_91$`WL2 Ali 2 intensity`, pch = 1, frame = FALSE, main = 'QQ plot for WL2 Ali2' )
+qqline(WL_199_91$`WL2 Ali 2 intensity`, col = "steelblue", lwd = 2)
+qqnorm(WL_199_91$`WL2 Ali 3 intensity`, pch = 1, frame = FALSE, main = 'QQ plot for WL2 Ali3' )
+qqline(WL_199_91$`WL2 Ali 3 intensity`, col = "steelblue", lwd = 2)
+
+#Ploting Boxplots for Individual WL 2 Aliquots
+par(mfrow = c(1, 3))
+boxplot(WL_199_91$`WL2 Aliquot 1 intensity`,main = 'Boxplot for WL2 Ali1')
+boxplot(WL_199_91$`WL2 Ali 2 intensity`,main = 'Boxplot for WL2 Ali2')
+boxplot(WL_199_91$`WL2 Ali 3 intensity`,main = 'Boxplot for WL2 Ali3')
+
+#Ploting SmoothScattered Plot for Individual WL 2 Aliquots
+par(mfrow = c(1, 3))
+smoothScatter(WL_199_91$`WL2 Aliquot 1 intensity`,main = 'SmoothScattered Plot for WL2 Ali1')
+smoothScatter(WL_199_91$`WL2 Ali 2 intensity`,main = 'SmoothScattered Plot for WL2 Ali2')
+smoothScatter(WL_199_91$`WL2 Ali 3 intensity`,main = 'SmoothScattered Plot for WL2 Ali3')
+
+
+
+#Ploting Intensity vs Time for WL 3 Aliquots 
+par(mfrow = c(1, 3))
+plot(WL_199_91$`WL3 Aliquot 1 time`,WL_199_91$`WL3 Aliquot 1 intensity`, type= 'b', col = 'black', pch = 19, main = 'WL3 Aliquot 1', xlab = 'Time', ylab = 'Intensity' )
+plot(WL_199_91$`WL3 Ali 2 time`,WL_199_91$`WL3 Ali 2 intensity`, type= 'b', col = 'black', pch = 19, main = 'WL3 Aliquot 2', xlab = 'Time', ylab = 'Intensity' )
+plot(WL_199_91$`WL3 Ali 3 time`,WL_199_91$`WL3 Ali 3 intensity`, type= 'b', col = 'black', pch = 19, main = 'WL3 Aliquot 3', xlab = 'Time', ylab = 'Intensity' )
+
+#Ploting QQPlot for WL 3 Aliquots
+par(mfrow = c(1, 3))
+qqnorm(WL_199_91$`WL3 Aliquot 1 intensity`, pch = 1, frame = FALSE, main = 'QQ plot for WL3 Ali1' )
+qqline(WL_199_91$`WL3 Aliquot 1 intensity`, col = "steelblue", lwd = 2)
+qqnorm(WL_199_91$`WL3 Ali 2 intensity`, pch = 1, frame = FALSE, main = 'QQ plot for WL3 Ali2' )
+qqline(WL_199_91$`WL3 Ali 2 intensity`, col = "steelblue", lwd = 2)
+qqnorm(WL_199_91$`WL3 Ali 3 intensity`, pch = 1, frame = FALSE, main = 'QQ plot for WL3 Ali3' )
+qqline(WL_199_91$`WL3 Ali 3 intensity`, col = "steelblue", lwd = 2)
+
+#Ploting Boxplots for Individual WL 3 Aliquots
+par(mfrow = c(1, 3))
+boxplot(WL_199_91$`WL3 Aliquot 1 intensity`,main = 'Boxplot for WL3 Ali1')
+boxplot(WL_199_91$`WL3 Ali 2 intensity`,main = 'Boxplot for WL3 Ali2')
+boxplot(WL_199_91$`WL3 Ali 3 intensity`,main = 'Boxplot for WL3 Ali3')
+
+#Ploting SmoothScattered Plot for Individual WL 3 Aliquots
+par(mfrow = c(1, 3))
+smoothScatter(WL_199_91$`WL3 Aliquot 1 intensity`,main = 'SmoothScattered Plot for WL3 Ali1')
+smoothScatter(WL_199_91$`WL3 Ali 2 intensity`,main = 'SmoothScattered Plot for WL3 Ali2')
+smoothScatter(WL_199_91$`WL3 Ali 3 intensity`,main = 'SmoothScattered Plot for WL3 Ali3')
+```
+
+
+```{r, echo= FALSE, warning=FALSE}
+#Getting Average for Intensities
+
+#Aliquote 1
+WL1_ali1_199_91 <- mean(na.omit(WL_199_91$`WL1 Aliquot 1 intensity`))
+WL2_ali1_199_91 <- mean(na.omit(WL_199_91$`WL2 Aliquot 1 intensity`))
+WL3_ali1_199_91 <- mean(na.omit(WL_199_91$`WL3 Aliquot 1 intensity`))
+#Aliquote 2
+WL1_ali2_199_91 <- mean(na.omit(WL_199_91$`WL1 Ali 2 intensity`))
+WL2_ali2_199_91 <- mean(na.omit(WL_199_91$`WL2 Ali 2 intensity`))
+WL3_ali2_199_91 <- mean(na.omit(WL_199_91$`WL3 Ali 2 intensity`))
+#Aliquote 3
+WL1_ali3_199_91 <- mean(na.omit(WL_199_91$`WL1 Ali 3 intensity`))
+WL2_ali3_199_91 <- mean(na.omit(WL_199_91$`WL2 Ali 3 intensity`))
+WL3_ali3_199_91 <- mean(na.omit(WL_199_91$`WL3 Ali 3 intensity`))
+
+
+#Average Intensity for Walgreen pills
+WL1_199_91 <- mean(WL1_ali1_199_91, WL1_ali2_199_91, WL1_ali3_199_91)
+WL2_199_91 <- mean(WL2_ali1_199_91, WL2_ali2_199_91, WL2_ali3_199_91)
+WL3_199_91 <- mean(WL3_ali1_199_91, WL3_ali2_199_91, WL3_ali3_199_91)
+
+```
+
+```{r, echo= FALSE, warning=FALSE}
+#Analysis of Variance
+Intensity <- c(BP1_199_91, BP2_199_91, BP3_199_91, PV1_199_91, PV2_199_91, PV3_199_91,WL1_199_91, WL2_199_91, WL3_199_91)
+Brands <- c('BP1', 'BP2', 'BP3', 'PV1', 'PV2', 'PV3', 'WL1', 'WL2', 'WL3')
+Pills <- c(1,1,1,2,2,2,3,3,3)
+data_199_91 <- cbind( Brands, Pills, Intensity)
+data_199_91 <- as.data.frame(data_199_91)
+one.way <- aov( Intensity ~ Pills, data = data_199_91)
+summary(one.way)
+#Ploting ANOVA
+par(mfrow=c(2,2))
+#plot(one.way)
+par(mfrow=c(1,1))
+#Post-hoc test
+tukey.one.way<-TukeyHSD(one.way)
+tukey.one.way
+plot(tukey.one.way, las = 1)
+```
+
+The p-value of the pills variable is low (p < 0.05), so it appears that there is significant differences between the pills for this peak region. From the post-hoc test results, we see that there are statistically significant differences (p < 0.05) between pill groups 3 (WALGREEN) and 1 (Bayer).
+
+# Analysis Peak 199.100 92.900
+
+```{r, echo= FALSE, warning=FALSE}
+#Loading Data for Peak 199.100 92.900
+library(readxl)
+BP_199_92 <- read_excel("Bay Pill 199.100 92.900 New.xlsx")
+PV_199_92 <- read_excel("P.V Pill 199.100 92.900 New.xlsx") 
+WL_199_92 <- read_excel("Wal Pill 199.100 92.900 New.xlsx") 
+```
+
+
+```{r, echo= FALSE, warning=FALSE}
+#Ploting Intensity vs Time for Bayer Pill 1 Aliquots 
+par(mfrow = c(1, 3))
+plot(BP_199_92$`BP1 Aliquot 1 time`,BP_199_92$`BP1 Aliquot 1 intensity`, type= 'b', col = 'blue', pch = 19, main = 'BP1 Aliquot 1', xlab = 'Time', ylab = 'Intensity' )
+plot(BP_199_92$`BP1 Ali 2 time`,BP_199_92$`BP1 Ali 2 intensity`, type= 'b', col = 'blue', pch = 19, main = 'BP1 Aliquot 2', xlab = 'Time', ylab = 'Intensity' )
+plot(BP_199_92$`BP1 Ali 3 time`,BP_199_92$`BP1 Ali 3 intensity`, type= 'b', col = 'blue', pch = 19, main = 'BP1 Aliquot 3', xlab = 'Time', ylab = 'Intensity' )
+
+#Ploting QQPlot for Bayer Pill 1 Aliquots
+par(mfrow = c(1, 3))
+qqnorm(BP_199_92$`BP1 Aliquot 1 intensity`, pch = 1, frame = FALSE, main = 'QQ plot for BP1 Ali1' )
+qqline(BP_199_92$`BP1 Aliquot 1 intensity`, col = "steelblue", lwd = 2)
+qqnorm(BP_199_92$`BP1 Ali 2 intensity`, pch = 1, frame = FALSE, main = 'QQ plot for BP1 Ali2' )
+qqline(BP_199_92$`BP1 Ali 2 intensity`, col = "steelblue", lwd = 2)
+qqnorm(BP_199_92$`BP1 Ali 3 intensity`, pch = 1, frame = FALSE, main = 'QQ plot for BP1 Ali3' )
+qqline(BP_199_92$`BP1 Ali 3 intensity`, col = "steelblue", lwd = 2)
+
+#Ploting Boxplots for Individual Bayer Pill 1 Aliquots
+par(mfrow = c(1, 3))
+boxplot(BP_199_92$`BP1 Aliquot 1 intensity`,main = 'Boxplot for BP1 Ali1')
+boxplot(BP_199_92$`BP1 Ali 2 intensity`,main = 'Boxplot for BP1 Ali2')
+boxplot(BP_199_92$`BP1 Ali 3 intensity`,main = 'Boxplot for BP1 Ali3')
+
+#Ploting SmoothScattered Plot for Individual Bayer Pill 1 Aliquots
+par(mfrow = c(1, 3))
+smoothScatter(BP_199_92$`BP1 Aliquot 1 intensity`,main = 'SmoothScattered Plot for BP1 Ali1')
+smoothScatter(BP_199_92$`BP1 Ali 2 intensity`,main = 'SmoothScattered Plot for BP1 Ali2')
+smoothScatter(BP_199_92$`BP1 Ali 3 intensity`,main = 'SmoothScattered Plot for BP1 Ali3')
+
+#Ploting Intensity vs Time for Bayer Pill 2 Aliquots 
+par(mfrow = c(1, 3))
+plot(BP_199_92$`BP2 Aliquot 1 time`,BP_199_92$`BP2 Aliquot 1 intensity`, type= 'b', col = 'green', pch = 19, main = 'BP2 Aliquot 1', xlab = 'Time', ylab = 'Intensity' )
+plot(BP_199_92$`BP2 Ali 2 time`,BP_199_92$`BP2 Ali 2 intensity`, type= 'b', col = 'green', pch = 19, main = 'BP2 Aliquot 2', xlab = 'Time', ylab = 'Intensity' )
+plot(BP_199_92$`BP2 Ali 3 time`,BP_199_92$`BP2 Ali 3 intensity`, type= 'b', col = 'green', pch = 19, main = 'BP2 Aliquot 3', xlab = 'Time', ylab = 'Intensity' )
+
+
+#Ploting QQPlot for Bayer Pill 2 Aliquots
+par(mfrow = c(1, 3))
+qqnorm(BP_199_92$`BP2 Aliquot 1 intensity`, pch = 1, frame = FALSE, main = 'QQ plot for BP2 Ali1' )
+qqline(BP_199_92$`BP2 Aliquot 1 intensity`, col = "steelblue", lwd = 2)
+qqnorm(BP_199_92$`BP2 Ali 2 intensity`, pch = 1, frame = FALSE, main = 'QQ plot for BP2 Ali2' )
+qqline(BP_199_92$`BP2 Ali 2 intensity`, col = "steelblue", lwd = 2)
+qqnorm(BP_199_92$`BP2 Ali 3 intensity`, pch = 1, frame = FALSE, main = 'QQ plot for BP2 Ali3' )
+qqline(BP_199_92$`BP2 Ali 3 intensity`, col = "steelblue", lwd = 2)
+
+#Ploting Boxplots for Individual Bayer Pill 2 Aliquots
+par(mfrow = c(1, 3))
+boxplot(BP_199_92$`BP2 Aliquot 1 intensity`,main = 'Boxplot for BP2 Ali1')
+boxplot(BP_199_92$`BP2 Ali 2 intensity`,main = 'Boxplot for BP2 Ali2')
+boxplot(BP_199_92$`BP2 Ali 3 intensity`,main = 'Boxplot for BP2 Ali3')
+
+#Ploting SmoothScattered Plot for Individual Bayer Pill 2 Aliquots
+par(mfrow = c(1, 3))
+smoothScatter(BP_199_92$`BP2 Aliquot 1 intensity`,main = 'SmoothScattered Plot for BP2 Ali1')
+smoothScatter(BP_199_92$`BP2 Ali 2 intensity`,main = 'SmoothScattered Plot for BP2 Ali2')
+smoothScatter(BP_199_92$`BP2 Ali 3 intensity`,main = 'SmoothScattered Plot for BP2 Ali3')
+
+
+#Ploting Intensity vs Time for Bayer Pill 3 Aliquots 
+par(mfrow = c(1, 3))
+plot(BP_199_92$`BP3 Aliquot 1 time`,BP_199_92$`BP3 Aliquot 1 intensity`, type= 'b', col = 'black', pch = 19, main = 'BP3 Aliquot 1', xlab = 'Time', ylab = 'Intensity' )
+plot(BP_199_92$`BP3 Ali 2 time`,BP_199_92$`BP3 Ali 2 intensity`, type= 'b', col = 'black', pch = 19, main = 'BP3 Aliquot 2', xlab = 'Time', ylab = 'Intensity' )
+plot(BP_199_92$`BP3 Ali 3 time`,BP_199_92$`BP3 Ali 3 intensity`, type= 'b', col = 'black', pch = 19, main = 'BP3 Aliquot 3', xlab = 'Time', ylab = 'Intensity' )
+
+#Ploting QQPlot for Bayer Pill 3 Aliquots
+par(mfrow = c(1, 3))
+qqnorm(BP_199_92$`BP3 Aliquot 1 intensity`, pch = 1, frame = FALSE, main = 'QQ plot for BP3 Ali1' )
+qqline(BP_199_92$`BP3 Aliquot 1 intensity`, col = "steelblue", lwd = 2)
+qqnorm(BP_199_92$`BP3 Ali 2 intensity`, pch = 1, frame = FALSE, main = 'QQ plot for BP3 Ali2' )
+qqline(BP_199_92$`BP3 Ali 2 intensity`, col = "steelblue", lwd = 2)
+qqnorm(BP_199_92$`BP3 Ali 3 intensity`, pch = 1, frame = FALSE, main = 'QQ plot for BP3 Ali3' )
+qqline(BP_199_92$`BP3 Ali 3 intensity`, col = "steelblue", lwd = 2)
+
+#Ploting Boxplots for Individual Bayer Pill 3 Aliquots
+par(mfrow = c(1, 3))
+boxplot(BP_199_92$`BP3 Aliquot 1 intensity`,main = 'Boxplot for BP3 Ali1')
+boxplot(BP_199_92$`BP3 Ali 2 intensity`,main = 'Boxplot for BP3 Ali2')
+boxplot(BP_199_92$`BP3 Ali 3 intensity`,main = 'Boxplot for BP3 Ali3')
+
+#Ploting SmoothScattered Plot for Individual Bayer Pill 3 Aliquots
+par(mfrow = c(1, 3))
+smoothScatter(BP_199_92$`BP3 Aliquot 1 intensity`,main = 'SmoothScattered Plot for BP3 Ali1')
+smoothScatter(BP_199_92$`BP3 Ali 2 intensity`,main = 'SmoothScattered Plot for BP3 Ali2')
+smoothScatter(BP_199_92$`BP3 Ali 3 intensity`,main = 'SmoothScattered Plot for BP3 Ali3')
+
+```
+
+```{r, echo= FALSE, warning=FALSE}
+#Getting Average for Intensities
+
+#Aliquote 1
+BP1_ali1_199_92 <- mean(na.omit(BP_199_92$`BP1 Aliquot 1 intensity`))
+BP2_ali1_199_92 <- mean(na.omit(BP_199_92$`BP2 Aliquot 1 intensity`))
+BP3_ali1_199_92 <- mean(na.omit(BP_199_92$`BP3 Aliquot 1 intensity`))
+#Aliquote 2
+BP1_ali2_199_92 <- mean(na.omit(BP_199_92$`BP1 Ali 2 intensity`))
+BP2_ali2_199_92 <- mean(na.omit(BP_199_92$`BP2 Ali 2 intensity`))
+BP3_ali2_199_92 <- mean(na.omit(BP_199_92$`BP3 Ali 2 intensity`))
+#Aliquote 3
+BP1_ali3_199_92 <- mean(na.omit(BP_199_92$`BP1 Ali 3 intensity`))
+BP2_ali3_199_92 <- mean(na.omit(BP_199_92$`BP2 Ali 3 intensity`))
+BP3_ali3_199_92 <- mean(na.omit(BP_199_92$`BP3 Ali 3 intensity`))
+#Average Intensity for Bayer Pills
+BP1_199_92 <- mean(BP1_ali1_199_92, BP1_ali2_199_92, BP1_ali3_199_92)
+BP2_199_92 <- mean(BP2_ali1_199_92, BP2_ali2_199_92, BP2_ali3_199_92)
+BP3_199_92 <- mean(BP3_ali1_199_92, BP3_ali2_199_92, BP3_ali3_199_92)
+
+```
+
+```{r, echo= FALSE, warning=FALSE}
+#Ploting Intensity vs Time for PV 1 Aliquots 
+par(mfrow = c(1, 3))
+plot(PV_199_92$`PV1 Aliquot 1 time`,PV_199_92$`PV1 Aliquot 1 intensity`, type= 'b', col = 'blue', pch = 19, main = 'PV1 Aliquot 1', xlab = 'Time', ylab = 'Intensity' )
+plot(PV_199_92$`PV1 Ali 2 time`,PV_199_92$`PV1 Ali 2 intensity`, type= 'b', col = 'blue', pch = 19, main = 'PV1 Aliquot 2', xlab = 'Time', ylab = 'Intensity' )
+plot(PV_199_92$`PV1 Ali 3 time`,PV_199_92$`PV1 Ali 3 intensity`, type= 'b', col = 'blue', pch = 19, main = 'PV1 Aliquot 3', xlab = 'Time', ylab = 'Intensity' )
+
+#Ploting QQPlot for PV 1 Aliquots
+par(mfrow = c(1, 3))
+qqnorm(PV_199_92$`PV1 Aliquot 1 intensity`, pch = 1, frame = FALSE, main = 'QQ plot for PV1 Ali1' )
+qqline(PV_199_92$`PV1 Aliquot 1 intensity`, col = "steelblue", lwd = 2)
+qqnorm(PV_199_92$`PV1 Ali 2 intensity`, pch = 1, frame = FALSE, main = 'QQ plot for PV1 Ali2' )
+qqline(PV_199_92$`PV1 Ali 2 intensity`, col = "steelblue", lwd = 2)
+qqnorm(PV_199_92$`PV1 Ali 3 intensity`, pch = 1, frame = FALSE, main = 'QQ plot for PV1 Ali3' )
+qqline(PV_199_92$`PV1 Ali 3 intensity`, col = "steelblue", lwd = 2)
+
+#Ploting Boxplots for Individual PV 1 Aliquots
+par(mfrow = c(1, 3))
+boxplot(PV_199_92$`PV1 Aliquot 1 intensity`,main = 'Boxplot for PV1 Ali1')
+boxplot(PV_199_92$`PV1 Ali 2 intensity`,main = 'Boxplot for PV1 Ali2')
+boxplot(PV_199_92$`PV1 Ali 3 intensity`,main = 'Boxplot for PV1 Ali3')
+
+#Ploting SmoothScattered Plot for Individual PV 1 Aliquots
+par(mfrow = c(1, 3))
+smoothScatter(PV_199_92$`PV1 Aliquot 1 intensity`,main = 'SmoothScattered Plot for PV1 Ali1')
+smoothScatter(PV_199_92$`PV1 Ali 2 intensity`,main = 'SmoothScattered Plot for PV1 Ali2')
+smoothScatter(PV_199_92$`PV1 Ali 3 intensity`,main = 'SmoothScattered Plot for PV1 Ali3')
+
+
+#Ploting Intensity vs Time for PV 2 Aliquots 
+par(mfrow = c(1, 3))
+plot(PV_199_92$`PV2 Aliquot 1 time`,PV_199_92$`PV2 Aliquot 1 intensity`, type= 'b', col = 'green', pch = 19, main = 'PV2 Aliquot 1', xlab = 'Time', ylab = 'Intensity' )
+plot(PV_199_92$`PV2 Ali 2 time`,PV_199_92$`PV2 Ali 2 intensity`, type= 'b', col = 'green', pch = 19, main = 'PV2 Aliquot 2', xlab = 'Time', ylab = 'Intensity' )
+plot(PV_199_92$`PV2 Ali 3 time`,PV_199_92$`PV2 Ali 3 intensity`, type= 'b', col = 'green', pch = 19, main = 'PV2 Aliquot 3', xlab = 'Time', ylab = 'Intensity' )
+
+#Ploting QQPlot for PV 2 Aliquots
+par(mfrow = c(1, 3))
+qqnorm(PV_199_92$`PV2 Aliquot 1 intensity`, pch = 1, frame = FALSE, main = 'QQ plot for PV2 Ali1' )
+qqline(PV_199_92$`PV2 Aliquot 1 intensity`, col = "steelblue", lwd = 2)
+qqnorm(PV_199_92$`PV2 Ali 2 intensity`, pch = 1, frame = FALSE, main = 'QQ plot for PV2 Ali2' )
+qqline(PV_199_92$`PV2 Ali 2 intensity`, col = "steelblue", lwd = 2)
+qqnorm(PV_199_92$`PV2 Ali 3 intensity`, pch = 1, frame = FALSE, main = 'QQ plot for PV2 Ali3' )
+qqline(PV_199_92$`PV2 Ali 3 intensity`, col = "steelblue", lwd = 2)
+
+#Ploting Boxplots for Individual PV 2 Aliquots
+par(mfrow = c(1, 3))
+boxplot(PV_199_92$`PV2 Aliquot 1 intensity`,main = 'Boxplot for PV2 Ali1')
+boxplot(PV_199_92$`PV2 Ali 2 intensity`,main = 'Boxplot for PV2 Ali2')
+boxplot(PV_199_92$`PV2 Ali 3 intensity`,main = 'Boxplot for PV2 Ali3')
+
+#Ploting SmoothScattered Plot for Individual PV 2 Aliquots
+par(mfrow = c(1, 3))
+smoothScatter(PV_199_92$`PV2 Aliquot 1 intensity`,main = 'SmoothScattered Plot for PV2 Ali1')
+smoothScatter(PV_199_92$`PV2 Ali 2 intensity`,main = 'SmoothScattered Plot for PV2 Ali2')
+smoothScatter(PV_199_92$`PV2 Ali 3 intensity`,main = 'SmoothScattered Plot for PV2 Ali3')
+
+
+#Ploting Intensity vs Time for PV 3 Aliquots 
+par(mfrow = c(1, 3))
+plot(PV_199_92$`PV3 Aliquot 1 time`,PV_199_92$`PV3 Aliquot 1 intensity`, type= 'b', col = 'black', pch = 19, main = 'PV3 Aliquot 1', xlab = 'Time', ylab = 'Intensity' )
+plot(PV_199_92$`PV3 Ali 2 time`,PV_199_92$`PV3 Ali 2 intensity`, type= 'b', col = 'black', pch = 19, main = 'PV3 Aliquot 2', xlab = 'Time', ylab = 'Intensity' )
+plot(PV_199_92$`PV3 Ali 3 time`,PV_199_92$`PV3 Ali 3 intensity`, type= 'b', col = 'black', pch = 19, main = 'PV3 Aliquot 3', xlab = 'Time', ylab = 'Intensity' )
+
+#Ploting QQPlot for PV 3 Aliquots
+par(mfrow = c(1, 3))
+qqnorm(PV_199_92$`PV3 Aliquot 1 intensity`, pch = 1, frame = FALSE, main = 'QQ plot for PV3 Ali1' )
+qqline(PV_199_92$`PV3 Aliquot 1 intensity`, col = "steelblue", lwd = 2)
+qqnorm(PV_199_92$`PV3 Ali 2 intensity`, pch = 1, frame = FALSE, main = 'QQ plot for PV3 Ali2' )
+qqline(PV_199_92$`PV3 Ali 2 intensity`, col = "steelblue", lwd = 2)
+qqnorm(PV_199_92$`PV3 Ali 3 intensity`, pch = 1, frame = FALSE, main = 'QQ plot for PV3 Ali3' )
+qqline(PV_199_92$`PV3 Ali 3 intensity`, col = "steelblue", lwd = 2)
+
+#Ploting Boxplots for Individual PV 3 Aliquots
+par(mfrow = c(1, 3))
+boxplot(PV_199_92$`PV3 Aliquot 1 intensity`,main = 'Boxplot for PV3 Ali1')
+boxplot(PV_199_92$`PV3 Ali 2 intensity`,main = 'Boxplot for PV3 Ali2')
+boxplot(PV_199_92$`PV3 Ali 3 intensity`,main = 'Boxplot for PV3 Ali3')
+
+#Ploting SmoothScattered Plot for Individual PV 3 Aliquots
+par(mfrow = c(1, 3))
+smoothScatter(PV_199_92$`PV3 Aliquot 1 intensity`,main = 'SmoothScattered Plot for PV3 Ali1')
+smoothScatter(PV_199_92$`PV3 Ali 2 intensity`,main = 'SmoothScattered Plot for PV3 Ali2')
+smoothScatter(PV_199_92$`PV3 Ali 3 intensity`,main = 'SmoothScattered Plot for PV3 Ali3')
+```
+
+
+```{r, echo= FALSE, warning=FALSE}
+#Getting Average for Intensities
+
+#Aliquote 1
+PV1_ali1_199_92 <- mean(na.omit(PV_199_92$`PV1 Aliquot 1 intensity`))
+PV2_ali1_199_92 <- mean(na.omit(PV_199_92$`PV2 Aliquot 1 intensity`))
+PV3_ali1_199_92 <- mean(na.omit(PV_199_92$`PV3 Aliquot 1 intensity`))
+#Aliquote 2
+PV1_ali2_199_92 <- mean(na.omit(PV_199_92$`PV1 Ali 2 intensity`))
+PV2_ali2_199_92 <- mean(na.omit(PV_199_92$`PV2 Ali 2 intensity`))
+PV3_ali2_199_92 <- mean(na.omit(PV_199_92$`PV3 Ali 2 intensity`))
+#Aliquote 3
+PV1_ali3_199_92 <- mean(na.omit(PV_199_92$`PV1 Ali 3 intensity`))
+PV2_ali3_199_92 <- mean(na.omit(PV_199_92$`PV2 Ali 3 intensity`))
+PV3_ali3_199_92 <- mean(na.omit(PV_199_92$`PV3 Ali 3 intensity`))
+
+#Average Intensity for PV pills
+PV1_199_92 <- mean(PV1_ali1_199_92, PV1_ali2_199_92, PV1_ali3_199_92)
+PV2_199_92 <- mean(PV2_ali1_199_92, PV2_ali2_199_92, PV2_ali3_199_92)
+PV3_199_92 <- mean(PV3_ali1_199_92, PV3_ali2_199_92, PV3_ali3_199_92)
+```
+
+```{r, echo= FALSE, warning=FALSE}
+#Ploting Intensity vs Time for WL 1 Aliquots 
+par(mfrow = c(1, 3))
+plot(WL_199_92$`WL1 Aliquot 1 time`,WL_199_92$`WL1 Aliquot 1 intensity`, type= 'b', col = 'blue', pch = 19, main = 'WL1 Aliquot 1', xlab = 'Time', ylab = 'Intensity' )
+plot(WL_199_92$`WL1 Ali 2 time`,WL_199_92$`WL1 Ali 2 intensity`, type= 'b', col = 'blue', pch = 19, main = 'WL1 Aliquot 2', xlab = 'Time', ylab = 'Intensity' )
+plot(WL_199_92$`WL1 Ali 3 time`,WL_199_92$`WL1 Ali 3 intensity`, type= 'b', col = 'blue', pch = 19, main = 'WL1 Aliquot 3', xlab = 'Time', ylab = 'Intensity' )
+
+#Ploting QQPlot for WL 1 Aliquots
+par(mfrow = c(1, 3))
+qqnorm(WL_199_92$`WL1 Aliquot 1 intensity`, pch = 1, frame = FALSE, main = 'QQ plot for WL1 Ali1' )
+qqline(WL_199_92$`WL1 Aliquot 1 intensity`, col = "steelblue", lwd = 2)
+qqnorm(WL_199_92$`WL1 Ali 2 intensity`, pch = 1, frame = FALSE, main = 'QQ plot for WL1 Ali2' )
+qqline(WL_199_92$`WL1 Ali 2 intensity`, col = "steelblue", lwd = 2)
+qqnorm(WL_199_92$`WL1 Ali 3 intensity`, pch = 1, frame = FALSE, main = 'QQ plot for WL1 Ali3' )
+qqline(WL_199_92$`WL1 Ali 3 intensity`, col = "steelblue", lwd = 2)
+
+#Ploting Boxplots for Individual WL 1 Aliquots
+par(mfrow = c(1, 3))
+boxplot(WL_199_92$`WL1 Aliquot 1 intensity`,main = 'Boxplot for WL1 Ali1')
+boxplot(WL_199_92$`WL1 Ali 2 intensity`,main = 'Boxplot for WL1 Ali2')
+boxplot(WL_199_92$`WL1 Ali 3 intensity`,main = 'Boxplot for WL1 Ali3')
+
+#Ploting SmoothScattered Plot for Individual WL 1 Aliquots
+par(mfrow = c(1, 3))
+smoothScatter(WL_199_92$`WL1 Aliquot 1 intensity`,main = 'SmoothScattered Plot for WL1 Ali1')
+smoothScatter(WL_199_92$`WL1 Ali 2 intensity`,main = 'SmoothScattered Plot for WL1 Ali2')
+smoothScatter(WL_199_92$`WL1 Ali 3 intensity`,main = 'SmoothScattered Plot for WL1 Ali3')
+
+
+
+#Ploting Intensity vs Time for WL 2 Aliquots 
+par(mfrow = c(1, 3))
+plot(WL_199_92$`WL2 Aliquot 1 time`,WL_199_92$`WL2 Aliquot 1 intensity`, type= 'b', col = 'green', pch = 19, main = 'WL2 Aliquot 1', xlab = 'Time', ylab = 'Intensity' )
+plot(WL_199_92$`WL2 Ali 2 time`,WL_199_92$`WL2 Ali 2 intensity`, type= 'b', col = 'green', pch = 19, main = 'WL2 Aliquot 2', xlab = 'Time', ylab = 'Intensity' )
+plot(WL_199_92$`WL2 Ali 3 time`,WL_199_92$`WL2 Ali 3 intensity`, type= 'b', col = 'green', pch = 19, main = 'WL2 Aliquot 3', xlab = 'Time', ylab = 'Intensity' )
+
+#Ploting QQPlot for WL 2 Aliquots
+par(mfrow = c(1, 3))
+qqnorm(WL_199_92$`WL2 Aliquot 1 intensity`, pch = 1, frame = FALSE, main = 'QQ plot for WL2 Ali1' )
+qqline(WL_199_92$`WL2 Aliquot 1 intensity`, col = "steelblue", lwd = 2)
+qqnorm(WL_199_92$`WL2 Ali 2 intensity`, pch = 1, frame = FALSE, main = 'QQ plot for WL2 Ali2' )
+qqline(WL_199_92$`WL2 Ali 2 intensity`, col = "steelblue", lwd = 2)
+qqnorm(WL_199_92$`WL2 Ali 3 intensity`, pch = 1, frame = FALSE, main = 'QQ plot for WL2 Ali3' )
+qqline(WL_199_92$`WL2 Ali 3 intensity`, col = "steelblue", lwd = 2)
+
+#Ploting Boxplots for Individual WL 2 Aliquots
+par(mfrow = c(1, 3))
+boxplot(WL_199_92$`WL2 Aliquot 1 intensity`,main = 'Boxplot for WL2 Ali1')
+boxplot(WL_199_92$`WL2 Ali 2 intensity`,main = 'Boxplot for WL2 Ali2')
+boxplot(WL_199_92$`WL2 Ali 3 intensity`,main = 'Boxplot for WL2 Ali3')
+
+#Ploting SmoothScattered Plot for Individual WL 2 Aliquots
+par(mfrow = c(1, 3))
+smoothScatter(WL_199_92$`WL2 Aliquot 1 intensity`,main = 'SmoothScattered Plot for WL2 Ali1')
+smoothScatter(WL_199_92$`WL2 Ali 2 intensity`,main = 'SmoothScattered Plot for WL2 Ali2')
+smoothScatter(WL_199_92$`WL2 Ali 3 intensity`,main = 'SmoothScattered Plot for WL2 Ali3')
+
+
+
+#Ploting Intensity vs Time for WL 3 Aliquots 
+par(mfrow = c(1, 3))
+plot(WL_199_92$`WL3 Aliquot 1 time`,WL_199_92$`WL3 Aliquot 1 intensity`, type= 'b', col = 'black', pch = 19, main = 'WL3 Aliquot 1', xlab = 'Time', ylab = 'Intensity' )
+plot(WL_199_92$`WL3 Ali 2 time`,WL_199_92$`WL3 Ali 2 intensity`, type= 'b', col = 'black', pch = 19, main = 'WL3 Aliquot 2', xlab = 'Time', ylab = 'Intensity' )
+plot(WL_199_92$`WL3 Ali 3 time`,WL_199_92$`WL3 Ali 3 intensity`, type= 'b', col = 'black', pch = 19, main = 'WL3 Aliquot 3', xlab = 'Time', ylab = 'Intensity' )
+
+#Ploting QQPlot for WL 3 Aliquots
+par(mfrow = c(1, 3))
+qqnorm(WL_199_92$`WL3 Aliquot 1 intensity`, pch = 1, frame = FALSE, main = 'QQ plot for WL3 Ali1' )
+qqline(WL_199_92$`WL3 Aliquot 1 intensity`, col = "steelblue", lwd = 2)
+qqnorm(WL_199_92$`WL3 Ali 2 intensity`, pch = 1, frame = FALSE, main = 'QQ plot for WL3 Ali2' )
+qqline(WL_199_92$`WL3 Ali 2 intensity`, col = "steelblue", lwd = 2)
+qqnorm(WL_199_92$`WL3 Ali 3 intensity`, pch = 1, frame = FALSE, main = 'QQ plot for WL3 Ali3' )
+qqline(WL_199_92$`WL3 Ali 3 intensity`, col = "steelblue", lwd = 2)
+
+#Ploting Boxplots for Individual WL 3 Aliquots
+par(mfrow = c(1, 3))
+boxplot(WL_199_92$`WL3 Aliquot 1 intensity`,main = 'Boxplot for WL3 Ali1')
+boxplot(WL_199_92$`WL3 Ali 2 intensity`,main = 'Boxplot for WL3 Ali2')
+boxplot(WL_199_92$`WL3 Ali 3 intensity`,main = 'Boxplot for WL3 Ali3')
+
+#Ploting SmoothScattered Plot for Individual WL 3 Aliquots
+par(mfrow = c(1, 3))
+smoothScatter(WL_199_92$`WL3 Aliquot 1 intensity`,main = 'SmoothScattered Plot for WL3 Ali1')
+smoothScatter(WL_199_92$`WL3 Ali 2 intensity`,main = 'SmoothScattered Plot for WL3 Ali2')
+smoothScatter(WL_199_92$`WL3 Ali 3 intensity`,main = 'SmoothScattered Plot for WL3 Ali3')
+```
+
+
+```{r, echo= FALSE, warning=FALSE}
+#Getting Average for Intensities
+
+#Aliquote 1
+WL1_ali1_199_92 <- mean(na.omit(WL_199_92$`WL1 Aliquot 1 intensity`))
+WL2_ali1_199_92 <- mean(na.omit(WL_199_92$`WL2 Aliquot 1 intensity`))
+WL3_ali1_199_92 <- mean(na.omit(WL_199_92$`WL3 Aliquot 1 intensity`))
+#Aliquote 2
+WL1_ali2_199_92 <- mean(na.omit(WL_199_92$`WL1 Ali 2 intensity`))
+WL2_ali2_199_92 <- mean(na.omit(WL_199_92$`WL2 Ali 2 intensity`))
+WL3_ali2_199_92 <- mean(na.omit(WL_199_92$`WL3 Ali 2 intensity`))
+#Aliquote 3
+WL1_ali3_199_92 <- mean(na.omit(WL_199_92$`WL1 Ali 3 intensity`))
+WL2_ali3_199_92 <- mean(na.omit(WL_199_92$`WL2 Ali 3 intensity`))
+WL3_ali3_199_92 <- mean(na.omit(WL_199_92$`WL3 Ali 3 intensity`))
+
+
+#Average Intensity for Walgreen pills
+WL1_199_92 <- mean(WL1_ali1_199_92, WL1_ali2_199_92, WL1_ali3_199_92)
+WL2_199_92 <- mean(WL2_ali1_199_92, WL2_ali2_199_92, WL2_ali3_199_92)
+WL3_199_92 <- mean(WL3_ali1_199_92, WL3_ali2_199_92, WL3_ali3_199_92)
+
+```
+
+```{r, echo= FALSE, warning=FALSE}
+#Analysis of Variance
+Intensity <- c(BP1_199_92, BP2_199_92, BP3_199_92, PV1_199_92, PV2_199_92, PV3_199_92,WL1_199_92, WL2_199_92, WL3_199_92)
+Brands <- c('BP1', 'BP2', 'BP3', 'PV1', 'PV2', 'PV3', 'WL1', 'WL2', 'WL3')
+Pills <- c(1,1,1,2,2,2,3,3,3)
+data_199_92 <- cbind( Brands, Pills, Intensity)
+data_199_92 <- as.data.frame(data_199_92)
+one.way <- aov( Intensity ~ Pills, data = data_199_92)
+summary(one.way)
+#Ploting ANOVA
+par(mfrow=c(2,2))
+#plot(one.way)
+par(mfrow=c(1,1))
+#Post-hoc test
+tukey.one.way<-TukeyHSD(one.way)
+tukey.one.way
+plot(tukey.one.way, las = 1)
+```
+
+
+The p-value of the pills variable is low (0.00359 < 0.05), so it appears that there is significant differences between the pills for this peak region. From the post-hoc test results, we see that there are statistically significant differences (p < 0.05) between pill groups 2 (PV) and 1 (Bayer) and between pill groups 3 (Walgreen) and 2 (PV).
+
+# Analysis Peak 199.10 137.00
+
+```{r, echo= FALSE, warning=FALSE}
+#Loading Data for Peak 199_137.7 93.00
+library(readxl)
+BP_199_137 <- read_excel("Bay Pill 199.100 137.00 New.xlsx")
+PV_199_137 <- read_excel("P.V Pill 199.100 137.00 New.xlsx") 
+WL_199_137 <- read_excel("Wal Pill 199.100 137.00 New.xlsx") 
+```
+
+
+```{r, echo= FALSE, warning=FALSE}
+#Ploting Intensity vs Time for Bayer Pill 1 Aliquots 
+par(mfrow = c(1, 3))
+plot(BP_199_137$`BP1 Aliquot 1 time`,BP_199_137$`BP1 Aliquot 1 intensity`, type= 'b', col = 'blue', pch = 19, main = 'BP1 Aliquot 1', xlab = 'Time', ylab = 'Intensity' )
+plot(BP_199_137$`BP1 Ali 2 time`,BP_199_137$`BP1 Ali 2 intensity`, type= 'b', col = 'blue', pch = 19, main = 'BP1 Aliquot 2', xlab = 'Time', ylab = 'Intensity' )
+plot(BP_199_137$`BP1 Ali 3 time`,BP_199_137$`BP1 Ali 3 intensity`, type= 'b', col = 'blue', pch = 19, main = 'BP1 Aliquot 3', xlab = 'Time', ylab = 'Intensity' )
+
+#Ploting QQPlot for Bayer Pill 1 Aliquots
+par(mfrow = c(1, 3))
+qqnorm(BP_199_137$`BP1 Aliquot 1 intensity`, pch = 1, frame = FALSE, main = 'QQ plot for BP1 Ali1' )
+qqline(BP_199_137$`BP1 Aliquot 1 intensity`, col = "steelblue", lwd = 2)
+qqnorm(BP_199_137$`BP1 Ali 2 intensity`, pch = 1, frame = FALSE, main = 'QQ plot for BP1 Ali2' )
+qqline(BP_199_137$`BP1 Ali 2 intensity`, col = "steelblue", lwd = 2)
+qqnorm(BP_199_137$`BP1 Ali 3 intensity`, pch = 1, frame = FALSE, main = 'QQ plot for BP1 Ali3' )
+qqline(BP_199_137$`BP1 Ali 3 intensity`, col = "steelblue", lwd = 2)
+
+#Ploting Boxplots for Individual Bayer Pill 1 Aliquots
+par(mfrow = c(1, 3))
+boxplot(BP_199_137$`BP1 Aliquot 1 intensity`,main = 'Boxplot for BP1 Ali1')
+boxplot(BP_199_137$`BP1 Ali 2 intensity`,main = 'Boxplot for BP1 Ali2')
+boxplot(BP_199_137$`BP1 Ali 3 intensity`,main = 'Boxplot for BP1 Ali3')
+
+#Ploting SmoothScattered Plot for Individual Bayer Pill 1 Aliquots
+par(mfrow = c(1, 3))
+smoothScatter(BP_199_137$`BP1 Aliquot 1 intensity`,main = 'SmoothScattered Plot for BP1 Ali1')
+smoothScatter(BP_199_137$`BP1 Ali 2 intensity`,main = 'SmoothScattered Plot for BP1 Ali2')
+smoothScatter(BP_199_137$`BP1 Ali 3 intensity`,main = 'SmoothScattered Plot for BP1 Ali3')
+
+#Ploting Intensity vs Time for Bayer Pill 2 Aliquots 
+par(mfrow = c(1, 3))
+plot(BP_199_137$`BP2 Aliquot 1 time`,BP_199_137$`BP2 Aliquot 1 intensity`, type= 'b', col = 'green', pch = 19, main = 'BP2 Aliquot 1', xlab = 'Time', ylab = 'Intensity' )
+plot(BP_199_137$`BP2 Ali 2 time`,BP_199_137$`BP2 Ali 2 intensity`, type= 'b', col = 'green', pch = 19, main = 'BP2 Aliquot 2', xlab = 'Time', ylab = 'Intensity' )
+plot(BP_199_137$`BP2 Ali 3 time`,BP_199_137$`BP2 Ali 3 intensity`, type= 'b', col = 'green', pch = 19, main = 'BP2 Aliquot 3', xlab = 'Time', ylab = 'Intensity' )
+
+
+#Ploting QQPlot for Bayer Pill 2 Aliquots
+par(mfrow = c(1, 3))
+qqnorm(BP_199_137$`BP2 Aliquot 1 intensity`, pch = 1, frame = FALSE, main = 'QQ plot for BP2 Ali1' )
+qqline(BP_199_137$`BP2 Aliquot 1 intensity`, col = "steelblue", lwd = 2)
+qqnorm(BP_199_137$`BP2 Ali 2 intensity`, pch = 1, frame = FALSE, main = 'QQ plot for BP2 Ali2' )
+qqline(BP_199_137$`BP2 Ali 2 intensity`, col = "steelblue", lwd = 2)
+qqnorm(BP_199_137$`BP2 Ali 3 intensity`, pch = 1, frame = FALSE, main = 'QQ plot for BP2 Ali3' )
+qqline(BP_199_137$`BP2 Ali 3 intensity`, col = "steelblue", lwd = 2)
+
+#Ploting Boxplots for Individual Bayer Pill 2 Aliquots
+par(mfrow = c(1, 3))
+boxplot(BP_199_137$`BP2 Aliquot 1 intensity`,main = 'Boxplot for BP2 Ali1')
+boxplot(BP_199_137$`BP2 Ali 2 intensity`,main = 'Boxplot for BP2 Ali2')
+boxplot(BP_199_137$`BP2 Ali 3 intensity`,main = 'Boxplot for BP2 Ali3')
+
+#Ploting SmoothScattered Plot for Individual Bayer Pill 2 Aliquots
+par(mfrow = c(1, 3))
+smoothScatter(BP_199_137$`BP2 Aliquot 1 intensity`,main = 'SmoothScattered Plot for BP2 Ali1')
+smoothScatter(BP_199_137$`BP2 Ali 2 intensity`,main = 'SmoothScattered Plot for BP2 Ali2')
+smoothScatter(BP_199_137$`BP2 Ali 3 intensity`,main = 'SmoothScattered Plot for BP2 Ali3')
+
+
+#Ploting Intensity vs Time for Bayer Pill 3 Aliquots 
+par(mfrow = c(1, 3))
+plot(BP_199_137$`BP3 Aliquot 1 time`,BP_199_137$`BP3 Aliquot 1 intensity`, type= 'b', col = 'black', pch = 19, main = 'BP3 Aliquot 1', xlab = 'Time', ylab = 'Intensity' )
+plot(BP_199_137$`BP3 Ali 2 time`,BP_199_137$`BP3 Ali 2 intensity`, type= 'b', col = 'black', pch = 19, main = 'BP3 Aliquot 2', xlab = 'Time', ylab = 'Intensity' )
+plot(BP_199_137$`BP3 Ali 3 time`,BP_199_137$`BP3 Ali 3 intensity`, type= 'b', col = 'black', pch = 19, main = 'BP3 Aliquot 3', xlab = 'Time', ylab = 'Intensity' )
+
+#Ploting QQPlot for Bayer Pill 3 Aliquots
+par(mfrow = c(1, 3))
+qqnorm(BP_199_137$`BP3 Aliquot 1 intensity`, pch = 1, frame = FALSE, main = 'QQ plot for BP3 Ali1' )
+qqline(BP_199_137$`BP3 Aliquot 1 intensity`, col = "steelblue", lwd = 2)
+qqnorm(BP_199_137$`BP3 Ali 2 intensity`, pch = 1, frame = FALSE, main = 'QQ plot for BP3 Ali2' )
+qqline(BP_199_137$`BP3 Ali 2 intensity`, col = "steelblue", lwd = 2)
+qqnorm(BP_199_137$`BP3 Ali 3 intensity`, pch = 1, frame = FALSE, main = 'QQ plot for BP3 Ali3' )
+qqline(BP_199_137$`BP3 Ali 3 intensity`, col = "steelblue", lwd = 2)
+
+#Ploting Boxplots for Individual Bayer Pill 3 Aliquots
+par(mfrow = c(1, 3))
+boxplot(BP_199_137$`BP3 Aliquot 1 intensity`,main = 'Boxplot for BP3 Ali1')
+boxplot(BP_199_137$`BP3 Ali 2 intensity`,main = 'Boxplot for BP3 Ali2')
+boxplot(BP_199_137$`BP3 Ali 3 intensity`,main = 'Boxplot for BP3 Ali3')
+
+#Ploting SmoothScattered Plot for Individual Bayer Pill 3 Aliquots
+par(mfrow = c(1, 3))
+smoothScatter(BP_199_137$`BP3 Aliquot 1 intensity`,main = 'SmoothScattered Plot for BP3 Ali1')
+smoothScatter(BP_199_137$`BP3 Ali 2 intensity`,main = 'SmoothScattered Plot for BP3 Ali2')
+smoothScatter(BP_199_137$`BP3 Ali 3 intensity`,main = 'SmoothScattered Plot for BP3 Ali3')
+
+```
+
+```{r, echo= FALSE, warning=FALSE}
+#Getting Average for Intensities
+
+#Aliquote 1
+BP1_ali1_199_137 <- mean(na.omit(BP_199_137$`BP1 Aliquot 1 intensity`))
+BP2_ali1_199_137 <- mean(na.omit(BP_199_137$`BP2 Aliquot 1 intensity`))
+BP3_ali1_199_137 <- mean(na.omit(BP_199_137$`BP3 Aliquot 1 intensity`))
+#Aliquote 2
+BP1_ali2_199_137 <- mean(na.omit(BP_199_137$`BP1 Ali 2 intensity`))
+BP2_ali2_199_137 <- mean(na.omit(BP_199_137$`BP2 Ali 2 intensity`))
+BP3_ali2_199_137 <- mean(na.omit(BP_199_137$`BP3 Ali 2 intensity`))
+#Aliquote 3
+BP1_ali3_199_137 <- mean(na.omit(BP_199_137$`BP1 Ali 3 intensity`))
+BP2_ali3_199_137 <- mean(na.omit(BP_199_137$`BP2 Ali 3 intensity`))
+BP3_ali3_199_137 <- mean(na.omit(BP_199_137$`BP3 Ali 3 intensity`))
+#Average Intensity for Bayer Pills
+BP1_199_137 <- mean(BP1_ali1_199_137, BP1_ali2_199_137, BP1_ali3_199_137)
+BP2_199_137 <- mean(BP2_ali1_199_137, BP2_ali2_199_137, BP2_ali3_199_137)
+BP3_199_137 <- mean(BP3_ali1_199_137, BP3_ali2_199_137, BP3_ali3_199_137)
+
+```
+
+```{r, echo= FALSE, warning=FALSE}
+#Ploting Intensity vs Time for PV 1 Aliquots 
+par(mfrow = c(1, 3))
+plot(PV_199_137$`PV1 Aliquot 1 time`,PV_199_137$`PV1 Aliquot 1 intensity`, type= 'b', col = 'blue', pch = 19, main = 'PV1 Aliquot 1', xlab = 'Time', ylab = 'Intensity' )
+plot(PV_199_137$`PV1 Ali 2 time`,PV_199_137$`PV1 Ali 2 intensity`, type= 'b', col = 'blue', pch = 19, main = 'PV1 Aliquot 2', xlab = 'Time', ylab = 'Intensity' )
+plot(PV_199_137$`PV1 Ali 3 time`,PV_199_137$`PV1 Ali 3 intensity`, type= 'b', col = 'blue', pch = 19, main = 'PV1 Aliquot 3', xlab = 'Time', ylab = 'Intensity' )
+
+#Ploting QQPlot for PV 1 Aliquots
+par(mfrow = c(1, 3))
+qqnorm(PV_199_137$`PV1 Aliquot 1 intensity`, pch = 1, frame = FALSE, main = 'QQ plot for PV1 Ali1' )
+qqline(PV_199_137$`PV1 Aliquot 1 intensity`, col = "steelblue", lwd = 2)
+qqnorm(PV_199_137$`PV1 Ali 2 intensity`, pch = 1, frame = FALSE, main = 'QQ plot for PV1 Ali2' )
+qqline(PV_199_137$`PV1 Ali 2 intensity`, col = "steelblue", lwd = 2)
+qqnorm(PV_199_137$`PV1 Ali 3 intensity`, pch = 1, frame = FALSE, main = 'QQ plot for PV1 Ali3' )
+qqline(PV_199_137$`PV1 Ali 3 intensity`, col = "steelblue", lwd = 2)
+
+#Ploting Boxplots for Individual PV 1 Aliquots
+par(mfrow = c(1, 3))
+boxplot(PV_199_137$`PV1 Aliquot 1 intensity`,main = 'Boxplot for PV1 Ali1')
+boxplot(PV_199_137$`PV1 Ali 2 intensity`,main = 'Boxplot for PV1 Ali2')
+boxplot(PV_199_137$`PV1 Ali 3 intensity`,main = 'Boxplot for PV1 Ali3')
+
+#Ploting SmoothScattered Plot for Individual PV 1 Aliquots
+par(mfrow = c(1, 3))
+smoothScatter(PV_199_137$`PV1 Aliquot 1 intensity`,main = 'SmoothScattered Plot for PV1 Ali1')
+smoothScatter(PV_199_137$`PV1 Ali 2 intensity`,main = 'SmoothScattered Plot for PV1 Ali2')
+smoothScatter(PV_199_137$`PV1 Ali 3 intensity`,main = 'SmoothScattered Plot for PV1 Ali3')
+
+
+#Ploting Intensity vs Time for PV 2 Aliquots 
+par(mfrow = c(1, 3))
+plot(PV_199_137$`PV2 Aliquot 1 time`,PV_199_137$`PV2 Aliquot 1 intensity`, type= 'b', col = 'green', pch = 19, main = 'PV2 Aliquot 1', xlab = 'Time', ylab = 'Intensity' )
+plot(PV_199_137$`PV2 Ali 2 time`,PV_199_137$`PV2 Ali 2 intensity`, type= 'b', col = 'green', pch = 19, main = 'PV2 Aliquot 2', xlab = 'Time', ylab = 'Intensity' )
+plot(PV_199_137$`PV2 Ali 3 time`,PV_199_137$`PV2 Ali 3 intensity`, type= 'b', col = 'green', pch = 19, main = 'PV2 Aliquot 3', xlab = 'Time', ylab = 'Intensity' )
+
+#Ploting QQPlot for PV 2 Aliquots
+par(mfrow = c(1, 3))
+qqnorm(PV_199_137$`PV2 Aliquot 1 intensity`, pch = 1, frame = FALSE, main = 'QQ plot for PV2 Ali1' )
+qqline(PV_199_137$`PV2 Aliquot 1 intensity`, col = "steelblue", lwd = 2)
+qqnorm(PV_199_137$`PV2 Ali 2 intensity`, pch = 1, frame = FALSE, main = 'QQ plot for PV2 Ali2' )
+qqline(PV_199_137$`PV2 Ali 2 intensity`, col = "steelblue", lwd = 2)
+qqnorm(PV_199_137$`PV2 Ali 3 intensity`, pch = 1, frame = FALSE, main = 'QQ plot for PV2 Ali3' )
+qqline(PV_199_137$`PV2 Ali 3 intensity`, col = "steelblue", lwd = 2)
+
+#Ploting Boxplots for Individual PV 2 Aliquots
+par(mfrow = c(1, 3))
+boxplot(PV_199_137$`PV2 Aliquot 1 intensity`,main = 'Boxplot for PV2 Ali1')
+boxplot(PV_199_137$`PV2 Ali 2 intensity`,main = 'Boxplot for PV2 Ali2')
+boxplot(PV_199_137$`PV2 Ali 3 intensity`,main = 'Boxplot for PV2 Ali3')
+
+#Ploting SmoothScattered Plot for Individual PV 2 Aliquots
+par(mfrow = c(1, 3))
+smoothScatter(PV_199_137$`PV2 Aliquot 1 intensity`,main = 'SmoothScattered Plot for PV2 Ali1')
+smoothScatter(PV_199_137$`PV2 Ali 2 intensity`,main = 'SmoothScattered Plot for PV2 Ali2')
+smoothScatter(PV_199_137$`PV2 Ali 3 intensity`,main = 'SmoothScattered Plot for PV2 Ali3')
+
+
+#Ploting Intensity vs Time for PV 3 Aliquots 
+par(mfrow = c(1, 3))
+plot(PV_199_137$`PV3 Aliquot 1 time`,PV_199_137$`PV3 Aliquot 1 intensity`, type= 'b', col = 'black', pch = 19, main = 'PV3 Aliquot 1', xlab = 'Time', ylab = 'Intensity' )
+plot(PV_199_137$`PV3 Ali 2 time`,PV_199_137$`PV3 Ali 2 intensity`, type= 'b', col = 'black', pch = 19, main = 'PV3 Aliquot 2', xlab = 'Time', ylab = 'Intensity' )
+plot(PV_199_137$`PV3 Ali 3 time`,PV_199_137$`PV3 Ali 3 intensity`, type= 'b', col = 'black', pch = 19, main = 'PV3 Aliquot 3', xlab = 'Time', ylab = 'Intensity' )
+
+#Ploting QQPlot for PV 3 Aliquots
+par(mfrow = c(1, 3))
+qqnorm(PV_199_137$`PV3 Aliquot 1 intensity`, pch = 1, frame = FALSE, main = 'QQ plot for PV3 Ali1' )
+qqline(PV_199_137$`PV3 Aliquot 1 intensity`, col = "steelblue", lwd = 2)
+qqnorm(PV_199_137$`PV3 Ali 2 intensity`, pch = 1, frame = FALSE, main = 'QQ plot for PV3 Ali2' )
+qqline(PV_199_137$`PV3 Ali 2 intensity`, col = "steelblue", lwd = 2)
+qqnorm(PV_199_137$`PV3 Ali 3 intensity`, pch = 1, frame = FALSE, main = 'QQ plot for PV3 Ali3' )
+qqline(PV_199_137$`PV3 Ali 3 intensity`, col = "steelblue", lwd = 2)
+
+#Ploting Boxplots for Individual PV 3 Aliquots
+par(mfrow = c(1, 3))
+boxplot(PV_199_137$`PV3 Aliquot 1 intensity`,main = 'Boxplot for PV3 Ali1')
+boxplot(PV_199_137$`PV3 Ali 2 intensity`,main = 'Boxplot for PV3 Ali2')
+boxplot(PV_199_137$`PV3 Ali 3 intensity`,main = 'Boxplot for PV3 Ali3')
+
+#Ploting SmoothScattered Plot for Individual PV 3 Aliquots
+par(mfrow = c(1, 3))
+smoothScatter(PV_199_137$`PV3 Aliquot 1 intensity`,main = 'SmoothScattered Plot for PV3 Ali1')
+smoothScatter(PV_199_137$`PV3 Ali 2 intensity`,main = 'SmoothScattered Plot for PV3 Ali2')
+smoothScatter(PV_199_137$`PV3 Ali 3 intensity`,main = 'SmoothScattered Plot for PV3 Ali3')
+```
+
+
+```{r, echo= FALSE, warning=FALSE}
+#Getting Average for Intensities
+
+#Aliquote 1
+PV1_ali1_199_137 <- mean(na.omit(PV_199_137$`PV1 Aliquot 1 intensity`))
+PV2_ali1_199_137 <- mean(na.omit(PV_199_137$`PV2 Aliquot 1 intensity`))
+PV3_ali1_199_137 <- mean(na.omit(PV_199_137$`PV3 Aliquot 1 intensity`))
+#Aliquote 2
+PV1_ali2_199_137 <- mean(na.omit(PV_199_137$`PV1 Ali 2 intensity`))
+PV2_ali2_199_137 <- mean(na.omit(PV_199_137$`PV2 Ali 2 intensity`))
+PV3_ali2_199_137 <- mean(na.omit(PV_199_137$`PV3 Ali 2 intensity`))
+#Aliquote 3
+PV1_ali3_199_137 <- mean(na.omit(PV_199_137$`PV1 Ali 3 intensity`))
+PV2_ali3_199_137 <- mean(na.omit(PV_199_137$`PV2 Ali 3 intensity`))
+PV3_ali3_199_137 <- mean(na.omit(PV_199_137$`PV3 Ali 3 intensity`))
+
+#Average Intensity for PV pills
+PV1_199_137 <- mean(PV1_ali1_199_137, PV1_ali2_199_137, PV1_ali3_199_137)
+PV2_199_137 <- mean(PV2_ali1_199_137, PV2_ali2_199_137, PV2_ali3_199_137)
+PV3_199_137 <- mean(PV3_ali1_199_137, PV3_ali2_199_137, PV3_ali3_199_137)
+```
+
+```{r, echo= FALSE, warning=FALSE}
+#Ploting Intensity vs Time for WL 1 Aliquots 
+par(mfrow = c(1, 3))
+plot(WL_199_137$`WL1 Aliquot 1 time`,WL_199_137$`WL1 Aliquot 1 intensity`, type= 'b', col = 'blue', pch = 19, main = 'WL1 Aliquot 1', xlab = 'Time', ylab = 'Intensity' )
+plot(WL_199_137$`WL1 Ali 2 time`,WL_199_137$`WL1 Ali 2 intensity`, type= 'b', col = 'blue', pch = 19, main = 'WL1 Aliquot 2', xlab = 'Time', ylab = 'Intensity' )
+plot(WL_199_137$`WL1 Ali 3 time`,WL_199_137$`WL1 Ali 3 intensity`, type= 'b', col = 'blue', pch = 19, main = 'WL1 Aliquot 3', xlab = 'Time', ylab = 'Intensity' )
+
+#Ploting QQPlot for WL 1 Aliquots
+par(mfrow = c(1, 3))
+qqnorm(WL_199_137$`WL1 Aliquot 1 intensity`, pch = 1, frame = FALSE, main = 'QQ plot for WL1 Ali1' )
+qqline(WL_199_137$`WL1 Aliquot 1 intensity`, col = "steelblue", lwd = 2)
+qqnorm(WL_199_137$`WL1 Ali 2 intensity`, pch = 1, frame = FALSE, main = 'QQ plot for WL1 Ali2' )
+qqline(WL_199_137$`WL1 Ali 2 intensity`, col = "steelblue", lwd = 2)
+qqnorm(WL_199_137$`WL1 Ali 3 intensity`, pch = 1, frame = FALSE, main = 'QQ plot for WL1 Ali3' )
+qqline(WL_199_137$`WL1 Ali 3 intensity`, col = "steelblue", lwd = 2)
+
+#Ploting Boxplots for Individual WL 1 Aliquots
+par(mfrow = c(1, 3))
+boxplot(WL_199_137$`WL1 Aliquot 1 intensity`,main = 'Boxplot for WL1 Ali1')
+boxplot(WL_199_137$`WL1 Ali 2 intensity`,main = 'Boxplot for WL1 Ali2')
+boxplot(WL_199_137$`WL1 Ali 3 intensity`,main = 'Boxplot for WL1 Ali3')
+
+#Ploting SmoothScattered Plot for Individual WL 1 Aliquots
+par(mfrow = c(1, 3))
+smoothScatter(WL_199_137$`WL1 Aliquot 1 intensity`,main = 'SmoothScattered Plot for WL1 Ali1')
+smoothScatter(WL_199_137$`WL1 Ali 2 intensity`,main = 'SmoothScattered Plot for WL1 Ali2')
+smoothScatter(WL_199_137$`WL1 Ali 3 intensity`,main = 'SmoothScattered Plot for WL1 Ali3')
+
+
+
+#Ploting Intensity vs Time for WL 2 Aliquots 
+par(mfrow = c(1, 3))
+plot(WL_199_137$`WL2 Aliquot 1 time`,WL_199_137$`WL2 Aliquot 1 intensity`, type= 'b', col = 'green', pch = 19, main = 'WL2 Aliquot 1', xlab = 'Time', ylab = 'Intensity' )
+plot(WL_199_137$`WL2 Ali 2 time`,WL_199_137$`WL2 Ali 2 intensity`, type= 'b', col = 'green', pch = 19, main = 'WL2 Aliquot 2', xlab = 'Time', ylab = 'Intensity' )
+plot(WL_199_137$`WL2 Ali 3 time`,WL_199_137$`WL2 Ali 3 intensity`, type= 'b', col = 'green', pch = 19, main = 'WL2 Aliquot 3', xlab = 'Time', ylab = 'Intensity' )
+
+#Ploting QQPlot for WL 2 Aliquots
+par(mfrow = c(1, 3))
+qqnorm(WL_199_137$`WL2 Aliquot 1 intensity`, pch = 1, frame = FALSE, main = 'QQ plot for WL2 Ali1' )
+qqline(WL_199_137$`WL2 Aliquot 1 intensity`, col = "steelblue", lwd = 2)
+qqnorm(WL_199_137$`WL2 Ali 2 intensity`, pch = 1, frame = FALSE, main = 'QQ plot for WL2 Ali2' )
+qqline(WL_199_137$`WL2 Ali 2 intensity`, col = "steelblue", lwd = 2)
+qqnorm(WL_199_137$`WL2 Ali 3 intensity`, pch = 1, frame = FALSE, main = 'QQ plot for WL2 Ali3' )
+qqline(WL_199_137$`WL2 Ali 3 intensity`, col = "steelblue", lwd = 2)
+
+#Ploting Boxplots for Individual WL 2 Aliquots
+par(mfrow = c(1, 3))
+boxplot(WL_199_137$`WL2 Aliquot 1 intensity`,main = 'Boxplot for WL2 Ali1')
+boxplot(WL_199_137$`WL2 Ali 2 intensity`,main = 'Boxplot for WL2 Ali2')
+boxplot(WL_199_137$`WL2 Ali 3 intensity`,main = 'Boxplot for WL2 Ali3')
+
+#Ploting SmoothScattered Plot for Individual WL 2 Aliquots
+par(mfrow = c(1, 3))
+smoothScatter(WL_199_137$`WL2 Aliquot 1 intensity`,main = 'SmoothScattered Plot for WL2 Ali1')
+smoothScatter(WL_199_137$`WL2 Ali 2 intensity`,main = 'SmoothScattered Plot for WL2 Ali2')
+smoothScatter(WL_199_137$`WL2 Ali 3 intensity`,main = 'SmoothScattered Plot for WL2 Ali3')
+
+
+
+#Ploting Intensity vs Time for WL 3 Aliquots 
+par(mfrow = c(1, 3))
+plot(WL_199_137$`WL3 Aliquot 1 time`,WL_199_137$`WL3 Aliquot 1 intensity`, type= 'b', col = 'black', pch = 19, main = 'WL3 Aliquot 1', xlab = 'Time', ylab = 'Intensity' )
+plot(WL_199_137$`WL3 Ali 2 time`,WL_199_137$`WL3 Ali 2 intensity`, type= 'b', col = 'black', pch = 19, main = 'WL3 Aliquot 2', xlab = 'Time', ylab = 'Intensity' )
+plot(WL_199_137$`WL3 Ali 3 time`,WL_199_137$`WL3 Ali 3 intensity`, type= 'b', col = 'black', pch = 19, main = 'WL3 Aliquot 3', xlab = 'Time', ylab = 'Intensity' )
+
+#Ploting QQPlot for WL 3 Aliquots
+par(mfrow = c(1, 3))
+qqnorm(WL_199_137$`WL3 Aliquot 1 intensity`, pch = 1, frame = FALSE, main = 'QQ plot for WL3 Ali1' )
+qqline(WL_199_137$`WL3 Aliquot 1 intensity`, col = "steelblue", lwd = 2)
+qqnorm(WL_199_137$`WL3 Ali 2 intensity`, pch = 1, frame = FALSE, main = 'QQ plot for WL3 Ali2' )
+qqline(WL_199_137$`WL3 Ali 2 intensity`, col = "steelblue", lwd = 2)
+qqnorm(WL_199_137$`WL3 Ali 3 intensity`, pch = 1, frame = FALSE, main = 'QQ plot for WL3 Ali3' )
+qqline(WL_199_137$`WL3 Ali 3 intensity`, col = "steelblue", lwd = 2)
+
+#Ploting Boxplots for Individual WL 3 Aliquots
+par(mfrow = c(1, 3))
+boxplot(WL_199_137$`WL3 Aliquot 1 intensity`,main = 'Boxplot for WL3 Ali1')
+boxplot(WL_199_137$`WL3 Ali 2 intensity`,main = 'Boxplot for WL3 Ali2')
+boxplot(WL_199_137$`WL3 Ali 3 intensity`,main = 'Boxplot for WL3 Ali3')
+
+#Ploting SmoothScattered Plot for Individual WL 3 Aliquots
+par(mfrow = c(1, 3))
+smoothScatter(WL_199_137$`WL3 Aliquot 1 intensity`,main = 'SmoothScattered Plot for WL3 Ali1')
+smoothScatter(WL_199_137$`WL3 Ali 2 intensity`,main = 'SmoothScattered Plot for WL3 Ali2')
+smoothScatter(WL_199_137$`WL3 Ali 3 intensity`,main = 'SmoothScattered Plot for WL3 Ali3')
+```
+
+
+```{r, echo= FALSE, warning=FALSE}
+#Getting Average for Intensities
+
+#Aliquote 1
+WL1_ali1_199_137 <- mean(na.omit(WL_199_137$`WL1 Aliquot 1 intensity`))
+WL2_ali1_199_137 <- mean(na.omit(WL_199_137$`WL2 Aliquot 1 intensity`))
+WL3_ali1_199_137 <- mean(na.omit(WL_199_137$`WL3 Aliquot 1 intensity`))
+#Aliquote 2
+WL1_ali2_199_137 <- mean(na.omit(WL_199_137$`WL1 Ali 2 intensity`))
+WL2_ali2_199_137 <- mean(na.omit(WL_199_137$`WL2 Ali 2 intensity`))
+WL3_ali2_199_137 <- mean(na.omit(WL_199_137$`WL3 Ali 2 intensity`))
+#Aliquote 3
+WL1_ali3_199_137 <- mean(na.omit(WL_199_137$`WL1 Ali 3 intensity`))
+WL2_ali3_199_137 <- mean(na.omit(WL_199_137$`WL2 Ali 3 intensity`))
+WL3_ali3_199_137 <- mean(na.omit(WL_199_137$`WL3 Ali 3 intensity`))
+
+
+#Average Intensity for Walgreen pills
+WL1_199_137 <- mean(WL1_ali1_199_137, WL1_ali2_199_137, WL1_ali3_199_137)
+WL2_199_137 <- mean(WL2_ali1_199_137, WL2_ali2_199_137, WL2_ali3_199_137)
+WL3_199_137 <- mean(WL3_ali1_199_137, WL3_ali2_199_137, WL3_ali3_199_137)
+
+```
+
+```{r, echo= FALSE, warning=FALSE}
+#Analysis of Variance
+Intensity <- c(BP1_199_137, BP2_199_137, BP3_199_137, PV1_199_137, PV2_199_137, PV3_199_137,WL1_199_137, WL2_199_137, WL3_199_137)
+Brands <- c('BP1', 'BP2', 'BP3', 'PV1', 'PV2', 'PV3', 'WL1', 'WL2', 'WL3')
+Pills <- c(1,1,1,2,2,2,3,3,3)
+data_199_137 <- cbind( Brands, Pills, Intensity)
+data_199_137 <- as.data.frame(data_199_137)
+one.way <- aov( Intensity ~ Pills, data = data_199_137)
+summary(one.way)
+#Ploting ANOVA
+par(mfrow=c(2,2))
+#plot(one.way)
+par(mfrow=c(1,1))
+#Post-hoc test
+tukey.one.way<-TukeyHSD(one.way)
+tukey.one.way
+plot(tukey.one.way, las = 1)
+```
+
+The p-value of the pills variable is low (0.0103 < 0.05), so it appears that there is significant differences between the pills for this peak region. From the post-hoc test results, we see that there are statistically significant differences (p < 0.05) between pill groups 2 (PV) and 1 (Bayer) and between pill groups 3 (Walgreen) and 1 (Bayer).
+
+
+# Analysis Peak 240.00 92.900
+
+```{r, echo= FALSE, warning=FALSE}
+#Loading Data for Peak 240.00 92.900
+library(readxl)
+BP_240_92 <- read_excel("Bayer Pill 240.00 92.900 New.xlsx")
+PV_240_92 <- read_excel("P.V Pill 240.00 92.900 New.xlsx") 
+WL_240_92 <- read_excel("Wal Pill 240.00 92.900 New.xlsx") 
+```
+
+
+```{r, echo= FALSE, warning=FALSE}
+#Ploting Intensity vs Time for Bayer Pill 1 Aliquots 
+par(mfrow = c(1, 3))
+plot(BP_240_92$`BP1 Aliquot 1 time`,BP_240_92$`BP1 Aliquot 1 intensity`, type= 'b', col = 'blue', pch = 19, main = 'BP1 Aliquot 1', xlab = 'Time', ylab = 'Intensity' )
+plot(BP_240_92$`BP1 Ali 2 time`,BP_240_92$`BP1 Ali 2 intensity`, type= 'b', col = 'blue', pch = 19, main = 'BP1 Aliquot 2', xlab = 'Time', ylab = 'Intensity' )
+plot(BP_240_92$`BP1 Ali 3 time`,BP_240_92$`BP1 Ali 3 intensity`, type= 'b', col = 'blue', pch = 19, main = 'BP1 Aliquot 3', xlab = 'Time', ylab = 'Intensity' )
+
+#Ploting QQPlot for Bayer Pill 1 Aliquots
+par(mfrow = c(1, 3))
+qqnorm(BP_240_92$`BP1 Aliquot 1 intensity`, pch = 1, frame = FALSE, main = 'QQ plot for BP1 Ali1' )
+qqline(BP_240_92$`BP1 Aliquot 1 intensity`, col = "steelblue", lwd = 2)
+qqnorm(BP_240_92$`BP1 Ali 2 intensity`, pch = 1, frame = FALSE, main = 'QQ plot for BP1 Ali2' )
+qqline(BP_240_92$`BP1 Ali 2 intensity`, col = "steelblue", lwd = 2)
+qqnorm(BP_240_92$`BP1 Ali 3 intensity`, pch = 1, frame = FALSE, main = 'QQ plot for BP1 Ali3' )
+qqline(BP_240_92$`BP1 Ali 3 intensity`, col = "steelblue", lwd = 2)
+
+#Ploting Boxplots for Individual Bayer Pill 1 Aliquots
+par(mfrow = c(1, 3))
+boxplot(BP_240_92$`BP1 Aliquot 1 intensity`,main = 'Boxplot for BP1 Ali1')
+boxplot(BP_240_92$`BP1 Ali 2 intensity`,main = 'Boxplot for BP1 Ali2')
+boxplot(BP_240_92$`BP1 Ali 3 intensity`,main = 'Boxplot for BP1 Ali3')
+
+#Ploting SmoothScattered Plot for Individual Bayer Pill 1 Aliquots
+par(mfrow = c(1, 3))
+smoothScatter(BP_240_92$`BP1 Aliquot 1 intensity`,main = 'SmoothScattered Plot for BP1 Ali1')
+smoothScatter(BP_240_92$`BP1 Ali 2 intensity`,main = 'SmoothScattered Plot for BP1 Ali2')
+smoothScatter(BP_240_92$`BP1 Ali 3 intensity`,main = 'SmoothScattered Plot for BP1 Ali3')
+
+#Ploting Intensity vs Time for Bayer Pill 2 Aliquots 
+par(mfrow = c(1, 3))
+plot(BP_240_92$`BP2 Aliquot 1 time`,BP_240_92$`BP2 Aliquot 1 intensity`, type= 'b', col = 'green', pch = 19, main = 'BP2 Aliquot 1', xlab = 'Time', ylab = 'Intensity' )
+plot(BP_240_92$`BP2 Ali 2 time`,BP_240_92$`BP2 Ali 2 intensity`, type= 'b', col = 'green', pch = 19, main = 'BP2 Aliquot 2', xlab = 'Time', ylab = 'Intensity' )
+plot(BP_240_92$`BP2 Ali 3 time`,BP_240_92$`BP2 Ali 3 intensity`, type= 'b', col = 'green', pch = 19, main = 'BP2 Aliquot 3', xlab = 'Time', ylab = 'Intensity' )
+
+
+#Ploting QQPlot for Bayer Pill 2 Aliquots
+par(mfrow = c(1, 3))
+qqnorm(BP_240_92$`BP2 Aliquot 1 intensity`, pch = 1, frame = FALSE, main = 'QQ plot for BP2 Ali1' )
+qqline(BP_240_92$`BP2 Aliquot 1 intensity`, col = "steelblue", lwd = 2)
+qqnorm(BP_240_92$`BP2 Ali 2 intensity`, pch = 1, frame = FALSE, main = 'QQ plot for BP2 Ali2' )
+qqline(BP_240_92$`BP2 Ali 2 intensity`, col = "steelblue", lwd = 2)
+qqnorm(BP_240_92$`BP2 Ali 3 intensity`, pch = 1, frame = FALSE, main = 'QQ plot for BP2 Ali3' )
+qqline(BP_240_92$`BP2 Ali 3 intensity`, col = "steelblue", lwd = 2)
+
+#Ploting Boxplots for Individual Bayer Pill 2 Aliquots
+par(mfrow = c(1, 3))
+boxplot(BP_240_92$`BP2 Aliquot 1 intensity`,main = 'Boxplot for BP2 Ali1')
+boxplot(BP_240_92$`BP2 Ali 2 intensity`,main = 'Boxplot for BP2 Ali2')
+boxplot(BP_240_92$`BP2 Ali 3 intensity`,main = 'Boxplot for BP2 Ali3')
+
+#Ploting SmoothScattered Plot for Individual Bayer Pill 2 Aliquots
+par(mfrow = c(1, 3))
+smoothScatter(BP_240_92$`BP2 Aliquot 1 intensity`,main = 'SmoothScattered Plot for BP2 Ali1')
+smoothScatter(BP_240_92$`BP2 Ali 2 intensity`,main = 'SmoothScattered Plot for BP2 Ali2')
+smoothScatter(BP_240_92$`BP2 Ali 3 intensity`,main = 'SmoothScattered Plot for BP2 Ali3')
+
+
+#Ploting Intensity vs Time for Bayer Pill 3 Aliquots 
+par(mfrow = c(1, 3))
+plot(BP_240_92$`BP3 Aliquot 1 time`,BP_240_92$`BP3 Aliquot 1 intensity`, type= 'b', col = 'black', pch = 19, main = 'BP3 Aliquot 1', xlab = 'Time', ylab = 'Intensity' )
+plot(BP_240_92$`BP3 Ali 2 time`,BP_240_92$`BP3 Ali 2 intensity`, type= 'b', col = 'black', pch = 19, main = 'BP3 Aliquot 2', xlab = 'Time', ylab = 'Intensity' )
+plot(BP_240_92$`BP3 Ali 3 time`,BP_240_92$`BP3 Ali 3 intensity`, type= 'b', col = 'black', pch = 19, main = 'BP3 Aliquot 3', xlab = 'Time', ylab = 'Intensity' )
+
+#Ploting QQPlot for Bayer Pill 3 Aliquots
+par(mfrow = c(1, 3))
+qqnorm(BP_240_92$`BP3 Aliquot 1 intensity`, pch = 1, frame = FALSE, main = 'QQ plot for BP3 Ali1' )
+qqline(BP_240_92$`BP3 Aliquot 1 intensity`, col = "steelblue", lwd = 2)
+qqnorm(BP_240_92$`BP3 Ali 2 intensity`, pch = 1, frame = FALSE, main = 'QQ plot for BP3 Ali2' )
+qqline(BP_240_92$`BP3 Ali 2 intensity`, col = "steelblue", lwd = 2)
+qqnorm(BP_240_92$`BP3 Ali 3 intensity`, pch = 1, frame = FALSE, main = 'QQ plot for BP3 Ali3' )
+qqline(BP_240_92$`BP3 Ali 3 intensity`, col = "steelblue", lwd = 2)
+
+#Ploting Boxplots for Individual Bayer Pill 3 Aliquots
+par(mfrow = c(1, 3))
+boxplot(BP_240_92$`BP3 Aliquot 1 intensity`,main = 'Boxplot for BP3 Ali1')
+boxplot(BP_240_92$`BP3 Ali 2 intensity`,main = 'Boxplot for BP3 Ali2')
+boxplot(BP_240_92$`BP3 Ali 3 intensity`,main = 'Boxplot for BP3 Ali3')
+
+#Ploting SmoothScattered Plot for Individual Bayer Pill 3 Aliquots
+par(mfrow = c(1, 3))
+smoothScatter(BP_240_92$`BP3 Aliquot 1 intensity`,main = 'SmoothScattered Plot for BP3 Ali1')
+smoothScatter(BP_240_92$`BP3 Ali 2 intensity`,main = 'SmoothScattered Plot for BP3 Ali2')
+smoothScatter(BP_240_92$`BP3 Ali 3 intensity`,main = 'SmoothScattered Plot for BP3 Ali3')
+
+```
+
+```{r, echo= FALSE, warning=FALSE}
+#Getting Average for Intensities
+
+#Aliquote 1
+BP1_ali1_240_92 <- mean(na.omit(BP_240_92$`BP1 Aliquot 1 intensity`))
+BP2_ali1_240_92 <- mean(na.omit(BP_240_92$`BP2 Aliquot 1 intensity`))
+BP3_ali1_240_92 <- mean(na.omit(BP_240_92$`BP3 Aliquot 1 intensity`))
+#Aliquote 2
+BP1_ali2_240_92 <- mean(na.omit(BP_240_92$`BP1 Ali 2 intensity`))
+BP2_ali2_240_92 <- mean(na.omit(BP_240_92$`BP2 Ali 2 intensity`))
+BP3_ali2_240_92 <- mean(na.omit(BP_240_92$`BP3 Ali 2 intensity`))
+#Aliquote 3
+BP1_ali3_240_92 <- mean(na.omit(BP_240_92$`BP1 Ali 3 intensity`))
+BP2_ali3_240_92 <- mean(na.omit(BP_240_92$`BP2 Ali 3 intensity`))
+BP3_ali3_240_92 <- mean(na.omit(BP_240_92$`BP3 Ali 3 intensity`))
+#Average Intensity for Bayer Pills
+BP1_240_92 <- mean(BP1_ali1_240_92, BP1_ali2_240_92, BP1_ali3_240_92)
+BP2_240_92 <- mean(BP2_ali1_240_92, BP2_ali2_240_92, BP2_ali3_240_92)
+BP3_240_92 <- mean(BP3_ali1_240_92, BP3_ali2_240_92, BP3_ali3_240_92)
+
+```
+
+```{r, echo= FALSE, warning=FALSE}
+#Ploting Intensity vs Time for PV 1 Aliquots 
+par(mfrow = c(1, 3))
+plot(PV_240_92$`PV1 Aliquot 1 time`,PV_240_92$`PV1 Aliquot 1 intensity`, type= 'b', col = 'blue', pch = 19, main = 'PV1 Aliquot 1', xlab = 'Time', ylab = 'Intensity' )
+plot(PV_240_92$`PV1 Ali 2 time`,PV_240_92$`PV1 Ali 2 intensity`, type= 'b', col = 'blue', pch = 19, main = 'PV1 Aliquot 2', xlab = 'Time', ylab = 'Intensity' )
+plot(PV_240_92$`PV1 Ali 3 time`,PV_240_92$`PV1 Ali 3 intensity`, type= 'b', col = 'blue', pch = 19, main = 'PV1 Aliquot 3', xlab = 'Time', ylab = 'Intensity' )
+
+#Ploting QQPlot for PV 1 Aliquots
+par(mfrow = c(1, 3))
+qqnorm(PV_240_92$`PV1 Aliquot 1 intensity`, pch = 1, frame = FALSE, main = 'QQ plot for PV1 Ali1' )
+qqline(PV_240_92$`PV1 Aliquot 1 intensity`, col = "steelblue", lwd = 2)
+qqnorm(PV_240_92$`PV1 Ali 2 intensity`, pch = 1, frame = FALSE, main = 'QQ plot for PV1 Ali2' )
+qqline(PV_240_92$`PV1 Ali 2 intensity`, col = "steelblue", lwd = 2)
+qqnorm(PV_240_92$`PV1 Ali 3 intensity`, pch = 1, frame = FALSE, main = 'QQ plot for PV1 Ali3' )
+qqline(PV_240_92$`PV1 Ali 3 intensity`, col = "steelblue", lwd = 2)
+
+#Ploting Boxplots for Individual PV 1 Aliquots
+par(mfrow = c(1, 3))
+boxplot(PV_240_92$`PV1 Aliquot 1 intensity`,main = 'Boxplot for PV1 Ali1')
+boxplot(PV_240_92$`PV1 Ali 2 intensity`,main = 'Boxplot for PV1 Ali2')
+boxplot(PV_240_92$`PV1 Ali 3 intensity`,main = 'Boxplot for PV1 Ali3')
+
+#Ploting SmoothScattered Plot for Individual PV 1 Aliquots
+par(mfrow = c(1, 3))
+smoothScatter(PV_240_92$`PV1 Aliquot 1 intensity`,main = 'SmoothScattered Plot for PV1 Ali1')
+smoothScatter(PV_240_92$`PV1 Ali 2 intensity`,main = 'SmoothScattered Plot for PV1 Ali2')
+smoothScatter(PV_240_92$`PV1 Ali 3 intensity`,main = 'SmoothScattered Plot for PV1 Ali3')
+
+
+#Ploting Intensity vs Time for PV 2 Aliquots 
+par(mfrow = c(1, 3))
+plot(PV_240_92$`PV2 Aliquot 1 time`,PV_240_92$`PV2 Aliquot 1 intensity`, type= 'b', col = 'green', pch = 19, main = 'PV2 Aliquot 1', xlab = 'Time', ylab = 'Intensity' )
+plot(PV_240_92$`PV2 Ali 2 time`,PV_240_92$`PV2 Ali 2 intensity`, type= 'b', col = 'green', pch = 19, main = 'PV2 Aliquot 2', xlab = 'Time', ylab = 'Intensity' )
+plot(PV_240_92$`PV2 Ali 3 time`,PV_240_92$`PV2 Ali 3 intensity`, type= 'b', col = 'green', pch = 19, main = 'PV2 Aliquot 3', xlab = 'Time', ylab = 'Intensity' )
+
+#Ploting QQPlot for PV 2 Aliquots
+par(mfrow = c(1, 3))
+qqnorm(PV_240_92$`PV2 Aliquot 1 intensity`, pch = 1, frame = FALSE, main = 'QQ plot for PV2 Ali1' )
+qqline(PV_240_92$`PV2 Aliquot 1 intensity`, col = "steelblue", lwd = 2)
+qqnorm(PV_240_92$`PV2 Ali 2 intensity`, pch = 1, frame = FALSE, main = 'QQ plot for PV2 Ali2' )
+qqline(PV_240_92$`PV2 Ali 2 intensity`, col = "steelblue", lwd = 2)
+qqnorm(PV_240_92$`PV2 Ali 3 intensity`, pch = 1, frame = FALSE, main = 'QQ plot for PV2 Ali3' )
+qqline(PV_240_92$`PV2 Ali 3 intensity`, col = "steelblue", lwd = 2)
+
+#Ploting Boxplots for Individual PV 2 Aliquots
+par(mfrow = c(1, 3))
+boxplot(PV_240_92$`PV2 Aliquot 1 intensity`,main = 'Boxplot for PV2 Ali1')
+boxplot(PV_240_92$`PV2 Ali 2 intensity`,main = 'Boxplot for PV2 Ali2')
+boxplot(PV_240_92$`PV2 Ali 3 intensity`,main = 'Boxplot for PV2 Ali3')
+
+#Ploting SmoothScattered Plot for Individual PV 2 Aliquots
+par(mfrow = c(1, 3))
+smoothScatter(PV_240_92$`PV2 Aliquot 1 intensity`,main = 'SmoothScattered Plot for PV2 Ali1')
+smoothScatter(PV_240_92$`PV2 Ali 2 intensity`,main = 'SmoothScattered Plot for PV2 Ali2')
+smoothScatter(PV_240_92$`PV2 Ali 3 intensity`,main = 'SmoothScattered Plot for PV2 Ali3')
+
+
+#Ploting Intensity vs Time for PV 3 Aliquots 
+par(mfrow = c(1, 3))
+plot(PV_240_92$`PV3 Aliquot 1 time`,PV_240_92$`PV3 Aliquot 1 intensity`, type= 'b', col = 'black', pch = 19, main = 'PV3 Aliquot 1', xlab = 'Time', ylab = 'Intensity' )
+plot(PV_240_92$`PV3 Ali 2 time`,PV_240_92$`PV3 Ali 2 intensity`, type= 'b', col = 'black', pch = 19, main = 'PV3 Aliquot 2', xlab = 'Time', ylab = 'Intensity' )
+plot(PV_240_92$`PV3 Ali 3 time`,PV_240_92$`PV3 Ali 3 intensity`, type= 'b', col = 'black', pch = 19, main = 'PV3 Aliquot 3', xlab = 'Time', ylab = 'Intensity' )
+
+#Ploting QQPlot for PV 3 Aliquots
+par(mfrow = c(1, 3))
+qqnorm(PV_240_92$`PV3 Aliquot 1 intensity`, pch = 1, frame = FALSE, main = 'QQ plot for PV3 Ali1' )
+qqline(PV_240_92$`PV3 Aliquot 1 intensity`, col = "steelblue", lwd = 2)
+qqnorm(PV_240_92$`PV3 Ali 2 intensity`, pch = 1, frame = FALSE, main = 'QQ plot for PV3 Ali2' )
+qqline(PV_240_92$`PV3 Ali 2 intensity`, col = "steelblue", lwd = 2)
+qqnorm(PV_240_92$`PV3 Ali 3 intensity`, pch = 1, frame = FALSE, main = 'QQ plot for PV3 Ali3' )
+qqline(PV_240_92$`PV3 Ali 3 intensity`, col = "steelblue", lwd = 2)
+
+#Ploting Boxplots for Individual PV 3 Aliquots
+par(mfrow = c(1, 3))
+boxplot(PV_240_92$`PV3 Aliquot 1 intensity`,main = 'Boxplot for PV3 Ali1')
+boxplot(PV_240_92$`PV3 Ali 2 intensity`,main = 'Boxplot for PV3 Ali2')
+boxplot(PV_240_92$`PV3 Ali 3 intensity`,main = 'Boxplot for PV3 Ali3')
+
+#Ploting SmoothScattered Plot for Individual PV 3 Aliquots
+par(mfrow = c(1, 3))
+smoothScatter(PV_240_92$`PV3 Aliquot 1 intensity`,main = 'SmoothScattered Plot for PV3 Ali1')
+smoothScatter(PV_240_92$`PV3 Ali 2 intensity`,main = 'SmoothScattered Plot for PV3 Ali2')
+smoothScatter(PV_240_92$`PV3 Ali 3 intensity`,main = 'SmoothScattered Plot for PV3 Ali3')
+```
+
+
+```{r, echo= FALSE, warning=FALSE}
+#Getting Average for Intensities
+
+#Aliquote 1
+PV1_ali1_240_92 <- mean(na.omit(PV_240_92$`PV1 Aliquot 1 intensity`))
+PV2_ali1_240_92 <- mean(na.omit(PV_240_92$`PV2 Aliquot 1 intensity`))
+PV3_ali1_240_92 <- mean(na.omit(PV_240_92$`PV3 Aliquot 1 intensity`))
+#Aliquote 2
+PV1_ali2_240_92 <- mean(na.omit(PV_240_92$`PV1 Ali 2 intensity`))
+PV2_ali2_240_92 <- mean(na.omit(PV_240_92$`PV2 Ali 2 intensity`))
+PV3_ali2_240_92 <- mean(na.omit(PV_240_92$`PV3 Ali 2 intensity`))
+#Aliquote 3
+PV1_ali3_240_92 <- mean(na.omit(PV_240_92$`PV1 Ali 3 intensity`))
+PV2_ali3_240_92 <- mean(na.omit(PV_240_92$`PV2 Ali 3 intensity`))
+PV3_ali3_240_92 <- mean(na.omit(PV_240_92$`PV3 Ali 3 intensity`))
+
+#Average Intensity for PV pills
+PV1_240_92 <- mean(PV1_ali1_240_92, PV1_ali2_240_92, PV1_ali3_240_92)
+PV2_240_92 <- mean(PV2_ali1_240_92, PV2_ali2_240_92, PV2_ali3_240_92)
+PV3_240_92 <- mean(PV3_ali1_240_92, PV3_ali2_240_92, PV3_ali3_240_92)
+```
+
+```{r, echo= FALSE, warning=FALSE}
+#Ploting Intensity vs Time for WL 1 Aliquots 
+par(mfrow = c(1, 3))
+plot(WL_240_92$`WL1 Aliquot 1 time`,WL_240_92$`WL1 Aliquot 1 intensity`, type= 'b', col = 'blue', pch = 19, main = 'WL1 Aliquot 1', xlab = 'Time', ylab = 'Intensity' )
+plot(WL_240_92$`WL1 Ali 2 time`,WL_240_92$`WL1 Ali 2 intensity`, type= 'b', col = 'blue', pch = 19, main = 'WL1 Aliquot 2', xlab = 'Time', ylab = 'Intensity' )
+plot(WL_240_92$`WL1 Ali 3 time`,WL_240_92$`WL1 Ali 3 intensity`, type= 'b', col = 'blue', pch = 19, main = 'WL1 Aliquot 3', xlab = 'Time', ylab = 'Intensity' )
+
+#Ploting QQPlot for WL 1 Aliquots
+par(mfrow = c(1, 3))
+qqnorm(WL_240_92$`WL1 Aliquot 1 intensity`, pch = 1, frame = FALSE, main = 'QQ plot for WL1 Ali1' )
+qqline(WL_240_92$`WL1 Aliquot 1 intensity`, col = "steelblue", lwd = 2)
+qqnorm(WL_240_92$`WL1 Ali 2 intensity`, pch = 1, frame = FALSE, main = 'QQ plot for WL1 Ali2' )
+qqline(WL_240_92$`WL1 Ali 2 intensity`, col = "steelblue", lwd = 2)
+qqnorm(WL_240_92$`WL1 Ali 3 intensity`, pch = 1, frame = FALSE, main = 'QQ plot for WL1 Ali3' )
+qqline(WL_240_92$`WL1 Ali 3 intensity`, col = "steelblue", lwd = 2)
+
+#Ploting Boxplots for Individual WL 1 Aliquots
+par(mfrow = c(1, 3))
+boxplot(WL_240_92$`WL1 Aliquot 1 intensity`,main = 'Boxplot for WL1 Ali1')
+boxplot(WL_240_92$`WL1 Ali 2 intensity`,main = 'Boxplot for WL1 Ali2')
+boxplot(WL_240_92$`WL1 Ali 3 intensity`,main = 'Boxplot for WL1 Ali3')
+
+#Ploting SmoothScattered Plot for Individual WL 1 Aliquots
+par(mfrow = c(1, 3))
+smoothScatter(WL_240_92$`WL1 Aliquot 1 intensity`,main = 'SmoothScattered Plot for WL1 Ali1')
+smoothScatter(WL_240_92$`WL1 Ali 2 intensity`,main = 'SmoothScattered Plot for WL1 Ali2')
+smoothScatter(WL_240_92$`WL1 Ali 3 intensity`,main = 'SmoothScattered Plot for WL1 Ali3')
+
+
+
+#Ploting Intensity vs Time for WL 2 Aliquots 
+par(mfrow = c(1, 3))
+plot(WL_240_92$`WL2 Aliquot 1 time`,WL_240_92$`WL2 Aliquot 1 intensity`, type= 'b', col = 'green', pch = 19, main = 'WL2 Aliquot 1', xlab = 'Time', ylab = 'Intensity' )
+plot(WL_240_92$`WL2 Ali 2 time`,WL_240_92$`WL2 Ali 2 intensity`, type= 'b', col = 'green', pch = 19, main = 'WL2 Aliquot 2', xlab = 'Time', ylab = 'Intensity' )
+plot(WL_240_92$`WL2 Ali 3 time`,WL_240_92$`WL2 Ali 3 intensity`, type= 'b', col = 'green', pch = 19, main = 'WL2 Aliquot 3', xlab = 'Time', ylab = 'Intensity' )
+
+#Ploting QQPlot for WL 2 Aliquots
+par(mfrow = c(1, 3))
+qqnorm(WL_240_92$`WL2 Aliquot 1 intensity`, pch = 1, frame = FALSE, main = 'QQ plot for WL2 Ali1' )
+qqline(WL_240_92$`WL2 Aliquot 1 intensity`, col = "steelblue", lwd = 2)
+qqnorm(WL_240_92$`WL2 Ali 2 intensity`, pch = 1, frame = FALSE, main = 'QQ plot for WL2 Ali2' )
+qqline(WL_240_92$`WL2 Ali 2 intensity`, col = "steelblue", lwd = 2)
+qqnorm(WL_240_92$`WL2 Ali 3 intensity`, pch = 1, frame = FALSE, main = 'QQ plot for WL2 Ali3' )
+qqline(WL_240_92$`WL2 Ali 3 intensity`, col = "steelblue", lwd = 2)
+
+#Ploting Boxplots for Individual WL 2 Aliquots
+par(mfrow = c(1, 3))
+boxplot(WL_240_92$`WL2 Aliquot 1 intensity`,main = 'Boxplot for WL2 Ali1')
+boxplot(WL_240_92$`WL2 Ali 2 intensity`,main = 'Boxplot for WL2 Ali2')
+boxplot(WL_240_92$`WL2 Ali 3 intensity`,main = 'Boxplot for WL2 Ali3')
+
+#Ploting SmoothScattered Plot for Individual WL 2 Aliquots
+par(mfrow = c(1, 3))
+smoothScatter(WL_240_92$`WL2 Aliquot 1 intensity`,main = 'SmoothScattered Plot for WL2 Ali1')
+smoothScatter(WL_240_92$`WL2 Ali 2 intensity`,main = 'SmoothScattered Plot for WL2 Ali2')
+smoothScatter(WL_240_92$`WL2 Ali 3 intensity`,main = 'SmoothScattered Plot for WL2 Ali3')
+
+
+
+#Ploting Intensity vs Time for WL 3 Aliquots 
+par(mfrow = c(1, 3))
+plot(WL_240_92$`WL3 Aliquot 1 time`,WL_240_92$`WL3 Aliquot 1 intensity`, type= 'b', col = 'black', pch = 19, main = 'WL3 Aliquot 1', xlab = 'Time', ylab = 'Intensity' )
+plot(WL_240_92$`WL3 Ali 2 time`,WL_240_92$`WL3 Ali 2 intensity`, type= 'b', col = 'black', pch = 19, main = 'WL3 Aliquot 2', xlab = 'Time', ylab = 'Intensity' )
+plot(WL_240_92$`WL3 Ali 3 time`,WL_240_92$`WL3 Ali 3 intensity`, type= 'b', col = 'black', pch = 19, main = 'WL3 Aliquot 3', xlab = 'Time', ylab = 'Intensity' )
+
+#Ploting QQPlot for WL 3 Aliquots
+par(mfrow = c(1, 3))
+qqnorm(WL_240_92$`WL3 Aliquot 1 intensity`, pch = 1, frame = FALSE, main = 'QQ plot for WL3 Ali1' )
+qqline(WL_240_92$`WL3 Aliquot 1 intensity`, col = "steelblue", lwd = 2)
+qqnorm(WL_240_92$`WL3 Ali 2 intensity`, pch = 1, frame = FALSE, main = 'QQ plot for WL3 Ali2' )
+qqline(WL_240_92$`WL3 Ali 2 intensity`, col = "steelblue", lwd = 2)
+qqnorm(WL_240_92$`WL3 Ali 3 intensity`, pch = 1, frame = FALSE, main = 'QQ plot for WL3 Ali3' )
+qqline(WL_240_92$`WL3 Ali 3 intensity`, col = "steelblue", lwd = 2)
+
+#Ploting Boxplots for Individual WL 3 Aliquots
+par(mfrow = c(1, 3))
+boxplot(WL_240_92$`WL3 Aliquot 1 intensity`,main = 'Boxplot for WL3 Ali1')
+boxplot(WL_240_92$`WL3 Ali 2 intensity`,main = 'Boxplot for WL3 Ali2')
+boxplot(WL_240_92$`WL3 Ali 3 intensity`,main = 'Boxplot for WL3 Ali3')
+
+#Ploting SmoothScattered Plot for Individual WL 3 Aliquots
+par(mfrow = c(1, 3))
+smoothScatter(WL_240_92$`WL3 Aliquot 1 intensity`,main = 'SmoothScattered Plot for WL3 Ali1')
+smoothScatter(WL_240_92$`WL3 Ali 2 intensity`,main = 'SmoothScattered Plot for WL3 Ali2')
+smoothScatter(WL_240_92$`WL3 Ali 3 intensity`,main = 'SmoothScattered Plot for WL3 Ali3')
+```
+
+
+```{r, echo= FALSE, warning=FALSE}
+#Getting Average for Intensities
+
+#Aliquote 1
+WL1_ali1_240_92 <- mean(na.omit(WL_240_92$`WL1 Aliquot 1 intensity`))
+WL2_ali1_240_92 <- mean(na.omit(WL_240_92$`WL2 Aliquot 1 intensity`))
+WL3_ali1_240_92 <- mean(na.omit(WL_240_92$`WL3 Aliquot 1 intensity`))
+#Aliquote 2
+WL1_ali2_240_92 <- mean(na.omit(WL_240_92$`WL1 Ali 2 intensity`))
+WL2_ali2_240_92 <- mean(na.omit(WL_240_92$`WL2 Ali 2 intensity`))
+WL3_ali2_240_92 <- mean(na.omit(WL_240_92$`WL3 Ali 2 intensity`))
+#Aliquote 3
+WL1_ali3_240_92 <- mean(na.omit(WL_240_92$`WL1 Ali 3 intensity`))
+WL2_ali3_240_92 <- mean(na.omit(WL_240_92$`WL2 Ali 3 intensity`))
+WL3_ali3_240_92 <- mean(na.omit(WL_240_92$`WL3 Ali 3 intensity`))
+
+
+#Average Intensity for Walgreen pills
+WL1_240_92 <- mean(WL1_ali1_240_92, WL1_ali2_240_92, WL1_ali3_240_92)
+WL2_240_92 <- mean(WL2_ali1_240_92, WL2_ali2_240_92, WL2_ali3_240_92)
+WL3_240_92 <- mean(WL3_ali1_240_92, WL3_ali2_240_92, WL3_ali3_240_92)
+
+```
+
+```{r, echo= FALSE, warning=FALSE}
+#Analysis of Variance
+Intensity <- c(BP1_240_92, BP2_240_92, BP3_240_92, PV1_240_92, PV2_240_92, PV3_240_92,WL1_240_92, WL2_240_92, WL3_240_92)
+Brands <- c('BP1', 'BP2', 'BP3', 'PV1', 'PV2', 'PV3', 'WL1', 'WL2', 'WL3')
+Pills <- c(1,1,1,2,2,2,3,3,3)
+data_240_92 <- cbind( Brands, Pills, Intensity)
+data_240_92 <- as.data.frame(data_240_92)
+one.way <- aov( Intensity ~ Pills, data = data_240_92)
+summary(one.way)
+#Ploting ANOVA
+par(mfrow=c(2,2))
+#plot(one.way)
+par(mfrow=c(1,1))
+#Post-hoc test
+tukey.one.way<-TukeyHSD(one.way)
+tukey.one.way
+plot(tukey.one.way, las = 1)
+```
+
+
+The p-value of the pills variable is low (0.00369 < 0.05), so it appears that there is significant differences between the pills for this peak region. From the post-hoc test results, we see that there are statistically significant differences (p < 0.05) between pill groups 2 (PV) and 1 (Bayer) and between pill groups 3 (Walgreen) and 1 (Bayer).
+
+# Analysis Peak 240.00 137.100
+
+```{r, echo= FALSE, warning=FALSE}
+
+#Loading Data for Peak 240.00 137.100
+library(readxl)
+BP_240_137 <- read_excel("240.00 137.100 Bayer Pill New.xlsx")
+PV_240_137 <- read_excel("240.00 137.100 P.V Pill New.xlsx") 
+WL_240_137 <- read_excel("240.00 137.100 Wal Pill New.xlsx") 
+```
+
+
+```{r, echo= FALSE, warning=FALSE}
+#Ploting Intensity vs Time for Bayer Pill 1 Aliquots 
+par(mfrow = c(1, 3))
+plot(BP_240_137$`BP1 Aliquot 1 time`,BP_240_137$`BP1 Aliquot 1 intensity`, type= 'b', col = 'blue', pch = 19, main = 'BP1 Aliquot 1', xlab = 'Time', ylab = 'Intensity' )
+plot(BP_240_137$`BP1 Ali 2 time`,BP_240_137$`BP1 Ali 2 intensity`, type= 'b', col = 'blue', pch = 19, main = 'BP1 Aliquot 2', xlab = 'Time', ylab = 'Intensity' )
+plot(BP_240_137$`BP1 Ali 3 time`,BP_240_137$`BP1 Ali 3 intensity`, type= 'b', col = 'blue', pch = 19, main = 'BP1 Aliquot 3', xlab = 'Time', ylab = 'Intensity' )
+
+#Ploting QQPlot for Bayer Pill 1 Aliquots
+par(mfrow = c(1, 3))
+qqnorm(BP_240_137$`BP1 Aliquot 1 intensity`, pch = 1, frame = FALSE, main = 'QQ plot for BP1 Ali1' )
+qqline(BP_240_137$`BP1 Aliquot 1 intensity`, col = "steelblue", lwd = 2)
+qqnorm(BP_240_137$`BP1 Ali 2 intensity`, pch = 1, frame = FALSE, main = 'QQ plot for BP1 Ali2' )
+qqline(BP_240_137$`BP1 Ali 2 intensity`, col = "steelblue", lwd = 2)
+qqnorm(BP_240_137$`BP1 Ali 3 intensity`, pch = 1, frame = FALSE, main = 'QQ plot for BP1 Ali3' )
+qqline(BP_240_137$`BP1 Ali 3 intensity`, col = "steelblue", lwd = 2)
+
+#Ploting Boxplots for Individual Bayer Pill 1 Aliquots
+par(mfrow = c(1, 3))
+boxplot(BP_240_137$`BP1 Aliquot 1 intensity`,main = 'Boxplot for BP1 Ali1')
+boxplot(BP_240_137$`BP1 Ali 2 intensity`,main = 'Boxplot for BP1 Ali2')
+boxplot(BP_240_137$`BP1 Ali 3 intensity`,main = 'Boxplot for BP1 Ali3')
+
+#Ploting SmoothScattered Plot for Individual Bayer Pill 1 Aliquots
+par(mfrow = c(1, 3))
+smoothScatter(BP_240_137$`BP1 Aliquot 1 intensity`,main = 'SmoothScattered Plot for BP1 Ali1')
+smoothScatter(BP_240_137$`BP1 Ali 2 intensity`,main = 'SmoothScattered Plot for BP1 Ali2')
+smoothScatter(BP_240_137$`BP1 Ali 3 intensity`,main = 'SmoothScattered Plot for BP1 Ali3')
+
+#Ploting Intensity vs Time for Bayer Pill 2 Aliquots 
+par(mfrow = c(1, 3))
+plot(BP_240_137$`BP2 Aliquot 1 time`,BP_240_137$`BP2 Aliquot 1 intensity`, type= 'b', col = 'green', pch = 19, main = 'BP2 Aliquot 1', xlab = 'Time', ylab = 'Intensity' )
+plot(BP_240_137$`BP2 Ali 2 time`,BP_240_137$`BP2 Ali 2 intensity`, type= 'b', col = 'green', pch = 19, main = 'BP2 Aliquot 2', xlab = 'Time', ylab = 'Intensity' )
+plot(BP_240_137$`BP2 Ali 3 time`,BP_240_137$`BP2 Ali 3 intensity`, type= 'b', col = 'green', pch = 19, main = 'BP2 Aliquot 3', xlab = 'Time', ylab = 'Intensity' )
+
+
+#Ploting QQPlot for Bayer Pill 2 Aliquots
+par(mfrow = c(1, 3))
+qqnorm(BP_240_137$`BP2 Aliquot 1 intensity`, pch = 1, frame = FALSE, main = 'QQ plot for BP2 Ali1' )
+qqline(BP_240_137$`BP2 Aliquot 1 intensity`, col = "steelblue", lwd = 2)
+qqnorm(BP_240_137$`BP2 Ali 2 intensity`, pch = 1, frame = FALSE, main = 'QQ plot for BP2 Ali2' )
+qqline(BP_240_137$`BP2 Ali 2 intensity`, col = "steelblue", lwd = 2)
+qqnorm(BP_240_137$`BP2 Ali 3 intensity`, pch = 1, frame = FALSE, main = 'QQ plot for BP2 Ali3' )
+qqline(BP_240_137$`BP2 Ali 3 intensity`, col = "steelblue", lwd = 2)
+
+#Ploting Boxplots for Individual Bayer Pill 2 Aliquots
+par(mfrow = c(1, 3))
+boxplot(BP_240_137$`BP2 Aliquot 1 intensity`,main = 'Boxplot for BP2 Ali1')
+boxplot(BP_240_137$`BP2 Ali 2 intensity`,main = 'Boxplot for BP2 Ali2')
+boxplot(BP_240_137$`BP2 Ali 3 intensity`,main = 'Boxplot for BP2 Ali3')
+
+#Ploting SmoothScattered Plot for Individual Bayer Pill 2 Aliquots
+par(mfrow = c(1, 3))
+smoothScatter(BP_240_137$`BP2 Aliquot 1 intensity`,main = 'SmoothScattered Plot for BP2 Ali1')
+smoothScatter(BP_240_137$`BP2 Ali 2 intensity`,main = 'SmoothScattered Plot for BP2 Ali2')
+smoothScatter(BP_240_137$`BP2 Ali 3 intensity`,main = 'SmoothScattered Plot for BP2 Ali3')
+
+
+#Ploting Intensity vs Time for Bayer Pill 3 Aliquots 
+par(mfrow = c(1, 3))
+plot(BP_240_137$`BP3 Aliquot 1 time`,BP_240_137$`BP3 Aliquot 1 intensity`, type= 'b', col = 'black', pch = 19, main = 'BP3 Aliquot 1', xlab = 'Time', ylab = 'Intensity' )
+plot(BP_240_137$`BP3 Ali 2 time`,BP_240_137$`BP3 Ali 2 intensity`, type= 'b', col = 'black', pch = 19, main = 'BP3 Aliquot 2', xlab = 'Time', ylab = 'Intensity' )
+plot(BP_240_137$`BP3 Ali 3 time`,BP_240_137$`BP3 Ali 3 intensity`, type= 'b', col = 'black', pch = 19, main = 'BP3 Aliquot 3', xlab = 'Time', ylab = 'Intensity' )
+
+#Ploting QQPlot for Bayer Pill 3 Aliquots
+par(mfrow = c(1, 3))
+qqnorm(BP_240_137$`BP3 Aliquot 1 intensity`, pch = 1, frame = FALSE, main = 'QQ plot for BP3 Ali1' )
+qqline(BP_240_137$`BP3 Aliquot 1 intensity`, col = "steelblue", lwd = 2)
+qqnorm(BP_240_137$`BP3 Ali 2 intensity`, pch = 1, frame = FALSE, main = 'QQ plot for BP3 Ali2' )
+qqline(BP_240_137$`BP3 Ali 2 intensity`, col = "steelblue", lwd = 2)
+qqnorm(BP_240_137$`BP3 Ali 3 intensity`, pch = 1, frame = FALSE, main = 'QQ plot for BP3 Ali3' )
+qqline(BP_240_137$`BP3 Ali 3 intensity`, col = "steelblue", lwd = 2)
+
+#Ploting Boxplots for Individual Bayer Pill 3 Aliquots
+par(mfrow = c(1, 3))
+boxplot(BP_240_137$`BP3 Aliquot 1 intensity`,main = 'Boxplot for BP3 Ali1')
+boxplot(BP_240_137$`BP3 Ali 2 intensity`,main = 'Boxplot for BP3 Ali2')
+boxplot(BP_240_137$`BP3 Ali 3 intensity`,main = 'Boxplot for BP3 Ali3')
+
+#Ploting SmoothScattered Plot for Individual Bayer Pill 3 Aliquots
+par(mfrow = c(1, 3))
+smoothScatter(BP_240_137$`BP3 Aliquot 1 intensity`,main = 'SmoothScattered Plot for BP3 Ali1')
+smoothScatter(BP_240_137$`BP3 Ali 2 intensity`,main = 'SmoothScattered Plot for BP3 Ali2')
+smoothScatter(BP_240_137$`BP3 Ali 3 intensity`,main = 'SmoothScattered Plot for BP3 Ali3')
+
+```
+
+```{r, echo= FALSE, warning=FALSE}
+#Getting Average for Intensities
+
+#Aliquote 1
+BP1_ali1_240_137 <- mean(na.omit(BP_240_137$`BP1 Aliquot 1 intensity`))
+BP2_ali1_240_137 <- mean(na.omit(BP_240_137$`BP2 Aliquot 1 intensity`))
+BP3_ali1_240_137 <- mean(na.omit(BP_240_137$`BP3 Aliquot 1 intensity`))
+#Aliquote 2
+BP1_ali2_240_137 <- mean(na.omit(BP_240_137$`BP1 Ali 2 intensity`))
+BP2_ali2_240_137 <- mean(na.omit(BP_240_137$`BP2 Ali 2 intensity`))
+BP3_ali2_240_137 <- mean(na.omit(BP_240_137$`BP3 Ali 2 intensity`))
+#Aliquote 3
+BP1_ali3_240_137 <- mean(na.omit(BP_240_137$`BP1 Ali 3 intensity`))
+BP2_ali3_240_137 <- mean(na.omit(BP_240_137$`BP2 Ali 3 intensity`))
+BP3_ali3_240_137 <- mean(na.omit(BP_240_137$`BP3 Ali 3 intensity`))
+#Average Intensity for Bayer Pills
+BP1_240_137 <- mean(BP1_ali1_240_137, BP1_ali2_240_137, BP1_ali3_240_137)
+BP2_240_137 <- mean(BP2_ali1_240_137, BP2_ali2_240_137, BP2_ali3_240_137)
+BP3_240_137 <- mean(BP3_ali1_240_137, BP3_ali2_240_137, BP3_ali3_240_137)
+
+```
+
+```{r, echo= FALSE, warning=FALSE}
+#Ploting Intensity vs Time for PV 1 Aliquots 
+par(mfrow = c(1, 3))
+plot(PV_240_137$`PV1 Aliquot 1 time`,PV_240_137$`PV1 Aliquot 1 intensity`, type= 'b', col = 'blue', pch = 19, main = 'PV1 Aliquot 1', xlab = 'Time', ylab = 'Intensity' )
+plot(PV_240_137$`PV1 Ali 2 time`,PV_240_137$`PV1 Ali 2 intensity`, type= 'b', col = 'blue', pch = 19, main = 'PV1 Aliquot 2', xlab = 'Time', ylab = 'Intensity' )
+plot(PV_240_137$`PV1 Ali 3 time`,PV_240_137$`PV1 Ali 3 intensity`, type= 'b', col = 'blue', pch = 19, main = 'PV1 Aliquot 3', xlab = 'Time', ylab = 'Intensity' )
+
+#Ploting QQPlot for PV 1 Aliquots
+par(mfrow = c(1, 3))
+qqnorm(PV_240_137$`PV1 Aliquot 1 intensity`, pch = 1, frame = FALSE, main = 'QQ plot for PV1 Ali1' )
+qqline(PV_240_137$`PV1 Aliquot 1 intensity`, col = "steelblue", lwd = 2)
+qqnorm(PV_240_137$`PV1 Ali 2 intensity`, pch = 1, frame = FALSE, main = 'QQ plot for PV1 Ali2' )
+qqline(PV_240_137$`PV1 Ali 2 intensity`, col = "steelblue", lwd = 2)
+qqnorm(PV_240_137$`PV1 Ali 3 intensity`, pch = 1, frame = FALSE, main = 'QQ plot for PV1 Ali3' )
+qqline(PV_240_137$`PV1 Ali 3 intensity`, col = "steelblue", lwd = 2)
+
+#Ploting Boxplots for Individual PV 1 Aliquots
+par(mfrow = c(1, 3))
+boxplot(PV_240_137$`PV1 Aliquot 1 intensity`,main = 'Boxplot for PV1 Ali1')
+boxplot(PV_240_137$`PV1 Ali 2 intensity`,main = 'Boxplot for PV1 Ali2')
+boxplot(PV_240_137$`PV1 Ali 3 intensity`,main = 'Boxplot for PV1 Ali3')
+
+#Ploting SmoothScattered Plot for Individual PV 1 Aliquots
+par(mfrow = c(1, 3))
+smoothScatter(PV_240_137$`PV1 Aliquot 1 intensity`,main = 'SmoothScattered Plot for PV1 Ali1')
+smoothScatter(PV_240_137$`PV1 Ali 2 intensity`,main = 'SmoothScattered Plot for PV1 Ali2')
+smoothScatter(PV_240_137$`PV1 Ali 3 intensity`,main = 'SmoothScattered Plot for PV1 Ali3')
+
+
+#Ploting Intensity vs Time for PV 2 Aliquots 
+par(mfrow = c(1, 3))
+plot(PV_240_137$`PV2 Aliquot 1 time`,PV_240_137$`PV2 Aliquot 1 intensity`, type= 'b', col = 'green', pch = 19, main = 'PV2 Aliquot 1', xlab = 'Time', ylab = 'Intensity' )
+plot(PV_240_137$`PV2 Ali 2 time`,PV_240_137$`PV2 Ali 2 intensity`, type= 'b', col = 'green', pch = 19, main = 'PV2 Aliquot 2', xlab = 'Time', ylab = 'Intensity' )
+plot(PV_240_137$`PV2 Ali 3 time`,PV_240_137$`PV2 Ali 3 intensity`, type= 'b', col = 'green', pch = 19, main = 'PV2 Aliquot 3', xlab = 'Time', ylab = 'Intensity' )
+
+#Ploting QQPlot for PV 2 Aliquots
+par(mfrow = c(1, 3))
+qqnorm(PV_240_137$`PV2 Aliquot 1 intensity`, pch = 1, frame = FALSE, main = 'QQ plot for PV2 Ali1' )
+qqline(PV_240_137$`PV2 Aliquot 1 intensity`, col = "steelblue", lwd = 2)
+qqnorm(PV_240_137$`PV2 Ali 2 intensity`, pch = 1, frame = FALSE, main = 'QQ plot for PV2 Ali2' )
+qqline(PV_240_137$`PV2 Ali 2 intensity`, col = "steelblue", lwd = 2)
+qqnorm(PV_240_137$`PV2 Ali 3 intensity`, pch = 1, frame = FALSE, main = 'QQ plot for PV2 Ali3' )
+qqline(PV_240_137$`PV2 Ali 3 intensity`, col = "steelblue", lwd = 2)
+
+#Ploting Boxplots for Individual PV 2 Aliquots
+par(mfrow = c(1, 3))
+boxplot(PV_240_137$`PV2 Aliquot 1 intensity`,main = 'Boxplot for PV2 Ali1')
+boxplot(PV_240_137$`PV2 Ali 2 intensity`,main = 'Boxplot for PV2 Ali2')
+boxplot(PV_240_137$`PV2 Ali 3 intensity`,main = 'Boxplot for PV2 Ali3')
+
+#Ploting SmoothScattered Plot for Individual PV 2 Aliquots
+par(mfrow = c(1, 3))
+smoothScatter(PV_240_137$`PV2 Aliquot 1 intensity`,main = 'SmoothScattered Plot for PV2 Ali1')
+smoothScatter(PV_240_137$`PV2 Ali 2 intensity`,main = 'SmoothScattered Plot for PV2 Ali2')
+smoothScatter(PV_240_137$`PV2 Ali 3 intensity`,main = 'SmoothScattered Plot for PV2 Ali3')
+
+
+#Ploting Intensity vs Time for PV 3 Aliquots 
+par(mfrow = c(1, 3))
+plot(PV_240_137$`PV3 Aliquot 1 time`,PV_240_137$`PV3 Aliquot 1 intensity`, type= 'b', col = 'black', pch = 19, main = 'PV3 Aliquot 1', xlab = 'Time', ylab = 'Intensity' )
+plot(PV_240_137$`PV3 Ali 2 time`,PV_240_137$`PV3 Ali 2 intensity`, type= 'b', col = 'black', pch = 19, main = 'PV3 Aliquot 2', xlab = 'Time', ylab = 'Intensity' )
+plot(PV_240_137$`PV3 Ali 3 time`,PV_240_137$`PV3 Ali 3 intensity`, type= 'b', col = 'black', pch = 19, main = 'PV3 Aliquot 3', xlab = 'Time', ylab = 'Intensity' )
+
+#Ploting QQPlot for PV 3 Aliquots
+par(mfrow = c(1, 3))
+qqnorm(PV_240_137$`PV3 Aliquot 1 intensity`, pch = 1, frame = FALSE, main = 'QQ plot for PV3 Ali1' )
+qqline(PV_240_137$`PV3 Aliquot 1 intensity`, col = "steelblue", lwd = 2)
+qqnorm(PV_240_137$`PV3 Ali 2 intensity`, pch = 1, frame = FALSE, main = 'QQ plot for PV3 Ali2' )
+qqline(PV_240_137$`PV3 Ali 2 intensity`, col = "steelblue", lwd = 2)
+qqnorm(PV_240_137$`PV3 Ali 3 intensity`, pch = 1, frame = FALSE, main = 'QQ plot for PV3 Ali3' )
+qqline(PV_240_137$`PV3 Ali 3 intensity`, col = "steelblue", lwd = 2)
+
+#Ploting Boxplots for Individual PV 3 Aliquots
+par(mfrow = c(1, 3))
+boxplot(PV_240_137$`PV3 Aliquot 1 intensity`,main = 'Boxplot for PV3 Ali1')
+boxplot(PV_240_137$`PV3 Ali 2 intensity`,main = 'Boxplot for PV3 Ali2')
+boxplot(PV_240_137$`PV3 Ali 3 intensity`,main = 'Boxplot for PV3 Ali3')
+
+#Ploting SmoothScattered Plot for Individual PV 3 Aliquots
+par(mfrow = c(1, 3))
+smoothScatter(PV_240_137$`PV3 Aliquot 1 intensity`,main = 'SmoothScattered Plot for PV3 Ali1')
+smoothScatter(PV_240_137$`PV3 Ali 2 intensity`,main = 'SmoothScattered Plot for PV3 Ali2')
+smoothScatter(PV_240_137$`PV3 Ali 3 intensity`,main = 'SmoothScattered Plot for PV3 Ali3')
+```
+
+
+```{r, echo= FALSE, warning=FALSE}
+#Getting Average for Intensities
+
+#Aliquote 1
+PV1_ali1_240_137 <- mean(na.omit(PV_240_137$`PV1 Aliquot 1 intensity`))
+PV2_ali1_240_137 <- mean(na.omit(PV_240_137$`PV2 Aliquot 1 intensity`))
+PV3_ali1_240_137 <- mean(na.omit(PV_240_137$`PV3 Aliquot 1 intensity`))
+#Aliquote 2
+PV1_ali2_240_137 <- mean(na.omit(PV_240_137$`PV1 Ali 2 intensity`))
+PV2_ali2_240_137 <- mean(na.omit(PV_240_137$`PV2 Ali 2 intensity`))
+PV3_ali2_240_137 <- mean(na.omit(PV_240_137$`PV3 Ali 2 intensity`))
+#Aliquote 3
+PV1_ali3_240_137 <- mean(na.omit(PV_240_137$`PV1 Ali 3 intensity`))
+PV2_ali3_240_137 <- mean(na.omit(PV_240_137$`PV2 Ali 3 intensity`))
+PV3_ali3_240_137 <- mean(na.omit(PV_240_137$`PV3 Ali 3 intensity`))
+
+#Average Intensity for PV pills
+PV1_240_137 <- mean(PV1_ali1_240_137, PV1_ali2_240_137, PV1_ali3_240_137)
+PV2_240_137 <- mean(PV2_ali1_240_137, PV2_ali2_240_137, PV2_ali3_240_137)
+PV3_240_137 <- mean(PV3_ali1_240_137, PV3_ali2_240_137, PV3_ali3_240_137)
+```
+
+```{r, echo= FALSE, warning=FALSE}
+#Ploting Intensity vs Time for WL 1 Aliquots 
+par(mfrow = c(1, 3))
+plot(WL_240_137$`WL1 Aliquot 1 time`,WL_240_137$`WL1 Aliquot 1 intensity`, type= 'b', col = 'blue', pch = 19, main = 'WL1 Aliquot 1', xlab = 'Time', ylab = 'Intensity' )
+plot(WL_240_137$`WL1 Ali 2 time`,WL_240_137$`WL1 Ali 2 intensity`, type= 'b', col = 'blue', pch = 19, main = 'WL1 Aliquot 2', xlab = 'Time', ylab = 'Intensity' )
+plot(WL_240_137$`WL1 Ali 3 time`,WL_240_137$`WL1 Ali 3 intensity`, type= 'b', col = 'blue', pch = 19, main = 'WL1 Aliquot 3', xlab = 'Time', ylab = 'Intensity' )
+
+#Ploting QQPlot for WL 1 Aliquots
+par(mfrow = c(1, 3))
+qqnorm(WL_240_137$`WL1 Aliquot 1 intensity`, pch = 1, frame = FALSE, main = 'QQ plot for WL1 Ali1' )
+qqline(WL_240_137$`WL1 Aliquot 1 intensity`, col = "steelblue", lwd = 2)
+qqnorm(WL_240_137$`WL1 Ali 2 intensity`, pch = 1, frame = FALSE, main = 'QQ plot for WL1 Ali2' )
+qqline(WL_240_137$`WL1 Ali 2 intensity`, col = "steelblue", lwd = 2)
+qqnorm(WL_240_137$`WL1 Ali 3 intensity`, pch = 1, frame = FALSE, main = 'QQ plot for WL1 Ali3' )
+qqline(WL_240_137$`WL1 Ali 3 intensity`, col = "steelblue", lwd = 2)
+
+#Ploting Boxplots for Individual WL 1 Aliquots
+par(mfrow = c(1, 3))
+boxplot(WL_240_137$`WL1 Aliquot 1 intensity`,main = 'Boxplot for WL1 Ali1')
+boxplot(WL_240_137$`WL1 Ali 2 intensity`,main = 'Boxplot for WL1 Ali2')
+boxplot(WL_240_137$`WL1 Ali 3 intensity`,main = 'Boxplot for WL1 Ali3')
+
+#Ploting SmoothScattered Plot for Individual WL 1 Aliquots
+par(mfrow = c(1, 3))
+smoothScatter(WL_240_137$`WL1 Aliquot 1 intensity`,main = 'SmoothScattered Plot for WL1 Ali1')
+smoothScatter(WL_240_137$`WL1 Ali 2 intensity`,main = 'SmoothScattered Plot for WL1 Ali2')
+smoothScatter(WL_240_137$`WL1 Ali 3 intensity`,main = 'SmoothScattered Plot for WL1 Ali3')
+
+
+
+#Ploting Intensity vs Time for WL 2 Aliquots 
+par(mfrow = c(1, 3))
+plot(WL_240_137$`WL2 Aliquot 1 time`,WL_240_137$`WL2 Aliquot 1 intensity`, type= 'b', col = 'green', pch = 19, main = 'WL2 Aliquot 1', xlab = 'Time', ylab = 'Intensity' )
+plot(WL_240_137$`WL2 Ali 2 time`,WL_240_137$`WL2 Ali 2 intensity`, type= 'b', col = 'green', pch = 19, main = 'WL2 Aliquot 2', xlab = 'Time', ylab = 'Intensity' )
+plot(WL_240_137$`WL2 Ali 3 time`,WL_240_137$`WL2 Ali 3 intensity`, type= 'b', col = 'green', pch = 19, main = 'WL2 Aliquot 3', xlab = 'Time', ylab = 'Intensity' )
+
+#Ploting QQPlot for WL 2 Aliquots
+par(mfrow = c(1, 3))
+qqnorm(WL_240_137$`WL2 Aliquot 1 intensity`, pch = 1, frame = FALSE, main = 'QQ plot for WL2 Ali1' )
+qqline(WL_240_137$`WL2 Aliquot 1 intensity`, col = "steelblue", lwd = 2)
+qqnorm(WL_240_137$`WL2 Ali 2 intensity`, pch = 1, frame = FALSE, main = 'QQ plot for WL2 Ali2' )
+qqline(WL_240_137$`WL2 Ali 2 intensity`, col = "steelblue", lwd = 2)
+qqnorm(WL_240_137$`WL2 Ali 3 intensity`, pch = 1, frame = FALSE, main = 'QQ plot for WL2 Ali3' )
+qqline(WL_240_137$`WL2 Ali 3 intensity`, col = "steelblue", lwd = 2)
+
+#Ploting Boxplots for Individual WL 2 Aliquots
+par(mfrow = c(1, 3))
+boxplot(WL_240_137$`WL2 Aliquot 1 intensity`,main = 'Boxplot for WL2 Ali1')
+boxplot(WL_240_137$`WL2 Ali 2 intensity`,main = 'Boxplot for WL2 Ali2')
+boxplot(WL_240_137$`WL2 Ali 3 intensity`,main = 'Boxplot for WL2 Ali3')
+
+#Ploting SmoothScattered Plot for Individual WL 2 Aliquots
+par(mfrow = c(1, 3))
+smoothScatter(WL_240_137$`WL2 Aliquot 1 intensity`,main = 'SmoothScattered Plot for WL2 Ali1')
+smoothScatter(WL_240_137$`WL2 Ali 2 intensity`,main = 'SmoothScattered Plot for WL2 Ali2')
+smoothScatter(WL_240_137$`WL2 Ali 3 intensity`,main = 'SmoothScattered Plot for WL2 Ali3')
+
+
+
+#Ploting Intensity vs Time for WL 3 Aliquots 
+par(mfrow = c(1, 3))
+plot(WL_240_137$`WL3 Aliquot 1 time`,WL_240_137$`WL3 Aliquot 1 intensity`, type= 'b', col = 'black', pch = 19, main = 'WL3 Aliquot 1', xlab = 'Time', ylab = 'Intensity' )
+plot(WL_240_137$`WL3 Ali 2 time`,WL_240_137$`WL3 Ali 2 intensity`, type= 'b', col = 'black', pch = 19, main = 'WL3 Aliquot 2', xlab = 'Time', ylab = 'Intensity' )
+plot(WL_240_137$`WL3 Ali 3 time`,WL_240_137$`WL3 Ali 3 intensity`, type= 'b', col = 'black', pch = 19, main = 'WL3 Aliquot 3', xlab = 'Time', ylab = 'Intensity' )
+
+#Ploting QQPlot for WL 3 Aliquots
+par(mfrow = c(1, 3))
+qqnorm(WL_240_137$`WL3 Aliquot 1 intensity`, pch = 1, frame = FALSE, main = 'QQ plot for WL3 Ali1' )
+qqline(WL_240_137$`WL3 Aliquot 1 intensity`, col = "steelblue", lwd = 2)
+qqnorm(WL_240_137$`WL3 Ali 2 intensity`, pch = 1, frame = FALSE, main = 'QQ plot for WL3 Ali2' )
+qqline(WL_240_137$`WL3 Ali 2 intensity`, col = "steelblue", lwd = 2)
+qqnorm(WL_240_137$`WL3 Ali 3 intensity`, pch = 1, frame = FALSE, main = 'QQ plot for WL3 Ali3' )
+qqline(WL_240_137$`WL3 Ali 3 intensity`, col = "steelblue", lwd = 2)
+
+#Ploting Boxplots for Individual WL 3 Aliquots
+par(mfrow = c(1, 3))
+boxplot(WL_240_137$`WL3 Aliquot 1 intensity`,main = 'Boxplot for WL3 Ali1')
+boxplot(WL_240_137$`WL3 Ali 2 intensity`,main = 'Boxplot for WL3 Ali2')
+boxplot(WL_240_137$`WL3 Ali 3 intensity`,main = 'Boxplot for WL3 Ali3')
+
+#Ploting SmoothScattered Plot for Individual WL 3 Aliquots
+par(mfrow = c(1, 3))
+smoothScatter(WL_240_137$`WL3 Aliquot 1 intensity`,main = 'SmoothScattered Plot for WL3 Ali1')
+smoothScatter(WL_240_137$`WL3 Ali 2 intensity`,main = 'SmoothScattered Plot for WL3 Ali2')
+smoothScatter(WL_240_137$`WL3 Ali 3 intensity`,main = 'SmoothScattered Plot for WL3 Ali3')
+```
+
+
+```{r, echo= FALSE, warning=FALSE}
+#Getting Average for Intensities
+
+#Aliquote 1
+WL1_ali1_240_137 <- mean(na.omit(WL_240_137$`WL1 Aliquot 1 intensity`))
+WL2_ali1_240_137 <- mean(na.omit(WL_240_137$`WL2 Aliquot 1 intensity`))
+WL3_ali1_240_137 <- mean(na.omit(WL_240_137$`WL3 Aliquot 1 intensity`))
+#Aliquote 2
+WL1_ali2_240_137 <- mean(na.omit(WL_240_137$`WL1 Ali 2 intensity`))
+WL2_ali2_240_137 <- mean(na.omit(WL_240_137$`WL2 Ali 2 intensity`))
+WL3_ali2_240_137 <- mean(na.omit(WL_240_137$`WL3 Ali 2 intensity`))
+#Aliquote 3
+WL1_ali3_240_137 <- mean(na.omit(WL_240_137$`WL1 Ali 3 intensity`))
+WL2_ali3_240_137 <- mean(na.omit(WL_240_137$`WL2 Ali 3 intensity`))
+WL3_ali3_240_137 <- mean(na.omit(WL_240_137$`WL3 Ali 3 intensity`))
+
+
+#Average Intensity for Walgreen pills
+WL1_240_137 <- mean(WL1_ali1_240_137, WL1_ali2_240_137, WL1_ali3_240_137)
+WL2_240_137 <- mean(WL2_ali1_240_137, WL2_ali2_240_137, WL2_ali3_240_137)
+WL3_240_137 <- mean(WL3_ali1_240_137, WL3_ali2_240_137, WL3_ali3_240_137)
+
+```
+
+```{r, echo= FALSE, warning=FALSE}
+#Analysis of Variance
+Intensity <- c(BP1_240_137, BP2_240_137, BP3_240_137, PV1_240_137, PV2_240_137, PV3_240_137,WL1_240_137, WL2_240_137, WL3_240_137)
+Brands <- c('BP1', 'BP2', 'BP3', 'PV1', 'PV2', 'PV3', 'WL1', 'WL2', 'WL3')
+Pills <- c(1,1,1,2,2,2,3,3,3)
+data_240_137 <- cbind( Brands, Pills, Intensity)
+data_240_137 <- as.data.frame(data_240_137)
+one.way <- aov( Intensity ~ Pills, data = data_240_137)
+summary(one.way)
+#Ploting ANOVA
+par(mfrow=c(2,2))
+#plot(one.way)
+par(mfrow=c(1,1))
+#Post-hoc test
+tukey.one.way<-TukeyHSD(one.way)
+tukey.one.way
+plot(tukey.one.way, las = 1)
+```
+
+The p-value of the pills variable is low (0.00105 < 0.05), so it appears that there is significant differences between the pills for this peak region. From the post-hoc test results, we see that there are statistically significant differences (p < 0.05) between pill groups 2 (PV) and 1 (Bayer) and between pill groups 3 (Walgreen) and 1 (Bayer).
+
+
+## Conclusion
+
+From the exploratory data analysis of each intensities for every aliqoute, almost every dataset presents a normal distribution along with some outliers. The boxplots are skewed with some outliers. From the smoothscattered plot, we show lower density in the peaks of the intensities. From Analysis of Variance (ANOVA), we concluded that there are no significant difference for the peaks of (136.5 92.90) and (178.7 93.00). For rest of the peaks , we can see that The p-value of the pills variable is low (p < 0.05) indicating a significant difference between the pills.

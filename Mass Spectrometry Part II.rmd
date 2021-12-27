@@ -1,0 +1,3978 @@
+---
+title: "Project 2 "
+author: "Md Mominul Islam"
+date: "11/1/2021"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+## Background
+
+A chemist is studying the chemical make-up of three tablets from three distinct brands of aspirin using liquid chromatography-tandem mass spectrometry. Each tablet was tested in triplicate, which means we took three measurements of the identical pill for one peak. We have information for seven peaks in our dataset.
+
+
+## Objective
+
+Our main objective is to see whether there is a difference in each peak between the three kinds of tablets.
+
+## Data
+
+Our data consists of three aspirin tablets from three distinct manufacturers, each with three different aliqout strengths. It also includes the blank and retention times for which the intensity was calculated.
+
+## Algorithm
+
+We began by conducting exploratory data analysis for each pill of each brand beneath each peak. We used the Intensity versus Time Plot, QQPlot, Boxplots, and SmoothScattered plots for exploratory data analysis. We can see the distribution of numerical data and skewness by displaying the data quartiles (or percentiles) and averages using the Intensity vs Time Plot; QQplots shows the type of distribution; and Boxplots shows the distribution of numerical data and skewness by displaying the data quartiles (or percentiles) and averages.
+
+After that, we used Smoothscatterd plot to create a smoothed color density representation of a scatterplot using a (2D) kernel density estimate.
+
+We then used the mean of the intensity values for a specific aliqout for each tablet of each brand to compute the area under a peak (AUP). Then we averaged the means of three aliqout intensities for each pill type, yielding nine total averages of intensities for three pills from each brand. Then, for each peak, we ran a one-way anova. ANOVA shows us whether there are differences in group means, but it doesn't tell us what they are. Later, we used a Tukey's Honestly Significant Difference (Tukey's HSD) post-hoc test for pairwise comparisons to see whether groups were statistically different from one another.
+
+## Loading Data Set
+
+### Bayer Pill 1 from Peak 136.5 92.90 
+
+Links: https://r-charts.com/correlation/connected-scatter-plot/
+
+```{r, echo= FALSE, warning=FALSE}
+# Importing data from 136.5 92.90 Peak
+#Importing Bayer Pill 1 from 136.5 92.90 Peak
+Bayer1.136 <- read.delim("Data Set/The Trimed Datas Work/136.5 92.90/Bayer Pill 1 136.5 92.90 new.txt")
+Bayer1.136_intl<- Bayer1.136 [,-c(9:13)] # removing column from 9 to 13
+#changing column names for bayer pill1from 136.5 92.90 Peak
+colnames(Bayer1.136_intl) <-c('BlankTime','BlankIntensity','Aliquot1Time',
+                          'Aliquot1Intensity','Aliquot2Time','Aliquot2Intensity',
+                           'Aliquot3Time','Aliquot3Intensity')
+
+#Base R: Plot of Aliquot 1 time and intensity of Bayer pill 1
+par(mfrow= c(1,3)) # representing 3 intensities of Bayer Pill 1
+plot(Bayer1.136_intl$Aliquot1Time,Bayer1.136_intl$Aliquot1Intensity,
+     pch = 19,
+     col = "red",
+     lwd = 3,
+     type = "b", 
+     main = "BP1 Aliquot 1",
+     xlab = "Time",
+     ylab = "Intensity",
+     xlim =  c(2.3,3.2))
+points(Bayer1.136_intl$Aliquot1Time,Bayer1.136_intl$Aliquot1Intensity,
+       pch = 19)
+
+#Base R: Plot of Aliquot 2 time and intensity of Bayer pill 1
+plot(Bayer1.136_intl$Aliquot2Time,Bayer1.136_intl$Aliquot2Intensity,
+     pch = 19,
+     type = "b", 
+     col = "green",
+     lwd = 3,
+     main = "BP1 Aliquot 2",
+     xlab = "Time",
+     ylab = "Intensity",
+     xlim =  c(2.3,3.2))
+points(Bayer1.136_intl$Aliquot2Time,Bayer1.136_intl$Aliquot2Intensity,
+       pch = 19)
+
+#Base R: Plot of Aliquot 3 time and intensity of Bayer pill 1
+plot(Bayer1.136_intl$Aliquot3Time,Bayer1.136_intl$Aliquot3Intensity,
+     pch = 19,
+     type = "b", 
+     col = "blue",
+     lwd = 3,
+     main = "BP1 Aliquot 3",
+     xlab = "Aliquot 3 Time",
+     ylab = "Aliquot 3 Intensity",
+     xlim =  c(2.3,3.2))
+points(Bayer1.136_intl$Aliquot3Time,Bayer1.136_intl$Aliquot3Intensity,
+       pch = 19)
+
+```
+
+### Bayer Pill 2 from Peak 136.5 92.90 
+
+
+```{r, echo= FALSE, warning=FALSE}
+#Importing Bayer Pill 2 for Peak 136.5 92.90 
+Bayer2.136 <- read.delim("Data Set/The Trimed Datas Work/136.5 92.90/Bayer Pill 2 136.5 92.90 New.txt")
+Bayer2.136_intl<- Bayer2.136 [,-c(9:14)] # removing column from 9 to 14
+
+#changing column names for bayer pill1from 136.5 92.90 Peak
+colnames(Bayer2.136_intl) <-c('BlankTime','BlankIntensity','Aliquot1Time',
+                          'Aliquot1Intensity','Aliquot2Time','Aliquot2Intensity',
+                           'Aliquot3Time','Aliquot3Intensity')
+
+#Base R: Plot of Aliquot 1 time and intensity of Bayer pill 2
+par(mfrow= c(2,2)) # representing 3 intensities of Bayer Pill 2
+plot(Bayer2.136_intl$Aliquot1Time,Bayer2.136_intl$Aliquot1Intensity,
+     pch = 16,
+     col = "red",
+     lwd = 3,
+     main = "Aliquot1 Time vs Intensity for Bayer Pill2",
+     xlab = "Aliquot 1 Time",
+     ylab = "Aliquot 1 Intensity",
+     xlim =  c(2.3,3.2))
+#Base R: Plot of Aliquot 2 time and intensity of Bayer pill 2
+plot(Bayer2.136_intl$Aliquot2Time,Bayer2.136_intl$Aliquot2Intensity,
+     pch = 16,
+     col = "green",
+     lwd = 3,
+     main = "Aliquot2 Time vs Intensity for Bayer Pill2",
+     xlab = "Aliquot 2 Time",
+     ylab = "Aliquot 2 Intensity",
+     xlim =  c(2.3,3.2))
+#Base R: Plot of Aliquot 3 time and intensity of Bayer pill 2
+plot(Bayer2.136_intl$Aliquot3Time,Bayer2.136_intl$Aliquot3Intensity,
+     pch = 16,
+     col = "blue",
+     lwd = 3,
+     main = "Aliquot3 Time vs Intensity for Bayer Pill2",
+     xlab = "Aliquot 3 Time",
+     ylab = "Aliquot 3 Intensity",
+     xlim =  c(2.3,3.2))
+
+```
+
+
+### Bayer Pill 3 from Peak 136.5 92.90 
+
+```{r, echo= FALSE, warning=FALSE}
+#Importing bayer pill 3 for peak 136.5 92.90 
+Bayer3.136 <- read.delim("Data Set/The Trimed Datas Work/136.5 92.90/Bayer Pill 3 136.5 92.90 New.txt")
+Bayer3.136_intl<- Bayer3.136 [,-c(9:14)] # removing column from 9 to 14
+
+#changing column names for bayer pill1from 136.5 92.90 Peak
+colnames(Bayer3.136_intl) <-c('BlankTime','BlankIntensity','Aliquot1Time',
+                          'Aliquot1Intensity','Aliquot2Time','Aliquot2Intensity',
+                           'Aliquot3Time','Aliquot3Intensity')
+
+
+#Base R: Plot of Aliquot 1 time and intensity of Bayer pill 3
+par(mfrow= c(2,2)) # representing 3 intensities of Bayer Pill 3
+plot(Bayer3.136_intl$Aliquot1Time,Bayer3.136_intl$Aliquot1Intensity,
+     pch = 16,
+     col = "red",
+     lwd = 3,
+     main = "Aliquot1 Time vs Intensity for Bayer Pill3",
+     xlab = "Aliquot 1 Time",
+     ylab = "Aliquot 1 Intensity",
+     xlim =  c(2.3,3.2))
+#Base R: Plot of Aliquot 2 time and intensity of Bayer pill 3
+plot(Bayer3.136_intl$Aliquot2Time,Bayer3.136_intl$Aliquot2Intensity,
+     pch = 16,
+     col = "green",
+     lwd = 3,
+     main = "Aliquot2 Time vs Intensity for Bayer Pill3",
+     xlab = "Aliquot 2 Time",
+     ylab = "Aliquot 2 Intensity",
+     xlim =  c(2.3,3.2))
+#Base R: Plot of Aliquot 3 time and intensity of Bayer pill 3
+plot(Bayer3.136_intl$Aliquot3Time,Bayer3.136_intl$Aliquot3Intensity,
+     pch = 16,
+     col = "blue",
+     lwd = 3,
+     main = "Aliquot3 Time vs Intensity for Bayer Pill3",
+     xlab = "Aliquot 3 Time",
+     ylab = "Aliquot 3 Intensity",
+     xlim =  c(2.3,3.2))
+
+```
+
+## Average Bayer Pill Intensities
+
+
+```{r, echo= FALSE, warning=FALSE}
+#Getting Average for Intensities
+#Bayer Pill: Intensity 1
+BP1.ali1.136 <- mean(na.omit(Bayer1.136_intl$Aliquot1Intensity))
+BP2.ali1.136 <- mean(na.omit(Bayer2.136_intl$Aliquot1Intensity))
+BP3.ali1.136 <- mean(na.omit(Bayer3.136_intl$Aliquot1Intensity))
+#Bayer Pill: Intensity 2
+BP1.ali2.136 <- mean(na.omit(Bayer1.136_intl$Aliquot2Intensity))
+BP2.ali2.136 <- mean(na.omit(Bayer2.136_intl$Aliquot2Intensity))
+BP3.ali2.136 <- mean(na.omit(Bayer3.136_intl$Aliquot2Intensity))
+#Bayer Pill: Intensity 3
+BP1.ali3.136 <- mean(na.omit(Bayer1.136_intl$Aliquot3Intensity))
+BP2.ali3.136 <- mean(na.omit(Bayer2.136_intl$Aliquot3Intensity))
+BP3.ali3.136 <- mean(na.omit(Bayer3.136_intl$Aliquot3Intensity))
+```
+
+
+## Data Visualization for Bayer Pill Peak 136.5 92.90
+
+```{r, echo= FALSE, warning=FALSE}
+BP1.136 <- mean(BP1.ali1.136, BP1.ali2.136, BP1.ali3.136)
+BP2.136 <- mean(BP2.ali1.136, BP2.ali2.136, BP2.ali3.136)
+BP3.136 <- mean(BP3.ali1.136, BP3.ali2.136, BP3.ali3.136)
+
+BP.136 <- c(BP1.ali1.136, BP1.ali2.136, BP1.ali3.136, 
+            BP2.ali1.136, BP2.ali2.136, BP2.ali3.136, 
+            BP3.ali1.136, BP3.ali2.136, BP3.ali3.136)
+
+BP.136<- as.data.frame(BP.136)
+
+summary(BP.136)
+
+#boxplot 
+boxplot(BP.136,
+        horizontal = TRUE,
+        col = rainbow(ncol(BP.136)),
+        main = "Boxplot of Bayer Pills: Peak 136.5 92.90")
+
+#Scatter Plot
+smoothScatter(BP.136,
+              main = "Scatterplot for Bayer Pills from Peak 136.5 92.90",
+              xlab = "Time",
+              ylab = "Intensity")
+
+```
+
+
+### PV 1 Pill from Peak 136.5 92.90  
+
+```{r, echo= FALSE, warning=FALSE}
+#Importing P.V Pill 1 for Peak 136.5 92.90 
+PV1.136 <- read.delim("Data Set/The Trimed Datas Work/136.5 92.90/P.V Pill 1 136.5 92.90 New.txt")
+PV1.136_intl<- PV1.136[,-c(9:14)] # removing column from 9 to 14
+
+#changing column names for PV 1 from 136.5 92.90 Peak
+colnames(PV1.136_intl) <-c('BlankTime','BlankIntensity','Aliquot1Time',
+                          'Aliquot1Intensity','Aliquot2Time','Aliquot2Intensity',
+                           'Aliquot3Time','Aliquot3Intensity')
+
+#Base R: Plot of Aliquot 1 time and intensity of PV pill 1
+par(mfrow= c(2,2)) # representing 3 intensities of PV Pill 1
+plot(PV1.136_intl$Aliquot1Time,PV1.136_intl$Aliquot1Intensity,
+     pch = 16,
+     col = "red",
+     lwd = 3,
+     main = "Aliquot1 Time vs Intensity for PV Pill1",
+     xlab = "Aliquot 1 Time",
+     ylab = "Aliquot 1 Intensity",
+     xlim =  c(2.3,3.2))
+#Base R: Plot of Aliquot 2 time and intensity of PVpill 1
+plot(PV1.136_intl$Aliquot2Time,PV1.136_intl$Aliquot2Intensity,
+     pch = 16,
+     col = "green",
+     lwd = 3,
+     main = "Aliquot2 Time vs Intensity for PV Pill1",
+     xlab = "Aliquot 2 Time",
+     ylab = "Aliquot 2 Intensity",
+     xlim =  c(2.3,3.2))
+#Base R: Plot of Aliquot 3 time and intensity of PV pill 1
+plot(PV1.136_intl$Aliquot3Time,PV1.136_intl$Aliquot3Intensity,
+     pch = 16,
+     col = "blue",
+     lwd = 3,
+     main = "Aliquot3 Time vs Intensity for PV Pill1",
+     xlab = "Aliquot 3 Time",
+     ylab = "Aliquot 3 Intensity",
+     xlim =  c(2.3,3.2))
+
+```
+
+### PV 2 Pill from Peak 136.5 92.90  
+
+```{r,echo= FALSE, warning=FALSE}
+PV2.136 <- read.delim("Data Set/The Trimed Datas Work/136.5 92.90/P.V Pill 2 136.5 92.90 New.txt")
+PV2.136_intl<- PV2.136[,-c(9:13)] # removing column from 9 to 13
+
+#changing column names for PV pill2 from 136.5 92.90 Peak
+colnames(PV2.136_intl) <-c('BlankTime','BlankIntensity','Aliquot1Time',
+                          'Aliquot1Intensity','Aliquot2Time','Aliquot2Intensity',
+                           'Aliquot3Time','Aliquot3Intensity')
+
+#Base R: Plot of Aliquot 1 time and intensity of PVpill 2
+par(mfrow= c(2,2)) # representing 3 intensities of PVPill 2
+plot(PV2.136_intl$Aliquot1Time,PV2.136_intl$Aliquot1Intensity,
+     pch = 16,
+     col = "red",
+     lwd = 3,
+     main = "Aliquot1 Time vs Intensity for PVPill2",
+     xlab = "Aliquot 1 Time",
+     ylab = "Aliquot 1 Intensity",
+     xlim =  c(2.3,3.2))
+#Base R: Plot of Aliquot 2 time and intensity of PVpill 2
+plot(PV2.136_intl$Aliquot2Time,PV2.136_intl$Aliquot2Intensity,
+     pch = 16,
+     col = "green",
+     lwd = 3,
+     main = "Aliquot2 Time vs Intensity for PVPill2",
+     xlab = "Aliquot 2 Time",
+     ylab = "Aliquot 2 Intensity",
+     xlim =  c(2.3,3.2))
+#Base R: Plot of Aliquot 3 time and intensity of PVpill 2
+plot(PV2.136_intl$Aliquot3Time,PV2.136_intl$Aliquot3Intensity,
+     pch = 16,
+     col = "blue",
+     lwd = 3,
+     main = "Aliquot3 Time vs Intensity for PVPill2",
+     xlab = "Aliquot 3 Time",
+     ylab = "Aliquot 3 Intensity",
+     xlim =  c(2.3,3.2))
+
+
+```
+
+### PV 3 Pill from Peak 136.5 92.90  
+
+```{r,  echo= FALSE, warning=FALSE}
+PV3.136 <- read.delim("Data Set/The Trimed Datas Work/136.5 92.90/P.V Pill 3 136.5 92.90 New.txt")
+PV3.136_intl<- PV3.136[,-c(9:13)] # removing column from 9 to 13
+
+#changing column names for PV pill2 from 136.5 92.90 Peak
+colnames(PV3.136_intl) <-c('BlankTime','BlankIntensity','Aliquot1Time',
+                          'Aliquot1Intensity','Aliquot2Time','Aliquot2Intensity',
+                           'Aliquot3Time','Aliquot3Intensity')
+
+#Base R: Plot of Aliquot 1 time and intensity of PVpill 3
+par(mfrow= c(2,2)) # representing 3 intensities of PVPill 3
+plot(PV3.136_intl$Aliquot1Time,PV3.136_intl$Aliquot1Intensity,
+     pch = 16,
+     col = "red",
+     lwd = 3,
+     main = "Aliquot1 Time vs Intensity for PVPill3",
+     xlab = "Aliquot 1 Time",
+     ylab = "Aliquot 1 Intensity",
+     xlim =  c(2.3,3.2))
+#Base R: Plot of Aliquot 2 time and intensity of PVpill 3
+plot(PV3.136_intl$Aliquot2Time,PV3.136_intl$Aliquot2Intensity,
+     pch = 16,
+     col = "green",
+     lwd = 3,
+     main = "Aliquot2 Time vs Intensity for PVPill3",
+     xlab = "Aliquot 2 Time",
+     ylab = "Aliquot 2 Intensity",
+     xlim =  c(2.3,3.2))
+#Base R: Plot of Aliquot 3 time and intensity of PVpill 3
+plot(PV3.136_intl$Aliquot3Time,PV3.136_intl$Aliquot3Intensity,
+     pch = 16,
+     col = "blue",
+     lwd = 3,
+     main = "Aliquot3 Time vs Intensity for PVPill3",
+     xlab = "Aliquot 3 Time",
+     ylab = "Aliquot 3 Intensity",
+     xlim =  c(2.3,3.2))
+
+```
+
+## Average P.V Pill Intensities
+
+
+```{r,  echo= FALSE, warning=FALSE}
+#Getting Average for Intensities
+#PV Pill: Intensity 1
+PV1.ali1.136 <- mean(na.omit(PV1.136_intl$Aliquot1Intensity))
+PV2.ali1.136 <- mean(na.omit(PV2.136_intl$Aliquot1Intensity))
+PV3.ali1.136 <- mean(na.omit(PV3.136_intl$Aliquot1Intensity))
+
+#PV Pill: Intensity 2
+PV1.ali2.136 <- mean(na.omit(PV1.136_intl$Aliquot2Intensity))
+PV2.ali2.136 <- mean(na.omit(PV2.136_intl$Aliquot2Intensity))
+PV3.ali2.136 <- mean(na.omit(PV3.136_intl$Aliquot2Intensity))
+
+#PV Pill: Intensity 3
+PV1.ali3.136 <- mean(na.omit(PV1.136_intl$Aliquot3Intensity))
+PV2.ali3.136 <- mean(na.omit(PV2.136_intl$Aliquot3Intensity))
+PV3.ali3.136 <- mean(na.omit(PV3.136_intl$Aliquot3Intensity))
+```
+
+
+## Data Visualization for PV Pill Peak 136.5 92.90
+
+```{r,  echo= FALSE, warning=FALSE}
+PV1.136 <- mean(PV1.ali1.136, PV1.ali2.136, PV1.ali3.136)
+PV2.136 <- mean(PV2.ali1.136, PV2.ali2.136, PV2.ali3.136)
+PV3.136 <- mean(PV3.ali1.136, PV3.ali2.136, PV3.ali3.136)
+
+PV.136 <- c(PV1.ali1.136, PV1.ali2.136, PV1.ali3.136, 
+            PV2.ali1.136, PV2.ali2.136, PV2.ali3.136, 
+            PV3.ali1.136, PV3.ali2.136, PV3.ali3.136)
+
+PV.136<- as.data.frame(PV.136)
+
+summary(PV.136) # made a data frame
+
+
+#boxplot 
+boxplot(PV.136,
+        horizontal = TRUE,
+        col = rainbow(ncol(PV.136)),
+        main = "Boxplot of PV Pills: Peak 136.5 92.90")
+
+#Scatter Plot
+smoothScatter(PV.136,
+              main = "Scatterplot for PV Pills from Peak 136.5 92.90",
+              xlab = "Time",
+              ylab = "Intensity")
+
+```
+
+### Wal Pill 1 from Peak 136.5 92.90  
+
+```{r,  echo= FALSE, warning=FALSE}
+#Importing WP Pill 1 for Peak 136.5 92.90 
+WP1.136 <- read.delim("Data Set/The Trimed Datas Work/136.5 92.90/Wal Pill 1 136.5 92.90 New.txt")
+WP1.136_intl<- WP1.136[,-c(9:14)] # removing column from 9 to 14
+
+#changing column names for WP 1 from 136.5 92.90 Peak
+colnames(WP1.136_intl) <-c('BlankTime','BlankIntensity','Aliquot1Time',
+                          'Aliquot1Intensity','Aliquot2Time','Aliquot2Intensity',
+                           'Aliquot3Time','Aliquot3Intensity')
+
+#Base R: Plot of Aliquot 1 time and intensity of WP1
+par(mfrow= c(2,2)) # representing 3 intensities of WP1
+plot(WP1.136_intl$Aliquot1Time,WP1.136_intl$Aliquot1Intensity,
+     pch = 16,
+     col = "red",
+     lwd = 3,
+     main = "Aliquot1 Time vs Intensity for Wal Pill1",
+     xlab = "Aliquot 1 Time",
+     ylab = "Aliquot 1 Intensity",
+     xlim =  c(2.3,3.2))
+#Base R: Plot of Aliquot 2 time and intensity of Wal Pill1
+plot(WP1.136_intl$Aliquot2Time,WP1.136_intl$Aliquot2Intensity,
+     pch = 16,
+     col = "green",
+     lwd = 3,
+     main = "Aliquot2 Time vs Intensity for Wal Pill1",
+     xlab = "Aliquot 2 Time",
+     ylab = "Aliquot 2 Intensity",
+     xlim =  c(2.3,3.2))
+#Base R: Plot of Aliquot 3 time and intensity of Wal Pill1
+plot(WP1.136_intl$Aliquot3Time,WP1.136_intl$Aliquot3Intensity,
+     pch = 16,
+     col = "blue",
+     lwd = 3,
+     main = "Aliquot3 Time vs Intensity for Wal Pill1",
+     xlab = "Aliquot 3 Time",
+     ylab = "Aliquot 3 Intensity",
+     xlim =  c(2.3,3.2))
+```
+
+### Wal Pill 2 from Peak 136.5 92.90  
+
+```{r,  echo= FALSE, warning=FALSE}
+#Importing WP Pill 1 for Peak 136.5 92.90 
+WP2.136 <- read.delim("Data Set/The Trimed Datas Work/136.5 92.90/Wal Pill 2 136.5 92.90 New.txt")
+WP2.136_intl<- WP2.136[,-c(9:14)] # removing column from 9 to 14
+
+#changing column names for WP 1 from 136.5 92.90 Peak
+colnames(WP2.136_intl) <-c('BlankTime','BlankIntensity','Aliquot1Time',
+                          'Aliquot1Intensity','Aliquot2Time','Aliquot2Intensity',
+                           'Aliquot3Time','Aliquot3Intensity')
+
+
+
+#Base R: Plot of Aliquot 1 time and intensity of WP2
+par(mfrow= c(2,2)) # representing 3 intensities of WP2
+plot(WP2.136_intl$Aliquot1Time,WP2.136_intl$Aliquot1Intensity,
+     pch = 16,
+     col = "red",
+     lwd = 3,
+     main = "Aliquot1 Time vs Intensity for Wal Pill2",
+     xlab = "Aliquot 1 Time",
+     ylab = "Aliquot 1 Intensity",
+     xlim =  c(2.3,3.2))
+#Base R: Plot of Aliquot 2 time and intensity of Wal Pill2
+plot(WP2.136_intl$Aliquot2Time,WP2.136_intl$Aliquot2Intensity,
+     pch = 16,
+     col = "green",
+     lwd = 3,
+     main = "Aliquot2 Time vs Intensity for Wal Pill2",
+     xlab = "Aliquot 2 Time",
+     ylab = "Aliquot 2 Intensity",
+     xlim =  c(2.3,3.2))
+#Base R: Plot of Aliquot 3 time and intensity of Wal Pill2
+plot(WP2.136_intl$Aliquot3Time,WP2.136_intl$Aliquot3Intensity,
+     pch = 16,
+     col = "blue",
+     lwd = 3,
+     main = "Aliquot3 Time vs Intensity for Wal Pill2",
+     xlab = "Aliquot 3 Time",
+     ylab = "Aliquot 3 Intensity",
+     xlim =  c(2.3,3.2))
+```
+
+
+### Wal Pill 3 from Peak 136.5 92.90  
+
+```{r,  echo= FALSE, warning=FALSE}
+#Importing WP Pill 1 for Peak 136.5 92.90 
+WP3.136 <- read.delim("Data Set/The Trimed Datas Work/136.5 92.90/Wal Pill 3 136.5 92.90 New.txt")
+WP3.136_intl<- WP3.136[,-c(9:14)] # removing column from 9 to 14
+
+#changing column names for WP 1 from 136.5 92.90 Peak
+colnames(WP3.136_intl) <-c('BlankTime','BlankIntensity','Aliquot1Time',
+                          'Aliquot1Intensity','Aliquot2Time','Aliquot2Intensity',
+                           'Aliquot3Time','Aliquot3Intensity')
+
+#Base R: Plot of Aliquot 1 time and intensity of WP3
+par(mfrow= c(2,2)) # representing 3 intensities of WP3
+plot(WP3.136_intl$Aliquot1Time,WP3.136_intl$Aliquot1Intensity,
+     pch = 16,
+     col = "red",
+     lwd = 3,
+     main = "Aliquot1 Time vs Intensity for Wal Pill3",
+     xlab = "Aliquot 1 Time",
+     ylab = "Aliquot 1 Intensity",
+     xlim =  c(2.3,3.2))
+#Base R: Plot of Aliquot 2 time and intensity of Wal Pill3
+plot(WP3.136_intl$Aliquot2Time,WP3.136_intl$Aliquot2Intensity,
+     pch = 16,
+     col = "green",
+     lwd = 3,
+     main = "Aliquot2 Time vs Intensity for Wal Pill3",
+     xlab = "Aliquot 2 Time",
+     ylab = "Aliquot 2 Intensity",
+     xlim =  c(2.3,3.2))
+#Base R: Plot of Aliquot 3 time and intensity of Wal Pill3
+plot(WP3.136_intl$Aliquot3Time,WP3.136_intl$Aliquot3Intensity,
+     pch = 16,
+     col = "blue",
+     lwd = 3,
+     main = "Aliquot3 Time vs Intensity for Wal Pill3",
+     xlab = "Aliquot 3 Time",
+     ylab = "Aliquot 3 Intensity",
+     xlim =  c(2.3,3.2))
+```
+## Average Wal Pill Intensities
+
+
+```{r,  echo= FALSE, warning=FALSE}
+#Getting Average for Intensities
+#Wal Pill: Intensity 1
+WP1.ali1.136 <- mean(na.omit(WP1.136_intl$Aliquot1Intensity))
+WP2.ali1.136 <- mean(na.omit(WP2.136_intl$Aliquot1Intensity))
+WP3.ali1.136 <- mean(na.omit(WP3.136_intl$Aliquot1Intensity))
+
+#Wal Pill: Intensity 2
+WP1.ali2.136 <- mean(na.omit(WP1.136_intl$Aliquot2Intensity))
+WP2.ali2.136 <- mean(na.omit(WP2.136_intl$Aliquot2Intensity))
+WP3.ali2.136 <- mean(na.omit(WP3.136_intl$Aliquot2Intensity))
+
+#Wal Pill: Intensity 3
+WP1.ali3.136 <- mean(na.omit(WP1.136_intl$Aliquot3Intensity))
+WP2.ali3.136 <- mean(na.omit(WP2.136_intl$Aliquot3Intensity))
+WP3.ali3.136 <- mean(na.omit(WP3.136_intl$Aliquot3Intensity))
+```
+
+
+## Data Visualization for Wal Pill Peak 136.5 92.90
+
+```{r,  echo= FALSE, warning=FALSE}
+WP1.136 <- mean(WP1.ali1.136, WP1.ali2.136, WP1.ali3.136)
+WP2.136 <- mean(WP2.ali1.136, WP2.ali2.136, WP2.ali3.136)
+WP3.136 <- mean(WP3.ali1.136, WP3.ali2.136, WP3.ali3.136)
+
+WP.136 <- c(WP1.ali1.136, WP1.ali2.136, WP1.ali3.136, 
+            WP2.ali1.136, WP2.ali2.136, WP2.ali3.136, 
+            WP3.ali1.136, WP3.ali2.136, WP3.ali3.136)
+
+WP.136<- as.data.frame(WP.136)
+
+summary(WP.136) # made a data frame
+
+
+#boxplot 
+boxplot(WP.136,
+        horizontal = TRUE,
+        col = rainbow(ncol(WP.136)),
+        main = "Boxplot of WP Pills: Peak 136.5 92.90")
+
+#Scatter Plot
+smoothScatter(WP.136,
+              main = "Scatterplot for WP Pills from Peak 136.5 92.90",
+              xlab = "Time",
+              ylab = "Intensity")
+
+```
+## Anova of Peak 136.5 92.90
+
+```{r,  echo= FALSE, warning=FALSE}
+Intensity <- c(BP1.136, BP2.136, BP3.136, PV1.136, PV2.136, PV3.136,WP1.136, WP2.136, WP3.136)
+Type <- c('BP1', 'BP2', 'BP3', 'PV1', 'PV2', 'PV3', 'WL1', 'WL2', 'WL3')
+Pills <- c(1,1,1,2,2,2,3,3,3)
+da.136 <- cbind(Type, Pills, Intensity)
+da.136 <- as.data.frame(da.136)
+anova.136 <- aov(Intensity ~ Pills, data = da.136)
+summary(anova.136)
+par(mfrow=c(2,2))
+plot(anova.136)
+#Post-hoc test
+tukey.136<-TukeyHSD(anova.136)
+tukey.136
+plot(tukey.136, las = 1)
+
+```
+
+
+The p-value of the pills variable is low (p > 0.05), For this peak location, it appears that there are no substantial differences between the tablets. According to the findings of the post-hoc test, there are no statistically significant differences (p > 0.05) between pill groups.
+
+
+## Loading Data for Peak 178.7 93.00
+
+### Bayer Pill 1 from Peak 178.7 93.00
+
+```{r,  echo= FALSE, warning=FALSE}
+# Importing data from 178.7 93.00 Peak
+#Importing Bayer Pill 1 from 178.7 93.00 Peak
+Bayer1.178 <- read.delim("Data Set/The Trimed Datas Work/178.7 93.00/178.7 93.00 Bayer Pill 1 New.txt")
+Bayer1.178_intl<- Bayer1.136 [,-c(9:13)] # removing column from 9 to 13
+#changing column names for bayer pill1from 178.7 93.00 Peak
+colnames(Bayer1.178_intl) <-c('BlankTime','BlankIntensity','Aliquot1Time',
+                          'Aliquot1Intensity','Aliquot2Time','Aliquot2Intensity',
+                           'Aliquot3Time','Aliquot3Intensity')
+
+#Base R: Plot of Aliquot 1 time and intensity of Bayer pill 1
+par(mfrow= c(2,2)) # representing 3 intensities of Bayer Pill 1
+plot(Bayer1.178_intl$Aliquot1Time,Bayer1.178_intl$Aliquot1Intensity,
+     pch = 16,
+     col = "red",
+     lwd = 3,
+     main = "Aliquot1 Time vs Intensity for Bayer Pill1",
+     xlab = "Aliquot 1 Time",
+     ylab = "Aliquot 1 Intensity",
+     xlim =  c(2.3,3.2))
+#Base R: Plot of Aliquot 2 time and intensity of Bayer pill 1
+plot(Bayer1.178_intl$Aliquot2Time,Bayer1.178_intl$Aliquot2Intensity,
+     pch = 16,
+     col = "green",
+     lwd = 3,
+     main = "Aliquot2 Time vs Intensity for Bayer Pill1",
+     xlab = "Aliquot 2 Time",
+     ylab = "Aliquot 2 Intensity",
+     xlim =  c(2.3,3.2))
+#Base R: Plot of Aliquot 3 time and intensity of Bayer pill 1
+plot(Bayer1.178_intl$Aliquot3Time,Bayer1.178_intl$Aliquot3Intensity,
+     pch = 16,
+     col = "blue",
+     lwd = 3,
+     main = "Aliquot3 Time vs Intensity for Bayer Pill1",
+     xlab = "Aliquot 3 Time",
+     ylab = "Aliquot 3 Intensity",
+     xlim =  c(2.3,3.2))
+
+```
+### Bayer Pill 2 from Peak 178.7 93.00
+
+
+```{r,  echo= FALSE, warning=FALSE}
+#Importing Bayer Pill 2 for Peak 178.7 93.00 
+Bayer2.178 <- read.delim("Data Set/The Trimed Datas Work/178.7 93.00/178.7 93.00 Bayer Pill 2 New.txt")
+Bayer2.178_intl<- Bayer2.178 [,-c(9:14)] # removing column from 9 to 14
+
+#changing column names for bayer pill1from 178.5 92.90 Peak
+colnames(Bayer2.178_intl) <-c('BlankTime','BlankIntensity','Aliquot1Time',
+                          'Aliquot1Intensity','Aliquot2Time','Aliquot2Intensity',
+                           'Aliquot3Time','Aliquot3Intensity')
+
+#Base R: Plot of Aliquot 1 time and intensity of Bayer pill 2
+par(mfrow= c(2,2)) # representing 3 intensities of Bayer Pill 2
+plot(Bayer2.178_intl$Aliquot1Time,Bayer2.178_intl$Aliquot1Intensity,
+     pch = 16,
+     col = "red",
+     lwd = 3,
+     main = "Aliquot1 Time vs Intensity for Bayer Pill2",
+     xlab = "Aliquot 1 Time",
+     ylab = "Aliquot 1 Intensity",
+     xlim =  c(2.3,3.2))
+#Base R: Plot of Aliquot 2 time and intensity of Bayer pill 2
+plot(Bayer2.178_intl$Aliquot2Time,Bayer2.178_intl$Aliquot2Intensity,
+     pch = 16,
+     col = "green",
+     lwd = 3,
+     main = "Aliquot2 Time vs Intensity for Bayer Pill2",
+     xlab = "Aliquot 2 Time",
+     ylab = "Aliquot 2 Intensity",
+     xlim =  c(2.3,3.2))
+#Base R: Plot of Aliquot 3 time and intensity of Bayer pill 2
+plot(Bayer2.178_intl$Aliquot3Time,Bayer2.178_intl$Aliquot3Intensity,
+     pch = 16,
+     col = "blue",
+     lwd = 3,
+     main = "Aliquot3 Time vs Intensity for Bayer Pill2",
+     xlab = "Aliquot 3 Time",
+     ylab = "Aliquot 3 Intensity",
+     xlim =  c(2.3,3.2))
+```
+
+### Bayer Pill 3 from Peak 178.7 93.00
+
+```{r,  echo= FALSE, warning=FALSE}
+#Importing bayer pill 3 for peak 178.7 93.00 
+Bayer3.178 <- read.delim("Data Set/The Trimed Datas Work/178.7 93.00/178.7 93.00 Bayer Pill 3 New.txt")
+Bayer3.178_intl<- Bayer3.178 [,-c(9:14)] # removing column from 9 to 14
+
+#changing column names for bayer pill1from 178.5 92.90 Peak
+colnames(Bayer3.178_intl) <-c('BlankTime','BlankIntensity','Aliquot1Time',
+                          'Aliquot1Intensity','Aliquot2Time','Aliquot2Intensity',
+                           'Aliquot3Time','Aliquot3Intensity')
+
+
+#Base R: Plot of Aliquot 1 time and intensity of Bayer pill 3
+par(mfrow= c(2,2)) # representing 3 intensities of Bayer Pill 3
+plot(Bayer3.178_intl$Aliquot1Time,Bayer3.178_intl$Aliquot1Intensity,
+     pch = 16,
+     col = "red",
+     lwd = 3,
+     main = "Aliquot1 Time vs Intensity for Bayer Pill3",
+     xlab = "Aliquot 1 Time",
+     ylab = "Aliquot 1 Intensity",
+     xlim =  c(2.3,3.2))
+#Base R: Plot of Aliquot 2 time and intensity of Bayer pill 3
+plot(Bayer3.178_intl$Aliquot2Time,Bayer3.178_intl$Aliquot2Intensity,
+     pch = 16,
+     col = "green",
+     lwd = 3,
+     main = "Aliquot2 Time vs Intensity for Bayer Pill3",
+     xlab = "Aliquot 2 Time",
+     ylab = "Aliquot 2 Intensity",
+     xlim =  c(2.3,3.2))
+#Base R: Plot of Aliquot 3 time and intensity of Bayer pill 3
+plot(Bayer3.178_intl$Aliquot3Time,Bayer3.178_intl$Aliquot3Intensity,
+     pch = 16,
+     col = "blue",
+     lwd = 3,
+     main = "Aliquot3 Time vs Intensity for Bayer Pill3",
+     xlab = "Aliquot 3 Time",
+     ylab = "Aliquot 3 Intensity",
+     xlim =  c(2.3,3.2))
+```
+
+## Average Bayer Pill Intensities for peak 178.7 93.00
+
+
+```{r,  echo= FALSE, warning=FALSE}
+#Getting Average for Intensities
+#Bayer Pill: Intensity 1
+BP1.ali1.178 <- mean(na.omit(Bayer1.178_intl$Aliquot1Intensity))
+BP2.ali1.178 <- mean(na.omit(Bayer2.178_intl$Aliquot1Intensity))
+BP3.ali1.178 <- mean(na.omit(Bayer3.178_intl$Aliquot1Intensity))
+#Bayer Pill: Intensity 2
+BP1.ali2.178 <- mean(na.omit(Bayer1.178_intl$Aliquot2Intensity))
+BP2.ali2.178 <- mean(na.omit(Bayer2.178_intl$Aliquot2Intensity))
+BP3.ali2.178 <- mean(na.omit(Bayer3.178_intl$Aliquot2Intensity))
+#Bayer Pill: Intensity 3
+BP1.ali3.178 <- mean(na.omit(Bayer1.178_intl$Aliquot3Intensity))
+BP2.ali3.178 <- mean(na.omit(Bayer2.178_intl$Aliquot3Intensity))
+BP3.ali3.178 <- mean(na.omit(Bayer3.178_intl$Aliquot3Intensity))
+```
+
+
+## Data Visualization for Bayer Pill for peak 178.7 93.00
+
+```{r,  echo= FALSE, warning=FALSE}
+BP1.178 <- mean(BP1.ali1.178, BP1.ali2.178, BP1.ali3.178)
+BP2.178 <- mean(BP2.ali1.178, BP2.ali2.178, BP2.ali3.178)
+BP3.178 <- mean(BP3.ali1.178, BP3.ali2.178, BP3.ali3.178)
+
+BP.178 <- c(BP1.ali1.178, BP1.ali2.178, BP1.ali3.178, 
+            BP2.ali1.178, BP2.ali2.178, BP2.ali3.178, 
+            BP3.ali1.178, BP3.ali2.178, BP3.ali3.178)
+
+BP.178<- as.data.frame(BP.178)
+
+summary(BP.178) # made a data frame
+
+
+#boxplot 
+boxplot(BP.178,
+        horizontal = TRUE,
+        col = rainbow(ncol(BP.178)),
+        main = "Boxplot of Bayer Pills: Peak 178.7 93.00")
+
+#Scatter Plot
+smoothScatter(BP.178,
+              main = "Scatterplot for Bayer Pills from Peak 178.7 93.00",
+              xlab = "Time",
+              ylab = "Intensity")
+
+```
+### PV 1 Pill from Peak 178.7 93.00 
+
+```{r,  echo= FALSE, warning=FALSE}
+#Importing P.V Pill 1 for Peak 178.7 93.00
+PV1.178 <- read.delim("Data Set/The Trimed Datas Work/178.7 93.00/178.7 93.00 P.V Pill 1 New.txt")
+PV1.178_intl<- PV1.178[,-c(9:14)] # removing column from 9 to 14
+
+#changing column names for PV 1 from 178.7 93.00
+colnames(PV1.178_intl) <-c('BlankTime','BlankIntensity','Aliquot1Time',
+                          'Aliquot1Intensity','Aliquot2Time','Aliquot2Intensity',
+                           'Aliquot3Time','Aliquot3Intensity')
+
+#Base R: Plot of Aliquot 1 time and intensity of PV pill 1
+par(mfrow= c(2,2)) # representing 3 intensities of PV Pill 1
+plot(PV1.178_intl$Aliquot1Time,PV1.178_intl$Aliquot1Intensity,
+     pch = 16,
+     col = "red",
+     lwd = 3,
+     main = "Aliquot1 Time vs Intensity for PV Pill1",
+     xlab = "Aliquot 1 Time",
+     ylab = "Aliquot 1 Intensity",
+     xlim =  c(2.3,3.2))
+#Base R: Plot of Aliquot 2 time and intensity of PVpill 1
+plot(PV1.178_intl$Aliquot2Time,PV1.178_intl$Aliquot2Intensity,
+     pch = 16,
+     col = "green",
+     lwd = 3,
+     main = "Aliquot2 Time vs Intensity for PV Pill1",
+     xlab = "Aliquot 2 Time",
+     ylab = "Aliquot 2 Intensity",
+     xlim =  c(2.3,3.2))
+#Base R: Plot of Aliquot 3 time and intensity of PV pill 1
+plot(PV1.178_intl$Aliquot3Time,PV1.178_intl$Aliquot3Intensity,
+     pch = 16,
+     col = "blue",
+     lwd = 3,
+     main = "Aliquot3 Time vs Intensity for PV Pill1",
+     xlab = "Aliquot 3 Time",
+     ylab = "Aliquot 3 Intensity",
+     xlim =  c(2.3,3.2))
+```
+### PV 2 Pill from Peak 178.7 93.00  
+
+```{r,  echo= FALSE, warning=FALSE}
+PV2.178 <- read.delim("Data Set/The Trimed Datas Work/178.7 93.00/178.7 93.00 P.V Pill 1 New.txt")
+PV2.178_intl<- PV2.178[,-c(9:13)] # removing column from 9 to 13
+
+#changing column names for PV pill2 from 178.7 93.00 Peak
+colnames(PV2.178_intl) <-c('BlankTime','BlankIntensity','Aliquot1Time',
+                          'Aliquot1Intensity','Aliquot2Time','Aliquot2Intensity',
+                           'Aliquot3Time','Aliquot3Intensity')
+
+#Base R: Plot of Aliquot 1 time and intensity of PVpill 2
+par(mfrow= c(2,2)) # representing 3 intensities of PVPill 2
+plot(PV2.178_intl$Aliquot1Time,PV2.178_intl$Aliquot1Intensity,
+     pch = 16,
+     col = "red",
+     lwd = 3,
+     main = "Aliquot1 Time vs Intensity for PVPill2",
+     xlab = "Aliquot 1 Time",
+     ylab = "Aliquot 1 Intensity",
+     xlim =  c(2.3,3.2))
+#Base R: Plot of Aliquot 2 time and intensity of PVpill 2
+plot(PV2.178_intl$Aliquot2Time,PV2.178_intl$Aliquot2Intensity,
+     pch = 16,
+     col = "green",
+     lwd = 3,
+     main = "Aliquot2 Time vs Intensity for PVPill2",
+     xlab = "Aliquot 2 Time",
+     ylab = "Aliquot 2 Intensity",
+     xlim =  c(2.3,3.2))
+#Base R: Plot of Aliquot 3 time and intensity of PVpill 2
+plot(PV2.178_intl$Aliquot3Time,PV2.178_intl$Aliquot3Intensity,
+     pch = 16,
+     col = "blue",
+     lwd = 3,
+     main = "Aliquot3 Time vs Intensity for PVPill2",
+     xlab = "Aliquot 3 Time",
+     ylab = "Aliquot 3 Intensity",
+     xlim =  c(2.3,3.2))
+
+```
+### PV 3 Pill from Peak 178.7 93.00
+
+```{r,  echo= FALSE, warning=FALSE}
+PV3.178 <- read.delim("Data Set/The Trimed Datas Work/178.7 93.00/178.7 93.00 P.V Pill 1 New.txt")
+PV3.178_intl<- PV3.178[,-c(9:13)] # removing column from 9 to 13
+
+#changing column names for PV pill2 from 178.7 93.00 Peak
+colnames(PV3.178_intl) <-c('BlankTime','BlankIntensity','Aliquot1Time',
+                          'Aliquot1Intensity','Aliquot2Time','Aliquot2Intensity',
+                           'Aliquot3Time','Aliquot3Intensity')
+
+#Base R: Plot of Aliquot 1 time and intensity of PVpill 3
+par(mfrow= c(2,2)) # representing 3 intensities of PVPill 3
+plot(PV3.178_intl$Aliquot1Time,PV3.178_intl$Aliquot1Intensity,
+     pch = 16,
+     col = "red",
+     lwd = 3,
+     main = "Aliquot1 Time vs Intensity for PVPill3",
+     xlab = "Aliquot 1 Time",
+     ylab = "Aliquot 1 Intensity",
+     xlim =  c(2.3,3.2))
+#Base R: Plot of Aliquot 2 time and intensity of PVpill 3
+plot(PV3.178_intl$Aliquot2Time,PV3.178_intl$Aliquot2Intensity,
+     pch = 16,
+     col = "green",
+     lwd = 3,
+     main = "Aliquot2 Time vs Intensity for PVPill3",
+     xlab = "Aliquot 2 Time",
+     ylab = "Aliquot 2 Intensity",
+     xlim =  c(2.3,3.2))
+#Base R: Plot of Aliquot 3 time and intensity of PVpill 3
+plot(PV3.178_intl$Aliquot3Time,PV3.178_intl$Aliquot3Intensity,
+     pch = 16,
+     col = "blue",
+     lwd = 3,
+     main = "Aliquot3 Time vs Intensity for PVPill3",
+     xlab = "Aliquot 3 Time",
+     ylab = "Aliquot 3 Intensity",
+     xlim =  c(2.3,3.2))
+```
+## Average P.V Pill Intensities Peak 178.7 93.00
+
+
+```{r,  echo= FALSE, warning=FALSE}
+#Getting Average for Intensities
+#PV Pill: Intensity 1
+PV1.ali1.178 <- mean(na.omit(PV1.178_intl$Aliquot1Intensity))
+PV2.ali1.178 <- mean(na.omit(PV2.178_intl$Aliquot1Intensity))
+PV3.ali1.178 <- mean(na.omit(PV3.178_intl$Aliquot1Intensity))
+
+#PV Pill: Intensity 2
+PV1.ali2.178 <- mean(na.omit(PV1.178_intl$Aliquot2Intensity))
+PV2.ali2.178 <- mean(na.omit(PV2.178_intl$Aliquot2Intensity))
+PV3.ali2.178 <- mean(na.omit(PV3.178_intl$Aliquot2Intensity))
+
+#PV Pill: Intensity 3
+PV1.ali3.178 <- mean(na.omit(PV1.178_intl$Aliquot3Intensity))
+PV2.ali3.178 <- mean(na.omit(PV2.178_intl$Aliquot3Intensity))
+PV3.ali3.178 <- mean(na.omit(PV3.178_intl$Aliquot3Intensity))
+```
+
+
+## Data Visualization for PV Pill Peak 178.7 93.00
+
+```{r,  echo= FALSE, warning=FALSE}
+PV1.178 <- mean(PV1.ali1.178, PV1.ali2.178, PV1.ali3.178)
+PV2.178 <- mean(PV2.ali1.178, PV2.ali2.178, PV2.ali3.178)
+PV3.178 <- mean(PV3.ali1.178, PV3.ali2.178, PV3.ali3.178)
+
+PV.178 <- c(PV1.ali1.178, PV1.ali2.178, PV1.ali3.178, 
+            PV2.ali1.178, PV2.ali2.178, PV2.ali3.178, 
+            PV3.ali1.178, PV3.ali2.178, PV3.ali3.178)
+
+PV.178<- as.data.frame(PV.178)
+
+summary(PV.178) # made a data frame
+
+
+#boxplot 
+boxplot(PV.178,
+        horizontal = TRUE,
+        col = rainbow(ncol(PV.178)),
+        main = "Boxplot of PV Pills: Peak 178.7 93.00")
+
+#Scatter Plot
+smoothScatter(PV.178,
+              main = "Scatterplot for PV Pills from Peak 178.7 93.00",
+              xlab = "Time",
+              ylab = "Intensity")
+
+```
+### Wal Pill 1 from Peak 178.7 93.00  
+
+```{r,  echo= FALSE, warning=FALSE}
+#Importing WP Pill 1 for Peak 178.7 93.00 
+WP1.178 <- read.delim("Data Set/The Trimed Datas Work/178.7 93.00/178.7 93.00 Wal Pill 1 New.txt")
+WP1.178_intl<- WP1.178[,-c(9:14)] # removing column from 9 to 14
+
+#changing column names for WP 1 from 178.7 93.00 Peak
+colnames(WP1.178_intl) <-c('BlankTime','BlankIntensity','Aliquot1Time',
+                          'Aliquot1Intensity','Aliquot2Time','Aliquot2Intensity',
+                           'Aliquot3Time','Aliquot3Intensity')
+
+#Base R: Plot of Aliquot 1 time and intensity of WP1
+par(mfrow= c(2,2)) # representing 3 intensities of WP1
+plot(WP1.178_intl$Aliquot1Time,WP1.178_intl$Aliquot1Intensity,
+     pch = 16,
+     col = "red",
+     lwd = 3,
+     main = "Aliquot1 Time vs Intensity for Wal Pill1",
+     xlab = "Aliquot 1 Time",
+     ylab = "Aliquot 1 Intensity",
+     xlim =  c(2.3,3.2))
+#Base R: Plot of Aliquot 2 time and intensity of Wal Pill1
+plot(WP1.178_intl$Aliquot2Time,WP1.178_intl$Aliquot2Intensity,
+     pch = 16,
+     col = "green",
+     lwd = 3,
+     main = "Aliquot2 Time vs Intensity for Wal Pill1",
+     xlab = "Aliquot 2 Time",
+     ylab = "Aliquot 2 Intensity",
+     xlim =  c(2.3,3.2))
+#Base R: Plot of Aliquot 3 time and intensity of Wal Pill1
+plot(WP1.178_intl$Aliquot3Time,WP1.178_intl$Aliquot3Intensity,
+     pch = 16,
+     col = "blue",
+     lwd = 3,
+     main = "Aliquot3 Time vs Intensity for Wal Pill1",
+     xlab = "Aliquot 3 Time",
+     ylab = "Aliquot 3 Intensity",
+     xlim =  c(2.3,3.2))
+```
+### Wal Pill 2 from Peak 178.7 93.00 
+
+```{r,  echo= FALSE, warning=FALSE}
+#Importing WP Pill 1 for Peak 178.7 93.00
+WP2.178 <- read.delim("Data Set/The Trimed Datas Work/178.7 93.00/178.7 93.00 Wal Pill 2 New.txt")
+WP2.178_intl<- WP2.178[,-c(9:14)] # removing column from 9 to 14
+
+#changing column names for WP 1 from 178.7 93.00 Peak
+colnames(WP2.178_intl) <-c('BlankTime','BlankIntensity','Aliquot1Time',
+                          'Aliquot1Intensity','Aliquot2Time','Aliquot2Intensity',
+                           'Aliquot3Time','Aliquot3Intensity')
+
+
+
+#Base R: Plot of Aliquot 1 time and intensity of WP2
+par(mfrow= c(2,2)) # representing 3 intensities of WP2
+plot(WP2.178_intl$Aliquot1Time,WP2.178_intl$Aliquot1Intensity,
+     pch = 16,
+     col = "red",
+     lwd = 3,
+     main = "Aliquot1 Time vs Intensity for Wal Pill2",
+     xlab = "Aliquot 1 Time",
+     ylab = "Aliquot 1 Intensity",
+     xlim =  c(2.3,3.2))
+#Base R: Plot of Aliquot 2 time and intensity of Wal Pill2
+plot(WP2.178_intl$Aliquot2Time,WP2.178_intl$Aliquot2Intensity,
+     pch = 16,
+     col = "green",
+     lwd = 3,
+     main = "Aliquot2 Time vs Intensity for Wal Pill2",
+     xlab = "Aliquot 2 Time",
+     ylab = "Aliquot 2 Intensity",
+     xlim =  c(2.3,3.2))
+#Base R: Plot of Aliquot 3 time and intensity of Wal Pill2
+plot(WP2.178_intl$Aliquot3Time,WP2.178_intl$Aliquot3Intensity,
+     pch = 16,
+     col = "blue",
+     lwd = 3,
+     main = "Aliquot3 Time vs Intensity for Wal Pill2",
+     xlab = "Aliquot 3 Time",
+     ylab = "Aliquot 3 Intensity",
+     xlim =  c(2.3,3.2))
+
+```
+### Wal Pill 3 from Peak 178.7 93.00 
+
+```{r,  echo= FALSE, warning=FALSE}
+#Importing WP Pill 1 for Peak 178.7 93.00
+WP3.178 <- read.delim("Data Set/The Trimed Datas Work/178.7 93.00/178.7 93.00 Wal Pill 3 New.txt")
+WP3.178_intl<- WP3.178[,-c(9:14)] # removing column from 9 to 14
+
+#changing column names for WP 1 from 178.7 93.00 Peak
+colnames(WP3.178_intl) <-c('BlankTime','BlankIntensity','Aliquot1Time',
+                          'Aliquot1Intensity','Aliquot2Time','Aliquot2Intensity',
+                           'Aliquot3Time','Aliquot3Intensity')
+
+#Base R: Plot of Aliquot 1 time and intensity of WP3
+par(mfrow= c(2,2)) # representing 3 intensities of WP3
+plot(WP3.178_intl$Aliquot1Time,WP3.178_intl$Aliquot1Intensity,
+     pch = 16,
+     col = "red",
+     lwd = 3,
+     main = "Aliquot1 Time vs Intensity for Wal Pill3",
+     xlab = "Aliquot 1 Time",
+     ylab = "Aliquot 1 Intensity",
+     xlim =  c(2.3,3.2))
+#Base R: Plot of Aliquot 2 time and intensity of Wal Pill3
+plot(WP3.178_intl$Aliquot2Time,WP3.178_intl$Aliquot2Intensity,
+     pch = 16,
+     col = "green",
+     lwd = 3,
+     main = "Aliquot2 Time vs Intensity for Wal Pill3",
+     xlab = "Aliquot 2 Time",
+     ylab = "Aliquot 2 Intensity",
+     xlim =  c(2.3,3.2))
+#Base R: Plot of Aliquot 3 time and intensity of Wal Pill3
+plot(WP3.178_intl$Aliquot3Time,WP3.178_intl$Aliquot3Intensity,
+     pch = 16,
+     col = "blue",
+     lwd = 3,
+     main = "Aliquot3 Time vs Intensity for Wal Pill3",
+     xlab = "Aliquot 3 Time",
+     ylab = "Aliquot 3 Intensity",
+     xlim =  c(2.3,3.2))
+
+```
+## Average Wal Pill Intensities for Peak 178.7 93.00 
+
+
+```{r,  echo= FALSE, warning=FALSE}
+#Getting Average for Intensities
+#Wal Pill: Intensity 1
+WP1.ali1.178 <- mean(na.omit(WP1.178_intl$Aliquot1Intensity))
+WP2.ali1.178 <- mean(na.omit(WP2.178_intl$Aliquot1Intensity))
+WP3.ali1.178 <- mean(na.omit(WP3.178_intl$Aliquot1Intensity))
+
+#Wal Pill: Intensity 2
+WP1.ali2.178 <- mean(na.omit(WP1.178_intl$Aliquot2Intensity))
+WP2.ali2.178 <- mean(na.omit(WP2.178_intl$Aliquot2Intensity))
+WP3.ali2.178 <- mean(na.omit(WP3.178_intl$Aliquot2Intensity))
+
+#Wal Pill: Intensity 3
+WP1.ali3.178 <- mean(na.omit(WP1.178_intl$Aliquot3Intensity))
+WP2.ali3.178 <- mean(na.omit(WP2.178_intl$Aliquot3Intensity))
+WP3.ali3.178 <- mean(na.omit(WP3.178_intl$Aliquot3Intensity))
+```
+
+
+## Data Visualization for Wal Pill Peak 178.7 93.00 
+
+```{r,  echo= FALSE, warning=FALSE}
+WP1.178 <- mean(WP1.ali1.178, WP1.ali2.178, WP1.ali3.178)
+WP2.178 <- mean(WP2.ali1.178, WP2.ali2.178, WP2.ali3.178)
+WP3.178 <- mean(WP3.ali1.178, WP3.ali2.178, WP3.ali3.178)
+
+WP.178 <- c(WP1.ali1.178, WP1.ali2.178, WP1.ali3.178, 
+            WP2.ali1.178, WP2.ali2.178, WP2.ali3.178, 
+            WP3.ali1.178, WP3.ali2.178, WP3.ali3.178)
+
+WP.178<- as.data.frame(WP.178)
+
+summary(WP.178) # made a data frame
+
+
+#boxplot 
+boxplot(WP.178,
+        horizontal = TRUE,
+        col = rainbow(ncol(WP.178)),
+        main = "Boxplot of WP Pills: Peak 178.7 93.00 ")
+
+#Scatter Plot
+smoothScatter(WP.178,
+              main = "Scatterplot for WP Pills from Peak 178.7 93.00 ",
+              xlab = "Time",
+              ylab = "Intensity")
+
+```
+## Anova of Peak 178.7 93.00
+
+```{r,  echo= FALSE, warning=FALSE}
+Intensity <- c(BP1.178, BP2.178, BP3.178, PV1.178, PV2.178, PV3.178,WP1.178, WP2.178, WP3.178)
+Type <- c('BP1', 'BP2', 'BP3', 'PV1', 'PV2', 'PV3', 'WL1', 'WL2', 'WL3')
+Pills <- c(1,1,1,2,2,2,3,3,3)
+da.178 <- cbind(Type, Pills, Intensity)
+da.178 <- as.data.frame(da.178)
+anova.178 <- aov(Intensity ~ Pills, data = da.178)
+summary(anova.178)
+par(mfrow=c(2,2))
+plot(anova.178)
+#Post-hoc test
+tukey.178<-TukeyHSD(anova.178)
+tukey.178
+plot(tukey.178, las = 1)
+
+```
+The p-value of the pills variable is low (p > 0.05), For this peak location, it appears that there are no substantial differences between the tablets. According to the findings of the post-hoc test, there are no statistically significant differences (p > 0.05) between pill groups.
+
+
+## Loading Data set for Peak 199.10 91.90
+
+### Bayer Pill 1 from Peak 199.10 91.90
+
+```{r,  echo= FALSE, warning=FALSE}
+# Importing data from 199.10 91.90 Peak
+#Importing Bayer Pill 1 from 199.10 91.90 Peak
+Bayer1.199 <- read.delim("Data Set/The Trimed Datas Work/199.10 91.90/Bay Pill 1 199.10 91.90 New.txt")
+Bayer1.199_intl<- Bayer1.199 [,-c(9:13)] # removing column from 9 to 13
+#changing column names for bayer pill1from 199.10 91.90 Peak
+colnames(Bayer1.199_intl) <-c('BlankTime','BlankIntensity','Aliquot1Time',
+                          'Aliquot1Intensity','Aliquot2Time','Aliquot2Intensity',
+                           'Aliquot3Time','Aliquot3Intensity')
+
+#Base R: Plot of Aliquot 1 time and intensity of Bayer pill 1
+par(mfrow= c(2,2)) # representing 3 intensities of Bayer Pill 1
+plot(Bayer1.199_intl$Aliquot1Time,Bayer1.199_intl$Aliquot1Intensity,
+     pch = 16,
+     col = "red",
+     lwd = 3,
+     main = "Aliquot1 Time vs Intensity for Bayer Pill1",
+     xlab = "Aliquot 1 Time",
+     ylab = "Aliquot 1 Intensity",
+     xlim =  c(2.3,3.2))
+#Base R: Plot of Aliquot 2 time and intensity of Bayer pill 1
+plot(Bayer1.199_intl$Aliquot2Time,Bayer1.199_intl$Aliquot2Intensity,
+     pch = 16,
+     col = "green",
+     lwd = 3,
+     main = "Aliquot2 Time vs Intensity for Bayer Pill1",
+     xlab = "Aliquot 2 Time",
+     ylab = "Aliquot 2 Intensity",
+     xlim =  c(2.3,3.2))
+#Base R: Plot of Aliquot 3 time and intensity of Bayer pill 1
+plot(Bayer1.199_intl$Aliquot3Time,Bayer1.199_intl$Aliquot3Intensity,
+     pch = 16,
+     col = "blue",
+     lwd = 3,
+     main = "Aliquot3 Time vs Intensity for Bayer Pill1",
+     xlab = "Aliquot 3 Time",
+     ylab = "Aliquot 3 Intensity",
+     xlim =  c(2.3,3.2))
+```
+
+### Bayer Pill 2 from Peak 199.10 91.90 
+
+
+```{r,  echo= FALSE, warning=FALSE}
+#Importing Bayer Pill 2 for Peak 199.10 91.90 
+Bayer2.199 <- read.delim("Data Set/The Trimed Datas Work/199.10 91.90/Bay Pill 2 199.10 91.90 New.txt")
+Bayer2.199_intl<- Bayer2.199 [,-c(9:14)] # removing column from 9 to 14
+
+#changing column names for bayer pill1from 199.10 91.90 Peak
+colnames(Bayer2.199_intl) <-c('BlankTime','BlankIntensity','Aliquot1Time',
+                          'Aliquot1Intensity','Aliquot2Time','Aliquot2Intensity',
+                           'Aliquot3Time','Aliquot3Intensity')
+
+#Base R: Plot of Aliquot 1 time and intensity of Bayer pill 2
+par(mfrow= c(2,2)) # representing 3 intensities of Bayer Pill 2
+plot(Bayer2.199_intl$Aliquot1Time,Bayer2.199_intl$Aliquot1Intensity,
+     pch = 16,
+     col = "red",
+     lwd = 3,
+     main = "Aliquot1 Time vs Intensity for Bayer Pill2",
+     xlab = "Aliquot 1 Time",
+     ylab = "Aliquot 1 Intensity",
+     xlim =  c(2.3,3.2))
+#Base R: Plot of Aliquot 2 time and intensity of Bayer pill 2
+plot(Bayer2.199_intl$Aliquot2Time,Bayer2.199_intl$Aliquot2Intensity,
+     pch = 16,
+     col = "green",
+     lwd = 3,
+     main = "Aliquot2 Time vs Intensity for Bayer Pill2",
+     xlab = "Aliquot 2 Time",
+     ylab = "Aliquot 2 Intensity",
+     xlim =  c(2.3,3.2))
+#Base R: Plot of Aliquot 3 time and intensity of Bayer pill 2
+plot(Bayer2.199_intl$Aliquot3Time,Bayer2.199_intl$Aliquot3Intensity,
+     pch = 16,
+     col = "blue",
+     lwd = 3,
+     main = "Aliquot3 Time vs Intensity for Bayer Pill2",
+     xlab = "Aliquot 3 Time",
+     ylab = "Aliquot 3 Intensity",
+     xlim =  c(2.3,3.2))
+
+```
+### Bayer Pill 3 from Peak 199.10 91.90 
+
+```{r,  echo= FALSE, warning=FALSE}
+#Importing bayer pill 3 for peak 199.10 91.90 
+Bayer3.199 <- read.delim("Data Set/The Trimed Datas Work/199.10 91.90/Bay Pill 3 199.10 91.90 New.txt")
+Bayer3.199_intl<- Bayer3.199 [,-c(9:14)] # removing column from 9 to 14
+
+#changing column names for bayer pill1from 199.10 91.90 Peak
+colnames(Bayer3.199_intl) <-c('BlankTime','BlankIntensity','Aliquot1Time',
+                          'Aliquot1Intensity','Aliquot2Time','Aliquot2Intensity',
+                           'Aliquot3Time','Aliquot3Intensity')
+
+
+#Base R: Plot of Aliquot 1 time and intensity of Bayer pill 3
+par(mfrow= c(2,2)) # representing 3 intensities of Bayer Pill 3
+plot(Bayer3.199_intl$Aliquot1Time,Bayer3.199_intl$Aliquot1Intensity,
+     pch = 16,
+     col = "red",
+     lwd = 3,
+     main = "Aliquot1 Time vs Intensity for Bayer Pill3",
+     xlab = "Aliquot 1 Time",
+     ylab = "Aliquot 1 Intensity",
+     xlim =  c(2.3,3.2))
+#Base R: Plot of Aliquot 2 time and intensity of Bayer pill 3
+plot(Bayer3.199_intl$Aliquot2Time,Bayer3.199_intl$Aliquot2Intensity,
+     pch = 16,
+     col = "green",
+     lwd = 3,
+     main = "Aliquot2 Time vs Intensity for Bayer Pill3",
+     xlab = "Aliquot 2 Time",
+     ylab = "Aliquot 2 Intensity",
+     xlim =  c(2.3,3.2))
+#Base R: Plot of Aliquot 3 time and intensity of Bayer pill 3
+plot(Bayer3.199_intl$Aliquot3Time,Bayer3.199_intl$Aliquot3Intensity,
+     pch = 16,
+     col = "blue",
+     lwd = 3,
+     main = "Aliquot3 Time vs Intensity for Bayer Pill3",
+     xlab = "Aliquot 3 Time",
+     ylab = "Aliquot 3 Intensity",
+     xlim =  c(2.3,3.2))
+
+```
+
+## Average Bayer Pill Intensities
+
+
+```{r,  echo= FALSE, warning=FALSE}
+#Getting Average for Intensities
+#Bayer Pill: Intensity 1
+BP1.ali1.199 <- mean(na.omit(Bayer1.199_intl$Aliquot1Intensity))
+BP2.ali1.199 <- mean(na.omit(Bayer2.199_intl$Aliquot1Intensity))
+BP3.ali1.199 <- mean(na.omit(Bayer3.199_intl$Aliquot1Intensity))
+#Bayer Pill: Intensity 2
+BP1.ali2.199 <- mean(na.omit(Bayer1.199_intl$Aliquot2Intensity))
+BP2.ali2.199 <- mean(na.omit(Bayer2.199_intl$Aliquot2Intensity))
+BP3.ali2.199 <- mean(na.omit(Bayer3.199_intl$Aliquot2Intensity))
+#Bayer Pill: Intensity 3
+BP1.ali3.199 <- mean(na.omit(Bayer1.199_intl$Aliquot3Intensity))
+BP2.ali3.199 <- mean(na.omit(Bayer2.199_intl$Aliquot3Intensity))
+BP3.ali3.199 <- mean(na.omit(Bayer3.199_intl$Aliquot3Intensity))
+```
+
+
+## Data Visualization for Bayer Pill Peak 199.10 91.90
+
+```{r,  echo= FALSE, warning=FALSE}
+BP1.199 <- mean(BP1.ali1.199, BP1.ali2.199, BP1.ali3.199)
+BP2.199 <- mean(BP2.ali1.199, BP2.ali2.199, BP2.ali3.199)
+BP3.199 <- mean(BP3.ali1.199, BP3.ali2.199, BP3.ali3.199)
+
+BP.199 <- c(BP1.ali1.199, BP1.ali2.199, BP1.ali3.199, 
+            BP2.ali1.199, BP2.ali2.199, BP2.ali3.199, 
+            BP3.ali1.199, BP3.ali2.199, BP3.ali3.199)
+
+BP.199<- as.data.frame(BP.199)
+
+summary(BP.199) # made a data frame
+
+
+#boxplot 
+boxplot(BP.199,
+        horizontal = TRUE,
+        col = rainbow(ncol(BP.199)),
+        main = "Boxplot of Bayer Pills: Peak 199.10 91.90")
+
+#Scatter Plot
+smoothScatter(BP.199,
+              main = "Scatterplot for Bayer Pills from Peak 199.10 91.90",
+              xlab = "Time",
+              ylab = "Intensity")
+
+```
+
+
+### PV 1 Pill from Peak 199.10 91.90  
+
+```{r,  echo= FALSE, warning=FALSE}
+#Importing P.V Pill 1 for Peak 199.10 91.90 
+PV1.199 <- read.delim("Data Set/The Trimed Datas Work/199.10 91.90/P.V Pill 1 199.10 91.90 New.txt")
+PV1.199_intl<- PV1.199[,-c(9:14)] # removing column from 9 to 14
+
+#changing column names for PV 1 from 199.10 91.90 Peak
+colnames(PV1.199_intl) <-c('BlankTime','BlankIntensity','Aliquot1Time',
+                          'Aliquot1Intensity','Aliquot2Time','Aliquot2Intensity',
+                           'Aliquot3Time','Aliquot3Intensity')
+
+#Base R: Plot of Aliquot 1 time and intensity of PV pill 1
+par(mfrow= c(2,2)) # representing 3 intensities of PV Pill 1
+plot(PV1.199_intl$Aliquot1Time,PV1.199_intl$Aliquot1Intensity,
+     pch = 16,
+     col = "red",
+     lwd = 3,
+     main = "Aliquot1 Time vs Intensity for PV Pill1",
+     xlab = "Aliquot 1 Time",
+     ylab = "Aliquot 1 Intensity",
+     xlim =  c(2.3,3.2))
+#Base R: Plot of Aliquot 2 time and intensity of PVpill 1
+plot(PV1.199_intl$Aliquot2Time,PV1.199_intl$Aliquot2Intensity,
+     pch = 16,
+     col = "green",
+     lwd = 3,
+     main = "Aliquot2 Time vs Intensity for PV Pill1",
+     xlab = "Aliquot 2 Time",
+     ylab = "Aliquot 2 Intensity",
+     xlim =  c(2.3,3.2))
+#Base R: Plot of Aliquot 3 time and intensity of PV pill 1
+plot(PV1.199_intl$Aliquot3Time,PV1.199_intl$Aliquot3Intensity,
+     pch = 16,
+     col = "blue",
+     lwd = 3,
+     main = "Aliquot3 Time vs Intensity for PV Pill1",
+     xlab = "Aliquot 3 Time",
+     ylab = "Aliquot 3 Intensity",
+     xlim =  c(2.3,3.2))
+
+```
+
+### PV 2 Pill from Peak 199.10 91.90  
+
+```{r,  echo= FALSE, warning=FALSE}
+PV2.199 <- read.delim("Data Set/The Trimed Datas Work/199.10 91.90/P.V Pill 2 199.10 91.90 New.txt")
+PV2.199_intl<- PV2.199[,-c(9:13)] # removing column from 9 to 13
+
+#changing column names for PV pill2 from 199.10 91.90 Peak
+colnames(PV2.199_intl) <-c('BlankTime','BlankIntensity','Aliquot1Time',
+                          'Aliquot1Intensity','Aliquot2Time','Aliquot2Intensity',
+                           'Aliquot3Time','Aliquot3Intensity')
+
+#Base R: Plot of Aliquot 1 time and intensity of PVpill 2
+par(mfrow= c(2,2)) # representing 3 intensities of PVPill 2
+plot(PV2.199_intl$Aliquot1Time,PV2.199_intl$Aliquot1Intensity,
+     pch = 16,
+     col = "red",
+     lwd = 3,
+     main = "Aliquot1 Time vs Intensity for PVPill2",
+     xlab = "Aliquot 1 Time",
+     ylab = "Aliquot 1 Intensity",
+     xlim =  c(2.3,3.2))
+#Base R: Plot of Aliquot 2 time and intensity of PVpill 2
+plot(PV2.199_intl$Aliquot2Time,PV2.199_intl$Aliquot2Intensity,
+     pch = 16,
+     col = "green",
+     lwd = 3,
+     main = "Aliquot2 Time vs Intensity for PVPill2",
+     xlab = "Aliquot 2 Time",
+     ylab = "Aliquot 2 Intensity",
+     xlim =  c(2.3,3.2))
+#Base R: Plot of Aliquot 3 time and intensity of PVpill 2
+plot(PV2.199_intl$Aliquot3Time,PV2.199_intl$Aliquot3Intensity,
+     pch = 16,
+     col = "blue",
+     lwd = 3,
+     main = "Aliquot3 Time vs Intensity for PVPill2",
+     xlab = "Aliquot 3 Time",
+     ylab = "Aliquot 3 Intensity",
+     xlim =  c(2.3,3.2))
+
+
+```
+
+### PV 3 Pill from Peak 199.10 91.90  
+
+```{r,  echo= FALSE, warning=FALSE}
+PV3.199 <- read.delim("Data Set/The Trimed Datas Work/199.10 91.90/P.V Pill 3 199.10 91.90 New.txt")
+PV3.199_intl<- PV3.199[,-c(9:13)] # removing column from 9 to 13
+
+#changing column names for PV pill2 from 199.10 91.90 Peak
+colnames(PV3.199_intl) <-c('BlankTime','BlankIntensity','Aliquot1Time',
+                          'Aliquot1Intensity','Aliquot2Time','Aliquot2Intensity',
+                           'Aliquot3Time','Aliquot3Intensity')
+
+#Base R: Plot of Aliquot 1 time and intensity of PVpill 3
+par(mfrow= c(2,2)) # representing 3 intensities of PVPill 3
+plot(PV3.199_intl$Aliquot1Time,PV3.199_intl$Aliquot1Intensity,
+     pch = 16,
+     col = "red",
+     lwd = 3,
+     main = "Aliquot1 Time vs Intensity for PVPill3",
+     xlab = "Aliquot 1 Time",
+     ylab = "Aliquot 1 Intensity",
+     xlim =  c(2.3,3.2))
+#Base R: Plot of Aliquot 2 time and intensity of PVpill 3
+plot(PV3.199_intl$Aliquot2Time,PV3.199_intl$Aliquot2Intensity,
+     pch = 16,
+     col = "green",
+     lwd = 3,
+     main = "Aliquot2 Time vs Intensity for PVPill3",
+     xlab = "Aliquot 2 Time",
+     ylab = "Aliquot 2 Intensity",
+     xlim =  c(2.3,3.2))
+#Base R: Plot of Aliquot 3 time and intensity of PVpill 3
+plot(PV3.199_intl$Aliquot3Time,PV3.199_intl$Aliquot3Intensity,
+     pch = 16,
+     col = "blue",
+     lwd = 3,
+     main = "Aliquot3 Time vs Intensity for PVPill3",
+     xlab = "Aliquot 3 Time",
+     ylab = "Aliquot 3 Intensity",
+     xlim =  c(2.3,3.2))
+
+```
+
+## Average P.V Pill Intensities
+
+
+```{r,  echo= FALSE, warning=FALSE}
+#Getting Average for Intensities
+#PV Pill: Intensity 1
+PV1.ali1.199 <- mean(na.omit(PV1.199_intl$Aliquot1Intensity))
+PV2.ali1.199 <- mean(na.omit(PV2.199_intl$Aliquot1Intensity))
+PV3.ali1.199 <- mean(na.omit(PV3.199_intl$Aliquot1Intensity))
+
+#PV Pill: Intensity 2
+PV1.ali2.199 <- mean(na.omit(PV1.199_intl$Aliquot2Intensity))
+PV2.ali2.199 <- mean(na.omit(PV2.199_intl$Aliquot2Intensity))
+PV3.ali2.199 <- mean(na.omit(PV3.199_intl$Aliquot2Intensity))
+
+#PV Pill: Intensity 3
+PV1.ali3.199 <- mean(na.omit(PV1.199_intl$Aliquot3Intensity))
+PV2.ali3.199 <- mean(na.omit(PV2.199_intl$Aliquot3Intensity))
+PV3.ali3.199 <- mean(na.omit(PV3.199_intl$Aliquot3Intensity))
+```
+
+
+## Data Visualization for PV Pill Peak 199.10 91.90
+
+```{r,  echo= FALSE, warning=FALSE}
+PV1.199 <- mean(PV1.ali1.199, PV1.ali2.199, PV1.ali3.199)
+PV2.199 <- mean(PV2.ali1.199, PV2.ali2.199, PV2.ali3.199)
+PV3.199 <- mean(PV3.ali1.199, PV3.ali2.199, PV3.ali3.199)
+
+PV.199 <- c(PV1.ali1.199, PV1.ali2.199, PV1.ali3.199, 
+            PV2.ali1.199, PV2.ali2.199, PV2.ali3.199, 
+            PV3.ali1.199, PV3.ali2.199, PV3.ali3.199)
+
+PV.199<- as.data.frame(PV.199)
+
+summary(PV.199) # made a data frame
+
+
+#boxplot 
+boxplot(PV.199,
+        horizontal = TRUE,
+        col = rainbow(ncol(PV.199)),
+        main = "Boxplot of PV Pills: Peak 199.10 91.90")
+
+#Scatter Plot
+smoothScatter(PV.199,
+              main = "Scatterplot for PV Pills from Peak 199.10 91.90",
+              xlab = "Time",
+              ylab = "Intensity")
+
+```
+
+### Wal Pill 1 from Peak 199.10 91.90  
+
+```{r,  echo= FALSE, warning=FALSE}
+#Importing WP Pill 1 for Peak 199.10 91.90 
+WP1.199 <- read.delim("Data Set/The Trimed Datas Work/199.10 91.90/Wal Pill 1 199.10 91.90 New.txt")
+WP1.199_intl<- WP1.199[,-c(9:14)] # removing column from 9 to 14
+
+#changing column names for WP 1 from 199.10 91.90 Peak
+colnames(WP1.199_intl) <-c('BlankTime','BlankIntensity','Aliquot1Time',
+                          'Aliquot1Intensity','Aliquot2Time','Aliquot2Intensity',
+                           'Aliquot3Time','Aliquot3Intensity')
+
+#Base R: Plot of Aliquot 1 time and intensity of WP1
+par(mfrow= c(2,2)) # representing 3 intensities of WP1
+plot(WP1.199_intl$Aliquot1Time,WP1.199_intl$Aliquot1Intensity,
+     pch = 16,
+     col = "red",
+     lwd = 3,
+     main = "Aliquot1 Time vs Intensity for Wal Pill1",
+     xlab = "Aliquot 1 Time",
+     ylab = "Aliquot 1 Intensity",
+     xlim =  c(2.3,3.2))
+#Base R: Plot of Aliquot 2 time and intensity of Wal Pill1
+plot(WP1.199_intl$Aliquot2Time,WP1.199_intl$Aliquot2Intensity,
+     pch = 16,
+     col = "green",
+     lwd = 3,
+     main = "Aliquot2 Time vs Intensity for Wal Pill1",
+     xlab = "Aliquot 2 Time",
+     ylab = "Aliquot 2 Intensity",
+     xlim =  c(2.3,3.2))
+#Base R: Plot of Aliquot 3 time and intensity of Wal Pill1
+plot(WP1.199_intl$Aliquot3Time,WP1.199_intl$Aliquot3Intensity,
+     pch = 16,
+     col = "blue",
+     lwd = 3,
+     main = "Aliquot3 Time vs Intensity for Wal Pill1",
+     xlab = "Aliquot 3 Time",
+     ylab = "Aliquot 3 Intensity",
+     xlim =  c(2.3,3.2))
+```
+
+### Wal Pill 2 from Peak 199.10 91.90  
+
+```{r,  echo= FALSE, warning=FALSE}
+#Importing WP Pill 1 for Peak 199.10 91.90 
+WP2.199 <- read.delim("Data Set/The Trimed Datas Work/199.10 91.90/Wal Pill 2 199.10 91.90 New.txt")
+WP2.199_intl<- WP2.199[,-c(9:14)] # removing column from 9 to 14
+
+#changing column names for WP 1 from 199.10 91.90 Peak
+colnames(WP2.199_intl) <-c('BlankTime','BlankIntensity','Aliquot1Time',
+                          'Aliquot1Intensity','Aliquot2Time','Aliquot2Intensity',
+                           'Aliquot3Time','Aliquot3Intensity')
+
+
+
+#Base R: Plot of Aliquot 1 time and intensity of WP2
+par(mfrow= c(2,2)) # representing 3 intensities of WP2
+plot(WP2.199_intl$Aliquot1Time,WP2.199_intl$Aliquot1Intensity,
+     pch = 16,
+     col = "red",
+     lwd = 3,
+     main = "Aliquot1 Time vs Intensity for Wal Pill2",
+     xlab = "Aliquot 1 Time",
+     ylab = "Aliquot 1 Intensity",
+     xlim =  c(2.3,3.2))
+#Base R: Plot of Aliquot 2 time and intensity of Wal Pill2
+plot(WP2.199_intl$Aliquot2Time,WP2.199_intl$Aliquot2Intensity,
+     pch = 16,
+     col = "green",
+     lwd = 3,
+     main = "Aliquot2 Time vs Intensity for Wal Pill2",
+     xlab = "Aliquot 2 Time",
+     ylab = "Aliquot 2 Intensity",
+     xlim =  c(2.3,3.2))
+#Base R: Plot of Aliquot 3 time and intensity of Wal Pill2
+plot(WP2.199_intl$Aliquot3Time,WP2.199_intl$Aliquot3Intensity,
+     pch = 16,
+     col = "blue",
+     lwd = 3,
+     main = "Aliquot3 Time vs Intensity for Wal Pill2",
+     xlab = "Aliquot 3 Time",
+     ylab = "Aliquot 3 Intensity",
+     xlim =  c(2.3,3.2))
+```
+
+
+### Wal Pill 3 from Peak 199.10 91.90  
+
+```{r,  echo= FALSE, warning=FALSE}
+#Importing WP Pill 1 for Peak 199.10 91.90 
+WP3.199 <- read.delim("Data Set/The Trimed Datas Work/199.10 91.90/Wal Pill 3 199.10 91.90 New.txt")
+WP3.199_intl<- WP3.199[,-c(9:14)] # removing column from 9 to 14
+
+#changing column names for WP 1 from 199.10 91.90 Peak
+colnames(WP3.199_intl) <-c('BlankTime','BlankIntensity','Aliquot1Time',
+                          'Aliquot1Intensity','Aliquot2Time','Aliquot2Intensity',
+                           'Aliquot3Time','Aliquot3Intensity')
+
+#Base R: Plot of Aliquot 1 time and intensity of WP3
+par(mfrow= c(2,2)) # representing 3 intensities of WP3
+plot(WP3.199_intl$Aliquot1Time,WP3.199_intl$Aliquot1Intensity,
+     pch = 16,
+     col = "red",
+     lwd = 3,
+     main = "Aliquot1 Time vs Intensity for Wal Pill3",
+     xlab = "Aliquot 1 Time",
+     ylab = "Aliquot 1 Intensity",
+     xlim =  c(2.3,3.2))
+#Base R: Plot of Aliquot 2 time and intensity of Wal Pill3
+plot(WP3.199_intl$Aliquot2Time,WP3.199_intl$Aliquot2Intensity,
+     pch = 16,
+     col = "green",
+     lwd = 3,
+     main = "Aliquot2 Time vs Intensity for Wal Pill3",
+     xlab = "Aliquot 2 Time",
+     ylab = "Aliquot 2 Intensity",
+     xlim =  c(2.3,3.2))
+#Base R: Plot of Aliquot 3 time and intensity of Wal Pill3
+plot(WP3.199_intl$Aliquot3Time,WP3.199_intl$Aliquot3Intensity,
+     pch = 16,
+     col = "blue",
+     lwd = 3,
+     main = "Aliquot3 Time vs Intensity for Wal Pill3",
+     xlab = "Aliquot 3 Time",
+     ylab = "Aliquot 3 Intensity",
+     xlim =  c(2.3,3.2))
+```
+## Average Wal Pill Intensities 199.10 91.90
+
+
+```{r,  echo= FALSE, warning=FALSE}
+#Getting Average for Intensities
+#Wal Pill: Intensity 1
+WP1.ali1.199 <- mean(na.omit(WP1.199_intl$Aliquot1Intensity))
+WP2.ali1.199 <- mean(na.omit(WP2.199_intl$Aliquot1Intensity))
+WP3.ali1.199 <- mean(na.omit(WP3.199_intl$Aliquot1Intensity))
+
+#Wal Pill: Intensity 2
+WP1.ali2.199 <- mean(na.omit(WP1.199_intl$Aliquot2Intensity))
+WP2.ali2.199 <- mean(na.omit(WP2.199_intl$Aliquot2Intensity))
+WP3.ali2.199 <- mean(na.omit(WP3.199_intl$Aliquot2Intensity))
+
+#Wal Pill: Intensity 3
+WP1.ali3.199 <- mean(na.omit(WP1.199_intl$Aliquot3Intensity))
+WP2.ali3.199 <- mean(na.omit(WP2.199_intl$Aliquot3Intensity))
+WP3.ali3.199 <- mean(na.omit(WP3.199_intl$Aliquot3Intensity))
+```
+
+
+## Data Visualization for Wal Pill Peak 199.10 91.90
+
+```{r,  echo= FALSE, warning=FALSE}
+WP1.199 <- mean(WP1.ali1.199, WP1.ali2.199, WP1.ali3.199)
+WP2.199 <- mean(WP2.ali1.199, WP2.ali2.199, WP2.ali3.199)
+WP3.199 <- mean(WP3.ali1.199, WP3.ali2.199, WP3.ali3.199)
+
+WP.199 <- c(WP1.ali1.199, WP1.ali2.199, WP1.ali3.199, 
+            WP2.ali1.199, WP2.ali2.199, WP2.ali3.199, 
+            WP3.ali1.199, WP3.ali2.199, WP3.ali3.199)
+
+WP.199<- as.data.frame(WP.199)
+
+summary(WP.199)# made a data frame
+
+
+#boxplot 
+boxplot(WP.199,
+        horizontal = TRUE,
+        col = rainbow(ncol(WP.199)),
+        main = "Boxplot of WP Pills: Peak 199.10 91.90")
+
+#Scatter Plot
+smoothScatter(WP.199,
+              main = "Scatterplot for WP Pills from Peak 199.10 91.90",
+              xlab = "Time",
+              ylab = "Intensity")
+
+```
+## Anova of Peak 199.10 91.90
+
+```{r,  echo= FALSE, warning=FALSE}
+Intensity <- c(BP1.199, BP2.199, BP3.199, PV1.199, PV2.199, PV3.199,WP1.199, WP2.199, WP3.199)
+Type <- c('BP1', 'BP2', 'BP3', 'PV1', 'PV2', 'PV3', 'WL1', 'WL2', 'WL3')
+Pills <- c(1,1,1,2,2,2,3,3,3)
+da.199 <- cbind(Type, Pills, Intensity)
+da.199 <- as.data.frame(da.199)
+anova.199 <- aov(Intensity ~ Pills, data = da.199)
+summary(anova.199)
+par(mfrow=c(2,2))
+plot(anova.199)
+#Post-hoc test
+tukey.199<-TukeyHSD(anova.199)
+tukey.199
+plot(tukey.199, las = 1)
+
+```
+The p-value of the pills variable is low (p < 0.05), For this peak location, it appears that there are substantial differences between the tablets. According to the findings of the post-hoc test, We can see that pill groups 2  and 1 have statistically significant differences (p<0.05).
+
+
+## Loading Data set for Peak 199.10 92.90
+
+### Bayer Pill 1 from Peak 199.10 92.90
+
+```{r,  echo= FALSE, warning=FALSE}
+# Importing data from 199.10 92.90Peak
+#Importing Bayer Pill 1 from 199.10 92.90Peak
+Bayer1.92 <- read.delim("Data Set/The Trimed Datas Work/199.10 92.90/Bay Pill 1 199.100 92.900 New.txt")
+Bayer1.92_intl<- Bayer1.92 [,-c(9:13)] # removing column from 9 to 13
+#changing column names for bayer pill1from 199.10 92.90Peak
+colnames(Bayer1.92_intl) <-c('BlankTime','BlankIntensity','Aliquot1Time',
+                          'Aliquot1Intensity','Aliquot2Time','Aliquot2Intensity',
+                           'Aliquot3Time','Aliquot3Intensity')
+
+#Base R: Plot of Aliquot 1 time and intensity of Bayer pill 1
+par(mfrow= c(2,2)) # representing 3 intensities of Bayer Pill 1
+plot(Bayer1.92_intl$Aliquot1Time,Bayer1.92_intl$Aliquot1Intensity,
+     pch = 16,
+     col = "red",
+     lwd = 3,
+     main = "Aliquot1 Time vs Intensity for Bayer Pill1",
+     xlab = "Aliquot 1 Time",
+     ylab = "Aliquot 1 Intensity",
+     xlim =  c(2.3,3.2))
+#Base R: Plot of Aliquot 2 time and intensity of Bayer pill 1
+plot(Bayer1.92_intl$Aliquot2Time,Bayer1.92_intl$Aliquot2Intensity,
+     pch = 16,
+     col = "green",
+     lwd = 3,
+     main = "Aliquot2 Time vs Intensity for Bayer Pill1",
+     xlab = "Aliquot 2 Time",
+     ylab = "Aliquot 2 Intensity",
+     xlim =  c(2.3,3.2))
+#Base R: Plot of Aliquot 3 time and intensity of Bayer pill 1
+plot(Bayer1.92_intl$Aliquot3Time,Bayer1.92_intl$Aliquot3Intensity,
+     pch = 16,
+     col = "blue",
+     lwd = 3,
+     main = "Aliquot3 Time vs Intensity for Bayer Pill1",
+     xlab = "Aliquot 3 Time",
+     ylab = "Aliquot 3 Intensity",
+     xlim =  c(2.3,3.2))
+```
+
+### Bayer Pill 2 from Peak 199.10 92.90
+
+
+```{r,  echo= FALSE, warning=FALSE}
+#Importing Bayer Pill 2 for Peak 199.10 92.90
+Bayer2.92 <- read.delim("Data Set/The Trimed Datas Work/199.10 92.90/Bay Pill 2 199.100 92.900 New.txt")
+Bayer2.92_intl<- Bayer2.199 [,-c(9:14)] # removing column from 9 to 14
+
+#changing column names for bayer pill1from 199.10 92.90Peak
+colnames(Bayer2.92_intl) <-c('BlankTime','BlankIntensity','Aliquot1Time',
+                          'Aliquot1Intensity','Aliquot2Time','Aliquot2Intensity',
+                           'Aliquot3Time','Aliquot3Intensity')
+
+#Base R: Plot of Aliquot 1 time and intensity of Bayer pill 2
+par(mfrow= c(2,2)) # representing 3 intensities of Bayer Pill 2
+plot(Bayer2.92_intl$Aliquot1Time,Bayer2.199_intl$Aliquot1Intensity,
+     pch = 16,
+     col = "red",
+     lwd = 3,
+     main = "Aliquot1 Time vs Intensity for Bayer Pill2",
+     xlab = "Aliquot 1 Time",
+     ylab = "Aliquot 1 Intensity",
+     xlim =  c(2.3,3.2))
+#Base R: Plot of Aliquot 2 time and intensity of Bayer pill 2
+plot(Bayer2.92_intl$Aliquot2Time,Bayer2.199_intl$Aliquot2Intensity,
+     pch = 16,
+     col = "green",
+     lwd = 3,
+     main = "Aliquot2 Time vs Intensity for Bayer Pill2",
+     xlab = "Aliquot 2 Time",
+     ylab = "Aliquot 2 Intensity",
+     xlim =  c(2.3,3.2))
+#Base R: Plot of Aliquot 3 time and intensity of Bayer pill 2
+plot(Bayer2.92_intl$Aliquot3Time,Bayer2.199_intl$Aliquot3Intensity,
+     pch = 16,
+     col = "blue",
+     lwd = 3,
+     main = "Aliquot3 Time vs Intensity for Bayer Pill2",
+     xlab = "Aliquot 3 Time",
+     ylab = "Aliquot 3 Intensity",
+     xlim =  c(2.3,3.2))
+
+```
+### Bayer Pill 3 from Peak 199.10 92.90
+
+```{r,  echo= FALSE, warning=FALSE}
+#Importing bayer pill 3 for peak 199.10 92.90
+Bayer3.92 <- read.delim("Data Set/The Trimed Datas Work/199.10 92.90/Bay Pill 2 199.100 92.900 New.txt")
+Bayer3.92_intl<- Bayer3.199 [,-c(9:14)] # removing column from 9 to 14
+
+#changing column names for bayer pill1from 199.10 92.90Peak
+colnames(Bayer3.92_intl) <-c('BlankTime','BlankIntensity','Aliquot1Time',
+                          'Aliquot1Intensity','Aliquot2Time','Aliquot2Intensity',
+                           'Aliquot3Time','Aliquot3Intensity')
+
+
+#Base R: Plot of Aliquot 1 time and intensity of Bayer pill 3
+par(mfrow= c(2,2)) # representing 3 intensities of Bayer Pill 3
+plot(Bayer3.92_intl$Aliquot1Time,Bayer3.92_intl$Aliquot1Intensity,
+     pch = 16,
+     col = "red",
+     lwd = 3,
+     main = "Aliquot1 Time vs Intensity for Bayer Pill3",
+     xlab = "Aliquot 1 Time",
+     ylab = "Aliquot 1 Intensity",
+     xlim =  c(2.3,3.2))
+#Base R: Plot of Aliquot 2 time and intensity of Bayer pill 3
+plot(Bayer3.92_intl$Aliquot2Time,Bayer3.92_intl$Aliquot2Intensity,
+     pch = 16,
+     col = "green",
+     lwd = 3,
+     main = "Aliquot2 Time vs Intensity for Bayer Pill3",
+     xlab = "Aliquot 2 Time",
+     ylab = "Aliquot 2 Intensity",
+     xlim =  c(2.3,3.2))
+#Base R: Plot of Aliquot 3 time and intensity of Bayer pill 3
+plot(Bayer3.92_intl$Aliquot3Time,Bayer3.92_intl$Aliquot3Intensity,
+     pch = 16,
+     col = "blue",
+     lwd = 3,
+     main = "Aliquot3 Time vs Intensity for Bayer Pill3",
+     xlab = "Aliquot 3 Time",
+     ylab = "Aliquot 3 Intensity",
+     xlim =  c(2.3,3.2))
+
+```
+
+## Average Bayer Pill Intensities
+
+
+```{r,  echo= FALSE, warning=FALSE}
+#Getting Average for Intensities
+#Bayer Pill: Intensity 1
+BP1.ali1.92 <- mean(na.omit(Bayer1.92_intl$Aliquot1Intensity))
+BP2.ali1.92 <- mean(na.omit(Bayer2.92_intl$Aliquot1Intensity))
+BP3.ali1.92 <- mean(na.omit(Bayer3.92_intl$Aliquot1Intensity))
+#Bayer Pill: Intensity 2
+BP1.ali2.92 <- mean(na.omit(Bayer1.92_intl$Aliquot2Intensity))
+BP2.ali2.92 <- mean(na.omit(Bayer2.92_intl$Aliquot2Intensity))
+BP3.ali2.92 <- mean(na.omit(Bayer3.92_intl$Aliquot2Intensity))
+#Bayer Pill: Intensity 3
+BP1.ali3.92 <- mean(na.omit(Bayer1.92_intl$Aliquot3Intensity))
+BP2.ali3.92 <- mean(na.omit(Bayer2.92_intl$Aliquot3Intensity))
+BP3.ali3.92 <- mean(na.omit(Bayer3.92_intl$Aliquot3Intensity))
+```
+
+
+## Data Visualization for Bayer Pill Peak 199.10 91.90
+
+```{r,  echo= FALSE, warning=FALSE}
+BP1.92 <- mean(BP1.ali1.92, BP1.ali2.92, BP1.ali3.92)
+BP2.92 <- mean(BP2.ali1.92, BP2.ali2.92, BP2.ali3.92)
+BP3.92 <- mean(BP3.ali1.92, BP3.ali2.92, BP3.ali3.92)
+
+BP.92 <- c(BP1.ali1.92, BP1.ali2.92, BP1.ali3.92, 
+            BP2.ali1.92, BP2.ali2.92, BP2.ali3.92, 
+            BP3.ali1.92, BP3.ali2.92, BP3.ali3.92)
+
+BP.92<- as.data.frame(BP.92)
+
+summary(BP.92) # made a data frame
+
+
+#boxplot 
+boxplot(BP.92,
+        horizontal = TRUE,
+        col = rainbow(ncol(BP.92)),
+        main = "Boxplot of Bayer Pills: Peak 199.10 91.90")
+
+#Scatter Plot
+smoothScatter(BP.92,
+              main = "Scatterplot for Bayer Pills from Peak 199.10 91.90",
+              xlab = "Time",
+              ylab = "Intensity")
+
+```
+
+
+### PV 1 Pill from Peak 199.10 92.90 
+
+```{r,  echo= FALSE, warning=FALSE}
+#Importing P.V Pill 1 for Peak 199.10 92.90
+PV1.92 <- read.delim("Data Set/The Trimed Datas Work/199.10 92.90/P.V Pill 1 199.100 92.900 New.txt")
+PV1.92_intl<- PV1.92[,-c(9:14)] # removing column from 9 to 14
+
+#changing column names for PV 1 from 199.10 92.90Peak
+colnames(PV1.92_intl) <-c('BlankTime','BlankIntensity','Aliquot1Time',
+                          'Aliquot1Intensity','Aliquot2Time','Aliquot2Intensity',
+                           'Aliquot3Time','Aliquot3Intensity')
+
+#Base R: Plot of Aliquot 1 time and intensity of PV pill 1
+par(mfrow= c(2,2)) # representing 3 intensities of PV Pill 1
+plot(PV1.92_intl$Aliquot1Time,PV1.92_intl$Aliquot1Intensity,
+     pch = 16,
+     col = "red",
+     lwd = 3,
+     main = "Aliquot1 Time vs Intensity for PV Pill1",
+     xlab = "Aliquot 1 Time",
+     ylab = "Aliquot 1 Intensity",
+     xlim =  c(2.3,3.2))
+#Base R: Plot of Aliquot 2 time and intensity of PVpill 1
+plot(PV1.92_intl$Aliquot2Time,PV1.92_intl$Aliquot2Intensity,
+     pch = 16,
+     col = "green",
+     lwd = 3,
+     main = "Aliquot2 Time vs Intensity for PV Pill1",
+     xlab = "Aliquot 2 Time",
+     ylab = "Aliquot 2 Intensity",
+     xlim =  c(2.3,3.2))
+#Base R: Plot of Aliquot 3 time and intensity of PV pill 1
+plot(PV1.92_intl$Aliquot3Time,PV1.92_intl$Aliquot3Intensity,
+     pch = 16,
+     col = "blue",
+     lwd = 3,
+     main = "Aliquot3 Time vs Intensity for PV Pill1",
+     xlab = "Aliquot 3 Time",
+     ylab = "Aliquot 3 Intensity",
+     xlim =  c(2.3,3.2))
+
+```
+
+### PV 2 Pill from Peak 199.10 92.90 
+
+```{r,  echo= FALSE, warning=FALSE}
+PV2.92 <- read.delim("Data Set/The Trimed Datas Work/199.10 92.90/P.V Pill 2 199.100 92.900 New.txt")
+PV2.92_intl<- PV2.92[,-c(9:13)] # removing column from 9 to 13
+
+#changing column names for PV pill2 from 199.10 92.90Peak
+colnames(PV2.92_intl) <-c('BlankTime','BlankIntensity','Aliquot1Time',
+                          'Aliquot1Intensity','Aliquot2Time','Aliquot2Intensity',
+                           'Aliquot3Time','Aliquot3Intensity')
+
+#Base R: Plot of Aliquot 1 time and intensity of PVpill 2
+par(mfrow= c(2,2)) # representing 3 intensities of PVPill 2
+plot(PV2.92_intl$Aliquot1Time,PV2.92_intl$Aliquot1Intensity,
+     pch = 16,
+     col = "red",
+     lwd = 3,
+     main = "Aliquot1 Time vs Intensity for PVPill2",
+     xlab = "Aliquot 1 Time",
+     ylab = "Aliquot 1 Intensity",
+     xlim =  c(2.3,3.2))
+#Base R: Plot of Aliquot 2 time and intensity of PVpill 2
+plot(PV2.92_intl$Aliquot2Time,PV2.92_intl$Aliquot2Intensity,
+     pch = 16,
+     col = "green",
+     lwd = 3,
+     main = "Aliquot2 Time vs Intensity for PVPill2",
+     xlab = "Aliquot 2 Time",
+     ylab = "Aliquot 2 Intensity",
+     xlim =  c(2.3,3.2))
+#Base R: Plot of Aliquot 3 time and intensity of PVpill 2
+plot(PV2.92_intl$Aliquot3Time,PV2.92_intl$Aliquot3Intensity,
+     pch = 16,
+     col = "blue",
+     lwd = 3,
+     main = "Aliquot3 Time vs Intensity for PVPill2",
+     xlab = "Aliquot 3 Time",
+     ylab = "Aliquot 3 Intensity",
+     xlim =  c(2.3,3.2))
+
+
+```
+
+### PV 3 Pill from Peak 199.10 92.90 
+
+```{r,  echo= FALSE, warning=FALSE}
+PV3.92 <- read.delim("Data Set/The Trimed Datas Work/199.10 92.90/P.V Pill 3 199.100 92.900 New.txt")
+PV3.92_intl<- PV3.92[,-c(9:13)] # removing column from 9 to 13
+
+#changing column names for PV pill2 from 199.10 92.90Peak
+colnames(PV3.92_intl) <-c('BlankTime','BlankIntensity','Aliquot1Time',
+                          'Aliquot1Intensity','Aliquot2Time','Aliquot2Intensity',
+                           'Aliquot3Time','Aliquot3Intensity')
+
+#Base R: Plot of Aliquot 1 time and intensity of PVpill 3
+par(mfrow= c(2,2)) # representing 3 intensities of PVPill 3
+plot(PV3.92_intl$Aliquot1Time,PV3.92_intl$Aliquot1Intensity,
+     pch = 16,
+     col = "red",
+     lwd = 3,
+     main = "Aliquot1 Time vs Intensity for PVPill3",
+     xlab = "Aliquot 1 Time",
+     ylab = "Aliquot 1 Intensity",
+     xlim =  c(2.3,3.2))
+#Base R: Plot of Aliquot 2 time and intensity of PVpill 3
+plot(PV3.92_intl$Aliquot2Time,PV3.92_intl$Aliquot2Intensity,
+     pch = 16,
+     col = "green",
+     lwd = 3,
+     main = "Aliquot2 Time vs Intensity for PVPill3",
+     xlab = "Aliquot 2 Time",
+     ylab = "Aliquot 2 Intensity",
+     xlim =  c(2.3,3.2))
+#Base R: Plot of Aliquot 3 time and intensity of PVpill 3
+plot(PV3.92_intl$Aliquot3Time,PV3.92_intl$Aliquot3Intensity,
+     pch = 16,
+     col = "blue",
+     lwd = 3,
+     main = "Aliquot3 Time vs Intensity for PVPill3",
+     xlab = "Aliquot 3 Time",
+     ylab = "Aliquot 3 Intensity",
+     xlim =  c(2.3,3.2))
+
+```
+
+## Average P.V Pill Intensities
+
+
+```{r,  echo= FALSE, warning=FALSE}
+#Getting Average for Intensities
+#PV Pill: Intensity 1
+PV1.ali1.92 <- mean(na.omit(PV1.92_intl$Aliquot1Intensity))
+PV2.ali1.92 <- mean(na.omit(PV2.92_intl$Aliquot1Intensity))
+PV3.ali1.92 <- mean(na.omit(PV3.92_intl$Aliquot1Intensity))
+
+#PV Pill: Intensity 2
+PV1.ali2.92 <- mean(na.omit(PV1.92_intl$Aliquot2Intensity))
+PV2.ali2.92 <- mean(na.omit(PV2.92_intl$Aliquot2Intensity))
+PV3.ali2.92 <- mean(na.omit(PV3.92_intl$Aliquot2Intensity))
+
+#PV Pill: Intensity 3
+PV1.ali3.92 <- mean(na.omit(PV1.92_intl$Aliquot3Intensity))
+PV2.ali3.92 <- mean(na.omit(PV2.92_intl$Aliquot3Intensity))
+PV3.ali3.92 <- mean(na.omit(PV3.92_intl$Aliquot3Intensity))
+```
+
+
+## Data Visualization for PV Pill Peak 199.10 92.90
+
+```{r,  echo= FALSE, warning=FALSE}
+PV1.92 <- mean(PV1.ali1.92, PV1.ali2.92, PV1.ali3.92)
+PV2.92 <- mean(PV2.ali1.92, PV2.ali2.92, PV2.ali3.92)
+PV3.92 <- mean(PV3.ali1.92, PV3.ali2.92, PV3.ali3.92)
+
+PV.92 <- c(PV1.ali1.92, PV1.ali2.92, PV1.ali3.92, 
+            PV2.ali1.92, PV2.ali2.92, PV2.ali3.92, 
+            PV3.ali1.92, PV3.ali2.92, PV3.ali3.92)
+
+PV.92<- as.data.frame(PV.92)
+
+summary(PV.92) # made a data frame
+
+
+#boxplot 
+boxplot(PV.92,
+        horizontal = TRUE,
+        col = rainbow(ncol(PV.199)),
+        main = "Boxplot of PV Pills: Peak 199.10 92.90")
+
+#Scatter Plot
+smoothScatter(PV.92,
+              main = "Scatterplot for PV Pills from Peak 199.10 92.90",
+              xlab = "Time",
+              ylab = "Intensity")
+
+```
+
+### Wal Pill 1 from Peak 199.10 92.90 
+
+```{r,  echo= FALSE, warning=FALSE}
+#Importing WP Pill 1 for Peak 199.10 92.90
+WP1.92 <- read.delim("Data Set/The Trimed Datas Work/199.10 92.90/Wal Pill 1 199.100 92.900 New.txt")
+WP1.92_intl<- WP1.92[,-c(9:14)] # removing column from 9 to 14
+
+#changing column names for WP 1 from 199.10 92.90Peak
+colnames(WP1.92_intl) <-c('BlankTime','BlankIntensity','Aliquot1Time',
+                          'Aliquot1Intensity','Aliquot2Time','Aliquot2Intensity',
+                           'Aliquot3Time','Aliquot3Intensity')
+
+#Base R: Plot of Aliquot 1 time and intensity of WP1
+par(mfrow= c(2,2)) # representing 3 intensities of WP1
+plot(WP1.92_intl$Aliquot1Time,WP1.92_intl$Aliquot1Intensity,
+     pch = 16,
+     col = "red",
+     lwd = 3,
+     main = "Aliquot1 Time vs Intensity for Wal Pill1",
+     xlab = "Aliquot 1 Time",
+     ylab = "Aliquot 1 Intensity",
+     xlim =  c(2.3,3.2))
+#Base R: Plot of Aliquot 2 time and intensity of Wal Pill1
+plot(WP1.92_intl$Aliquot2Time,WP1.92_intl$Aliquot2Intensity,
+     pch = 16,
+     col = "green",
+     lwd = 3,
+     main = "Aliquot2 Time vs Intensity for Wal Pill1",
+     xlab = "Aliquot 2 Time",
+     ylab = "Aliquot 2 Intensity",
+     xlim =  c(2.3,3.2))
+#Base R: Plot of Aliquot 3 time and intensity of Wal Pill1
+plot(WP1.92_intl$Aliquot3Time,WP1.92_intl$Aliquot3Intensity,
+     pch = 16,
+     col = "blue",
+     lwd = 3,
+     main = "Aliquot3 Time vs Intensity for Wal Pill1",
+     xlab = "Aliquot 3 Time",
+     ylab = "Aliquot 3 Intensity",
+     xlim =  c(2.3,3.2))
+```
+
+### Wal Pill 2 from Peak 199.10 92.90 
+
+```{r,  echo= FALSE, warning=FALSE}
+#Importing WP Pill 1 for Peak 199.10 92.90
+WP2.92 <- read.delim("Data Set/The Trimed Datas Work/199.10 92.90/Wal Pill 2 199.100 92.900 New.txt")
+WP2.92_intl<- WP2.92[,-c(9:14)] # removing column from 9 to 14
+
+#changing column names for WP 1 from 199.10 92.90Peak
+colnames(WP2.92_intl) <-c('BlankTime','BlankIntensity','Aliquot1Time',
+                          'Aliquot1Intensity','Aliquot2Time','Aliquot2Intensity',
+                           'Aliquot3Time','Aliquot3Intensity')
+
+
+
+#Base R: Plot of Aliquot 1 time and intensity of WP2
+par(mfrow= c(2,2)) # representing 3 intensities of WP2
+plot(WP2.92_intl$Aliquot1Time,WP2.92_intl$Aliquot1Intensity,
+     pch = 16,
+     col = "red",
+     lwd = 3,
+     main = "Aliquot1 Time vs Intensity for Wal Pill2",
+     xlab = "Aliquot 1 Time",
+     ylab = "Aliquot 1 Intensity",
+     xlim =  c(2.3,3.2))
+#Base R: Plot of Aliquot 2 time and intensity of Wal Pill2
+plot(WP2.92_intl$Aliquot2Time,WP2.92_intl$Aliquot2Intensity,
+     pch = 16,
+     col = "green",
+     lwd = 3,
+     main = "Aliquot2 Time vs Intensity for Wal Pill2",
+     xlab = "Aliquot 2 Time",
+     ylab = "Aliquot 2 Intensity",
+     xlim =  c(2.3,3.2))
+#Base R: Plot of Aliquot 3 time and intensity of Wal Pill2
+plot(WP2.92_intl$Aliquot3Time,WP2.92_intl$Aliquot3Intensity,
+     pch = 16,
+     col = "blue",
+     lwd = 3,
+     main = "Aliquot3 Time vs Intensity for Wal Pill2",
+     xlab = "Aliquot 3 Time",
+     ylab = "Aliquot 3 Intensity",
+     xlim =  c(2.3,3.2))
+```
+
+
+### Wal Pill 3 from Peak 199.10 92.90 
+
+```{r,  echo= FALSE, warning=FALSE}
+#Importing WP Pill 1 for Peak 199.10 92.90
+WP3.92 <- read.delim("Data Set/The Trimed Datas Work/199.10 92.90/Wal Pill 3 199.100 92.900 New.txt")
+WP3.92_intl<- WP3.92[,-c(9:14)] # removing column from 9 to 14
+
+#changing column names for WP 1 from 199.10 92.90Peak
+colnames(WP3.92_intl) <-c('BlankTime','BlankIntensity','Aliquot1Time',
+                          'Aliquot1Intensity','Aliquot2Time','Aliquot2Intensity',
+                           'Aliquot3Time','Aliquot3Intensity')
+
+#Base R: Plot of Aliquot 1 time and intensity of WP3
+par(mfrow= c(2,2)) # representing 3 intensities of WP3
+plot(WP3.92_intl$Aliquot1Time,WP3.92_intl$Aliquot1Intensity,
+     pch = 16,
+     col = "red",
+     lwd = 3,
+     main = "Aliquot1 Time vs Intensity for Wal Pill3",
+     xlab = "Aliquot 1 Time",
+     ylab = "Aliquot 1 Intensity",
+     xlim =  c(2.3,3.2))
+#Base R: Plot of Aliquot 2 time and intensity of Wal Pill3
+plot(WP3.92_intl$Aliquot2Time,WP3.92_intl$Aliquot2Intensity,
+     pch = 16,
+     col = "green",
+     lwd = 3,
+     main = "Aliquot2 Time vs Intensity for Wal Pill3",
+     xlab = "Aliquot 2 Time",
+     ylab = "Aliquot 2 Intensity",
+     xlim =  c(2.3,3.2))
+#Base R: Plot of Aliquot 3 time and intensity of Wal Pill3
+plot(WP3.92_intl$Aliquot3Time,WP3.92_intl$Aliquot3Intensity,
+     pch = 16,
+     col = "blue",
+     lwd = 3,
+     main = "Aliquot3 Time vs Intensity for Wal Pill3",
+     xlab = "Aliquot 3 Time",
+     ylab = "Aliquot 3 Intensity",
+     xlim =  c(2.3,3.2))
+```
+## Average Wal Pill Intensities
+
+
+```{r,  echo= FALSE, warning=FALSE}
+#Getting Average for Intensities
+#Wal Pill: Intensity 1
+WP1.ali1.92 <- mean(na.omit(WP1.92_intl$Aliquot1Intensity))
+WP2.ali1.92 <- mean(na.omit(WP2.92_intl$Aliquot1Intensity))
+WP3.ali1.92 <- mean(na.omit(WP3.92_intl$Aliquot1Intensity))
+
+#Wal Pill: Intensity 2
+WP1.ali2.92 <- mean(na.omit(WP1.92_intl$Aliquot2Intensity))
+WP2.ali2.92 <- mean(na.omit(WP2.92_intl$Aliquot2Intensity))
+WP3.ali2.92 <- mean(na.omit(WP3.92_intl$Aliquot2Intensity))
+
+#Wal Pill: Intensity 3
+WP1.ali3.92 <- mean(na.omit(WP1.92_intl$Aliquot3Intensity))
+WP2.ali3.92 <- mean(na.omit(WP2.92_intl$Aliquot3Intensity))
+WP3.ali3.92 <- mean(na.omit(WP3.92_intl$Aliquot3Intensity))
+```
+
+
+## Data Visualization for Wal Pill Peak 199.10 92.90
+
+```{r,  echo= FALSE, warning=FALSE}
+WP1.92 <- mean(WP1.ali1.92, WP1.ali2.92, WP1.ali3.92)
+WP2.92 <- mean(WP2.ali1.92, WP2.ali2.92, WP2.ali3.92)
+WP3.92 <- mean(WP3.ali1.92, WP3.ali2.92, WP3.ali3.92)
+
+WP.92 <- c(WP1.ali1.92, WP1.ali2.92, WP1.ali3.92, 
+            WP2.ali1.92, WP2.ali2.92, WP2.ali3.92, 
+            WP3.ali1.92, WP3.ali2.92, WP3.ali3.92)
+
+WP.92<- as.data.frame(WP.92)
+
+summary(WP.92) # made a data frame
+
+
+#boxplot 
+boxplot(WP.92,
+        horizontal = TRUE,
+        col = rainbow(ncol(WP.92)),
+        main = "Boxplot of WP Pills: Peak 199.10 92.90")
+
+#Scatter Plot
+smoothScatter(WP.92,
+              main = "Scatterplot for WP Pills from Peak 199.10 92.90",
+              xlab = "Time",
+              ylab = "Intensity")
+
+```
+## Anova of Peak 199.10 92.90
+
+```{r,  echo= FALSE, warning=FALSE}
+Intensity <- c(BP1.92, BP2.92, BP3.92, PV1.92, PV2.92, PV3.92,WP1.92, WP2.92, WP3.92)
+Type <- c('BP1', 'BP2', 'BP3', 'PV1', 'PV2', 'PV3', 'WL1', 'WL2', 'WL3')
+Pills <- c(1,1,1,2,2,2,3,3,3)
+da.92 <- cbind(Type, Pills, Intensity)
+da.92 <- as.data.frame(da.92)
+anova.92 <- aov(Intensity ~ Pills, data = da.92)
+summary(anova.92)
+par(mfrow=c(2,2))
+plot(anova.92)
+#Post-hoc test
+tukey.92<-TukeyHSD(anova.92)
+tukey.92
+plot(tukey.92, las = 1)
+```
+The p-value of the pills variable is low (p < 0.05), For this peak location, it appears that there are substantial differences between the tablets. According to the findings of the post-hoc test,We can see that pill groups 2 and 1 have statistically significant differences (p<0.05). Also We can see that pill groups 3 and 1 have statistically significant differences (p<0.05).
+
+
+## Loading Data set for Peak 199.10 137.00
+
+### Bayer Pill 1 from Peak 199.10 137.00
+
+```{r,  echo= FALSE, warning=FALSE}
+# Importing data from 199.10 137.00Peak
+#Importing Bayer Pill 1 from 199.10 137.00Peak
+Bayer1a <- read.delim("Data Set/The Trimed Datas Work/199.10 137.00/Bay Pill 1 199.100 137.00 New.txt")
+Bayer1a_intl<- Bayer1a [,-c(9:13)] # removing column from 9 to 13
+#changing column names for bayer pill1from 199.10 137.00Peak
+colnames(Bayer1a_intl) <-c('BlankTime','BlankIntensity','Aliquot1Time',
+                          'Aliquot1Intensity','Aliquot2Time','Aliquot2Intensity',
+                           'Aliquot3Time','Aliquot3Intensity')
+
+#Base R: Plot of Aliquot 1 time and intensity of Bayer pill 1
+par(mfrow= c(2,2)) # representing 3 intensities of Bayer Pill 1
+plot(Bayer1a_intl$Aliquot1Time,Bayer1a_intl$Aliquot1Intensity,
+     pch = 16,
+     col = "red",
+     lwd = 3,
+     main = "Aliquot1 Time vs Intensity for Bayer Pill1",
+     xlab = "Aliquot 1 Time",
+     ylab = "Aliquot 1 Intensity",
+     xlim =  c(2.3,3.2))
+#Base R: Plot of Aliquot 2 time and intensity of Bayer pill 1
+plot(Bayer1a_intl$Aliquot2Time,Bayer1a_intl$Aliquot2Intensity,
+     pch = 16,
+     col = "green",
+     lwd = 3,
+     main = "Aliquot2 Time vs Intensity for Bayer Pill1",
+     xlab = "Aliquot 2 Time",
+     ylab = "Aliquot 2 Intensity",
+     xlim =  c(2.3,3.2))
+#Base R: Plot of Aliquot 3 time and intensity of Bayer pill 1
+plot(Bayer1a_intl$Aliquot3Time,Bayer1a_intl$Aliquot3Intensity,
+     pch = 16,
+     col = "blue",
+     lwd = 3,
+     main = "Aliquot3 Time vs Intensity for Bayer Pill1",
+     xlab = "Aliquot 3 Time",
+     ylab = "Aliquot 3 Intensity",
+     xlim =  c(2.3,3.2))
+```
+
+### Bayer Pill 2 from Peak 199.10 137.00
+
+
+```{r,  echo= FALSE, warning=FALSE}
+#Importing Bayer Pill 2 for Peak 199.10 137.00
+Bayer2a <- read.delim("Data Set/The Trimed Datas Work/199.10 137.00/Bay Pill 2 199.100 137.00 New.txt")
+Bayer2a_intl<- Bayer2.199 [,-c(9:14)] # removing column from 9 to 14
+
+#changing column names for bayer pill1from 199.10 137.00Peak
+colnames(Bayer2a_intl) <-c('BlankTime','BlankIntensity','Aliquot1Time',
+                          'Aliquot1Intensity','Aliquot2Time','Aliquot2Intensity',
+                           'Aliquot3Time','Aliquot3Intensity')
+
+#Base R: Plot of Aliquot 1 time and intensity of Bayer pill 2
+par(mfrow= c(2,2)) # representing 3 intensities of Bayer Pill 2
+plot(Bayer2a_intl$Aliquot1Time,Bayer2.199_intl$Aliquot1Intensity,
+     pch = 16,
+     col = "red",
+     lwd = 3,
+     main = "Aliquot1 Time vs Intensity for Bayer Pill2",
+     xlab = "Aliquot 1 Time",
+     ylab = "Aliquot 1 Intensity",
+     xlim =  c(2.3,3.2))
+#Base R: Plot of Aliquot 2 time and intensity of Bayer pill 2
+plot(Bayer2a_intl$Aliquot2Time,Bayer2.199_intl$Aliquot2Intensity,
+     pch = 16,
+     col = "green",
+     lwd = 3,
+     main = "Aliquot2 Time vs Intensity for Bayer Pill2",
+     xlab = "Aliquot 2 Time",
+     ylab = "Aliquot 2 Intensity",
+     xlim =  c(2.3,3.2))
+#Base R: Plot of Aliquot 3 time and intensity of Bayer pill 2
+plot(Bayer2a_intl$Aliquot3Time,Bayer2.199_intl$Aliquot3Intensity,
+     pch = 16,
+     col = "blue",
+     lwd = 3,
+     main = "Aliquot3 Time vs Intensity for Bayer Pill2",
+     xlab = "Aliquot 3 Time",
+     ylab = "Aliquot 3 Intensity",
+     xlim =  c(2.3,3.2))
+
+```
+### Bayer Pill 3 from Peak 199.10 137.00
+
+```{r,  echo= FALSE, warning=FALSE}
+#Importing bayer pill 3 for peak 199.10 137.00
+Bayer3a <- read.delim("Data Set/The Trimed Datas Work/199.10 137.00/Bay Pill 3 199.100 137.00 New.txt")
+Bayer3a_intl<- Bayer3.199 [,-c(9:14)] # removing column from 9 to 14
+
+#changing column names for bayer pill1from 199.10 137.00Peak
+colnames(Bayer3a_intl) <-c('BlankTime','BlankIntensity','Aliquot1Time',
+                          'Aliquot1Intensity','Aliquot2Time','Aliquot2Intensity',
+                           'Aliquot3Time','Aliquot3Intensity')
+
+
+#Base R: Plot of Aliquot 1 time and intensity of Bayer pill 3
+par(mfrow= c(2,2)) # representing 3 intensities of Bayer Pill 3
+plot(Bayer3a_intl$Aliquot1Time,Bayer3a_intl$Aliquot1Intensity,
+     pch = 16,
+     col = "red",
+     lwd = 3,
+     main = "Aliquot1 Time vs Intensity for Bayer Pill3",
+     xlab = "Aliquot 1 Time",
+     ylab = "Aliquot 1 Intensity",
+     xlim =  c(2.3,3.2))
+#Base R: Plot of Aliquot 2 time and intensity of Bayer pill 3
+plot(Bayer3a_intl$Aliquot2Time,Bayer3a_intl$Aliquot2Intensity,
+     pch = 16,
+     col = "green",
+     lwd = 3,
+     main = "Aliquot2 Time vs Intensity for Bayer Pill3",
+     xlab = "Aliquot 2 Time",
+     ylab = "Aliquot 2 Intensity",
+     xlim =  c(2.3,3.2))
+#Base R: Plot of Aliquot 3 time and intensity of Bayer pill 3
+plot(Bayer3a_intl$Aliquot3Time,Bayer3a_intl$Aliquot3Intensity,
+     pch = 16,
+     col = "blue",
+     lwd = 3,
+     main = "Aliquot3 Time vs Intensity for Bayer Pill3",
+     xlab = "Aliquot 3 Time",
+     ylab = "Aliquot 3 Intensity",
+     xlim =  c(2.3,3.2))
+
+```
+
+## Average Bayer Pill Intensities
+
+
+```{r,  echo= FALSE, warning=FALSE}
+#Getting Average for Intensities
+#Bayer Pill: Intensity 1
+BP1.ali1a <- mean(na.omit(Bayer1a_intl$Aliquot1Intensity))
+BP2.ali1a <- mean(na.omit(Bayer2a_intl$Aliquot1Intensity))
+BP3.ali1a <- mean(na.omit(Bayer3a_intl$Aliquot1Intensity))
+#Bayer Pill: Intensity 2
+BP1.ali2a <- mean(na.omit(Bayer1a_intl$Aliquot2Intensity))
+BP2.ali2a <- mean(na.omit(Bayer2a_intl$Aliquot2Intensity))
+BP3.ali2a <- mean(na.omit(Bayer3a_intl$Aliquot2Intensity))
+#Bayer Pill: Intensity 3
+BP1.ali3a <- mean(na.omit(Bayer1a_intl$Aliquot3Intensity))
+BP2.ali3a <- mean(na.omit(Bayer2a_intl$Aliquot3Intensity))
+BP3.ali3a <- mean(na.omit(Bayer3a_intl$Aliquot3Intensity))
+```
+
+
+## Data Visualization for Bayer Pill Peak 199.10 91.90
+
+```{r,  echo= FALSE, warning=FALSE}
+BP1a <- mean(BP1.ali1a, BP1.ali2a, BP1.ali3a)
+BP2a <- mean(BP2.ali1a, BP2.ali2a, BP2.ali3a)
+BP3a <- mean(BP3.ali1a, BP3.ali2a, BP3.ali3a)
+
+BPa <- c(BP1.ali1a, BP1.ali2a, BP1.ali3a, 
+            BP2.ali1a, BP2.ali2a, BP2.ali3a, 
+            BP3.ali1a, BP3.ali2a, BP3.ali3a)
+
+BPa<- as.data.frame(BPa)
+
+summary(BPa) # made a data frame
+
+#boxplot 
+boxplot(BPa,
+        horizontal = TRUE,
+        col = rainbow(ncol(BPa)),
+        main = "Boxplot of Bayer Pills: Peak 199.10 91.90")
+
+#Scatter Plot
+smoothScatter(BPa,
+              main = "Scatterplot for Bayer Pills from Peak 199.10 91.90",
+              xlab = "Time",
+              ylab = "Intensity")
+
+```
+
+
+### PV 1 Pill from Peak 199.10 137.00 
+
+```{r,  echo= FALSE, warning=FALSE}
+#Importing P.V Pill 1 for Peak 199.10 137.00
+PV1a <- read.delim("Data Set/The Trimed Datas Work/199.10 137.00/P.V Pill 1 199.100 137.00 New.txt")
+PV1a_intl<- PV1a[,-c(9:14)] # removing column from 9 to 14
+
+#changing column names for PV 1 from 199.10 137.00Peak
+colnames(PV1a_intl) <-c('BlankTime','BlankIntensity','Aliquot1Time',
+                          'Aliquot1Intensity','Aliquot2Time','Aliquot2Intensity',
+                           'Aliquot3Time','Aliquot3Intensity')
+
+#Base R: Plot of Aliquot 1 time and intensity of PV pill 1
+par(mfrow= c(2,2)) # representing 3 intensities of PV Pill 1
+plot(PV1a_intl$Aliquot1Time,PV1a_intl$Aliquot1Intensity,
+     pch = 16,
+     col = "red",
+     lwd = 3,
+     main = "Aliquot1 Time vs Intensity for PV Pill1",
+     xlab = "Aliquot 1 Time",
+     ylab = "Aliquot 1 Intensity",
+     xlim =  c(2.3,3.2))
+#Base R: Plot of Aliquot 2 time and intensity of PVpill 1
+plot(PV1a_intl$Aliquot2Time,PV1a_intl$Aliquot2Intensity,
+     pch = 16,
+     col = "green",
+     lwd = 3,
+     main = "Aliquot2 Time vs Intensity for PV Pill1",
+     xlab = "Aliquot 2 Time",
+     ylab = "Aliquot 2 Intensity",
+     xlim =  c(2.3,3.2))
+#Base R: Plot of Aliquot 3 time and intensity of PV pill 1
+plot(PV1a_intl$Aliquot3Time,PV1a_intl$Aliquot3Intensity,
+     pch = 16,
+     col = "blue",
+     lwd = 3,
+     main = "Aliquot3 Time vs Intensity for PV Pill1",
+     xlab = "Aliquot 3 Time",
+     ylab = "Aliquot 3 Intensity",
+     xlim =  c(2.3,3.2))
+
+```
+
+### PV 2 Pill from Peak 199.10 137.00 
+
+```{r,  echo= FALSE, warning=FALSE}
+PV2a <- read.delim("Data Set/The Trimed Datas Work/199.10 137.00/P.V Pill 2 199.100 137.00 New.txt")
+PV2a_intl<- PV2a[,-c(9:13)] # removing column from 9 to 13
+
+#changing column names for PV pill2 from 199.10 137.00Peak
+colnames(PV2a_intl) <-c('BlankTime','BlankIntensity','Aliquot1Time',
+                          'Aliquot1Intensity','Aliquot2Time','Aliquot2Intensity',
+                           'Aliquot3Time','Aliquot3Intensity')
+
+#Base R: Plot of Aliquot 1 time and intensity of PVpill 2
+par(mfrow= c(2,2)) # representing 3 intensities of PVPill 2
+plot(PV2a_intl$Aliquot1Time,PV2a_intl$Aliquot1Intensity,
+     pch = 16,
+     col = "red",
+     lwd = 3,
+     main = "Aliquot1 Time vs Intensity for PVPill2",
+     xlab = "Aliquot 1 Time",
+     ylab = "Aliquot 1 Intensity",
+     xlim =  c(2.3,3.2))
+#Base R: Plot of Aliquot 2 time and intensity of PVpill 2
+plot(PV2a_intl$Aliquot2Time,PV2a_intl$Aliquot2Intensity,
+     pch = 16,
+     col = "green",
+     lwd = 3,
+     main = "Aliquot2 Time vs Intensity for PVPill2",
+     xlab = "Aliquot 2 Time",
+     ylab = "Aliquot 2 Intensity",
+     xlim =  c(2.3,3.2))
+#Base R: Plot of Aliquot 3 time and intensity of PVpill 2
+plot(PV2a_intl$Aliquot3Time,PV2a_intl$Aliquot3Intensity,
+     pch = 16,
+     col = "blue",
+     lwd = 3,
+     main = "Aliquot3 Time vs Intensity for PVPill2",
+     xlab = "Aliquot 3 Time",
+     ylab = "Aliquot 3 Intensity",
+     xlim =  c(2.3,3.2))
+
+
+```
+
+### PV 3 Pill from Peak 199.10 137.00 
+
+```{r,  echo= FALSE, warning=FALSE}
+PV3a <- read.delim("Data Set/The Trimed Datas Work/199.10 137.00/P.V Pill 3 199.100 137.00 New.txt")
+PV3a_intl<- PV3a[,-c(9:13)] # removing column from 9 to 13
+
+#changing column names for PV pill2 from 199.10 137.00Peak
+colnames(PV3a_intl) <-c('BlankTime','BlankIntensity','Aliquot1Time',
+                          'Aliquot1Intensity','Aliquot2Time','Aliquot2Intensity',
+                           'Aliquot3Time','Aliquot3Intensity')
+
+#Base R: Plot of Aliquot 1 time and intensity of PVpill 3
+par(mfrow= c(2,2)) # representing 3 intensities of PVPill 3
+plot(PV3a_intl$Aliquot1Time,PV3a_intl$Aliquot1Intensity,
+     pch = 16,
+     col = "red",
+     lwd = 3,
+     main = "Aliquot1 Time vs Intensity for PVPill3",
+     xlab = "Aliquot 1 Time",
+     ylab = "Aliquot 1 Intensity",
+     xlim =  c(2.3,3.2))
+#Base R: Plot of Aliquot 2 time and intensity of PVpill 3
+plot(PV3a_intl$Aliquot2Time,PV3a_intl$Aliquot2Intensity,
+     pch = 16,
+     col = "green",
+     lwd = 3,
+     main = "Aliquot2 Time vs Intensity for PVPill3",
+     xlab = "Aliquot 2 Time",
+     ylab = "Aliquot 2 Intensity",
+     xlim =  c(2.3,3.2))
+#Base R: Plot of Aliquot 3 time and intensity of PVpill 3
+plot(PV3a_intl$Aliquot3Time,PV3a_intl$Aliquot3Intensity,
+     pch = 16,
+     col = "blue",
+     lwd = 3,
+     main = "Aliquot3 Time vs Intensity for PVPill3",
+     xlab = "Aliquot 3 Time",
+     ylab = "Aliquot 3 Intensity",
+     xlim =  c(2.3,3.2))
+
+```
+
+## Average P.V Pill Intensities
+
+
+```{r,  echo= FALSE, warning=FALSE}
+#Getting Average for Intensities
+#PV Pill: Intensity 1
+PV1.ali1a <- mean(na.omit(PV1a_intl$Aliquot1Intensity))
+PV2.ali1a <- mean(na.omit(PV2a_intl$Aliquot1Intensity))
+PV3.ali1a <- mean(na.omit(PV3a_intl$Aliquot1Intensity))
+
+#PV Pill: Intensity 2
+PV1.ali2a <- mean(na.omit(PV1a_intl$Aliquot2Intensity))
+PV2.ali2a <- mean(na.omit(PV2a_intl$Aliquot2Intensity))
+PV3.ali2a <- mean(na.omit(PV3a_intl$Aliquot2Intensity))
+
+#PV Pill: Intensity 3
+PV1.ali3a <- mean(na.omit(PV1a_intl$Aliquot3Intensity))
+PV2.ali3a <- mean(na.omit(PV2a_intl$Aliquot3Intensity))
+PV3.ali3a <- mean(na.omit(PV3a_intl$Aliquot3Intensity))
+```
+
+
+## Data Visualization for PV Pill Peak 199.10 137.00
+
+```{r,  echo= FALSE, warning=FALSE}
+PV1a <- mean(PV1.ali1a, PV1.ali2a, PV1.ali3a)
+PV2a <- mean(PV2.ali1a, PV2.ali2a, PV2.ali3a)
+PV3a <- mean(PV3.ali1a, PV3.ali2a, PV3.ali3a)
+
+PVa <- c(PV1.ali1a, PV1.ali2a, PV1.ali3a, 
+            PV2.ali1a, PV2.ali2a, PV2.ali3a, 
+            PV3.ali1a, PV3.ali2a, PV3.ali3a)
+
+PVa<- as.data.frame(PVa)
+
+summary(PVa) # made a data frame
+
+
+#boxplot 
+boxplot(PVa,
+        horizontal = TRUE,
+        col = rainbow(ncol(PV.199)),
+        main = "Boxplot of PV Pills: Peak 199.10 137.00")
+
+#Scatter Plot
+smoothScatter(PVa,
+              main = "Scatterplot for PV Pills from Peak 199.10 137.00",
+              xlab = "Time",
+              ylab = "Intensity")
+
+```
+
+### Wal Pill 1 from Peak 199.10 137.00 
+
+```{r,  echo= FALSE, warning=FALSE}
+#Importing WP Pill 1 for Peak 199.10 137.00
+WP1a <- read.delim("Data Set/The Trimed Datas Work/199.10 137.00/Wal Pill 1 199.100 137.00 New.txt")
+WP1a_intl<- WP1a[,-c(9:14)] # removing column from 9 to 14
+
+#changing column names for WP 1 from 199.10 137.00Peak
+colnames(WP1a_intl) <-c('BlankTime','BlankIntensity','Aliquot1Time',
+                          'Aliquot1Intensity','Aliquot2Time','Aliquot2Intensity',
+                           'Aliquot3Time','Aliquot3Intensity')
+
+#Base R: Plot of Aliquot 1 time and intensity of WP1
+par(mfrow= c(2,2)) # representing 3 intensities of WP1
+plot(WP1a_intl$Aliquot1Time,WP1a_intl$Aliquot1Intensity,
+     pch = 16,
+     col = "red",
+     lwd = 3,
+     main = "Aliquot1 Time vs Intensity for Wal Pill1",
+     xlab = "Aliquot 1 Time",
+     ylab = "Aliquot 1 Intensity",
+     xlim =  c(2.3,3.2))
+#Base R: Plot of Aliquot 2 time and intensity of Wal Pill1
+plot(WP1a_intl$Aliquot2Time,WP1a_intl$Aliquot2Intensity,
+     pch = 16,
+     col = "green",
+     lwd = 3,
+     main = "Aliquot2 Time vs Intensity for Wal Pill1",
+     xlab = "Aliquot 2 Time",
+     ylab = "Aliquot 2 Intensity",
+     xlim =  c(2.3,3.2))
+#Base R: Plot of Aliquot 3 time and intensity of Wal Pill1
+plot(WP1a_intl$Aliquot3Time,WP1a_intl$Aliquot3Intensity,
+     pch = 16,
+     col = "blue",
+     lwd = 3,
+     main = "Aliquot3 Time vs Intensity for Wal Pill1",
+     xlab = "Aliquot 3 Time",
+     ylab = "Aliquot 3 Intensity",
+     xlim =  c(2.3,3.2))
+```
+
+### Wal Pill 2 from Peak 199.10 137.00 
+
+```{r,  echo= FALSE, warning=FALSE}
+#Importing WP Pill 1 for Peak 199.10 137.00
+WP2a <- read.delim("Data Set/The Trimed Datas Work/199.10 137.00/Wal Pill 2 199.100 137.00 New.txt")
+WP2a_intl<- WP2a[,-c(9:14)] # removing column from 9 to 14
+
+#changing column names for WP 1 from 199.10 137.00Peak
+colnames(WP2a_intl) <-c('BlankTime','BlankIntensity','Aliquot1Time',
+                          'Aliquot1Intensity','Aliquot2Time','Aliquot2Intensity',
+                           'Aliquot3Time','Aliquot3Intensity')
+
+
+
+#Base R: Plot of Aliquot 1 time and intensity of WP2
+par(mfrow= c(2,2)) # representing 3 intensities of WP2
+plot(WP2a_intl$Aliquot1Time,WP2a_intl$Aliquot1Intensity,
+     pch = 16,
+     col = "red",
+     lwd = 3,
+     main = "Aliquot1 Time vs Intensity for Wal Pill2",
+     xlab = "Aliquot 1 Time",
+     ylab = "Aliquot 1 Intensity",
+     xlim =  c(2.3,3.2))
+#Base R: Plot of Aliquot 2 time and intensity of Wal Pill2
+plot(WP2a_intl$Aliquot2Time,WP2a_intl$Aliquot2Intensity,
+     pch = 16,
+     col = "green",
+     lwd = 3,
+     main = "Aliquot2 Time vs Intensity for Wal Pill2",
+     xlab = "Aliquot 2 Time",
+     ylab = "Aliquot 2 Intensity",
+     xlim =  c(2.3,3.2))
+#Base R: Plot of Aliquot 3 time and intensity of Wal Pill2
+plot(WP2a_intl$Aliquot3Time,WP2a_intl$Aliquot3Intensity,
+     pch = 16,
+     col = "blue",
+     lwd = 3,
+     main = "Aliquot3 Time vs Intensity for Wal Pill2",
+     xlab = "Aliquot 3 Time",
+     ylab = "Aliquot 3 Intensity",
+     xlim =  c(2.3,3.2))
+```
+
+
+### Wal Pill 3 from Peak 199.10 137.00 
+
+```{r,  echo= FALSE, warning=FALSE}
+#Importing WP Pill 1 for Peak 199.10 137.00
+WP3a <- read.delim("Data Set/The Trimed Datas Work/199.10 137.00/Wal Pill 3 199.100 137.00 New.txt")
+WP3a_intl<- WP3a[,-c(9:14)] # removing column from 9 to 14
+
+#changing column names for WP 1 from 199.10 137.00Peak
+colnames(WP3a_intl) <-c('BlankTime','BlankIntensity','Aliquot1Time',
+                          'Aliquot1Intensity','Aliquot2Time','Aliquot2Intensity',
+                           'Aliquot3Time','Aliquot3Intensity')
+
+#Base R: Plot of Aliquot 1 time and intensity of WP3
+par(mfrow= c(2,2)) # representing 3 intensities of WP3
+plot(WP3a_intl$Aliquot1Time,WP3a_intl$Aliquot1Intensity,
+     pch = 16,
+     col = "red",
+     lwd = 3,
+     main = "Aliquot1 Time vs Intensity for Wal Pill3",
+     xlab = "Aliquot 1 Time",
+     ylab = "Aliquot 1 Intensity",
+     xlim =  c(2.3,3.2))
+#Base R: Plot of Aliquot 2 time and intensity of Wal Pill3
+plot(WP3a_intl$Aliquot2Time,WP3a_intl$Aliquot2Intensity,
+     pch = 16,
+     col = "green",
+     lwd = 3,
+     main = "Aliquot2 Time vs Intensity for Wal Pill3",
+     xlab = "Aliquot 2 Time",
+     ylab = "Aliquot 2 Intensity",
+     xlim =  c(2.3,3.2))
+#Base R: Plot of Aliquot 3 time and intensity of Wal Pill3
+plot(WP3a_intl$Aliquot3Time,WP3a_intl$Aliquot3Intensity,
+     pch = 16,
+     col = "blue",
+     lwd = 3,
+     main = "Aliquot3 Time vs Intensity for Wal Pill3",
+     xlab = "Aliquot 3 Time",
+     ylab = "Aliquot 3 Intensity",
+     xlim =  c(2.3,3.2))
+```
+## Average Wal Pill Intensities
+
+
+```{r,  echo= FALSE, warning=FALSE}
+#Getting Average for Intensities
+#Wal Pill: Intensity 1
+WP1.ali1a <- mean(na.omit(WP1a_intl$Aliquot1Intensity))
+WP2.ali1a <- mean(na.omit(WP2a_intl$Aliquot1Intensity))
+WP3.ali1a <- mean(na.omit(WP3a_intl$Aliquot1Intensity))
+
+#Wal Pill: Intensity 2
+WP1.ali2a <- mean(na.omit(WP1a_intl$Aliquot2Intensity))
+WP2.ali2a <- mean(na.omit(WP2a_intl$Aliquot2Intensity))
+WP3.ali2a <- mean(na.omit(WP3a_intl$Aliquot2Intensity))
+
+#Wal Pill: Intensity 3
+WP1.ali3a <- mean(na.omit(WP1a_intl$Aliquot3Intensity))
+WP2.ali3a <- mean(na.omit(WP2a_intl$Aliquot3Intensity))
+WP3.ali3a <- mean(na.omit(WP3a_intl$Aliquot3Intensity))
+```
+
+
+## Data Visualization for Wal Pill Peak 199.10 137.00
+
+```{r,  echo= FALSE, warning=FALSE}
+WP1a <- mean(WP1.ali1a, WP1.ali2a, WP1.ali3a)
+WP2a <- mean(WP2.ali1a, WP2.ali2a, WP2.ali3a)
+WP3a <- mean(WP3.ali1a, WP3.ali2a, WP3.ali3a)
+
+WPa <- c(WP1.ali1a, WP1.ali2a, WP1.ali3a, 
+            WP2.ali1a, WP2.ali2a, WP2.ali3a, 
+            WP3.ali1a, WP3.ali2a, WP3.ali3a)
+
+WPa<- as.data.frame(WPa)
+
+summary(WPa) # made a data frame
+
+
+#boxplot 
+boxplot(WPa,
+        horizontal = TRUE,
+        col = rainbow(ncol(WPa)),
+        main = "Boxplot of WP Pills: Peak 199.10 137.00")
+
+#Scatter Plot
+smoothScatter(WPa,
+              main = "Scatterplot for WP Pills from Peak 199.10 137.00",
+              xlab = "Time",
+              ylab = "Intensity")
+
+```
+## Anova of Peak 199.10 137.00
+
+```{r,  echo= FALSE, warning=FALSE}
+Intensity <- c(BP1a, BP2a, BP3a, PV1a, PV2a, PV3a,WP1a, WP2a, WP3a)
+Type <- c('BP1', 'BP2', 'BP3', 'PV1', 'PV2', 'PV3', 'WL1', 'WL2', 'WL3')
+Pills <- c(1,1,1,2,2,2,3,3,3)
+daa <- cbind(Type, Pills, Intensity)
+daa <- as.data.frame(daa)
+anovaa <- aov(Intensity ~ Pills, data = daa)
+summary(anovaa)
+par(mfrow=c(2,2))
+plot(anovaa)
+#Post-hoc test
+tukeya<-TukeyHSD(anovaa)
+tukeya
+plot(tukeya, las = 1)
+```
+
+The p-value of the pills variable is low (p < 0.05), For this peak location, it appears that there are substantial differences between the tablets. According to the findings of the post-hoc test,We can see that pill groups 2 and 1 have statistically significant differences (p<0.05). Also We can see that pill groups 3 and 1 have statistically significant differences (p<0.05).
+
+
+
+
+## Loading Data set for Peak 240.00 92.900
+
+### Bayer Pill 1 from Peak 240.00 92.900
+
+```{r,  echo= FALSE, warning=FALSE}
+# Importing data from 240.00 92.900Peak
+#Importing Bayer Pill 1 from 240.00 92.900Peak
+Bayer1.240 <- read.delim("Data Set/The Trimed Datas Work/240.00 92.900/Bayer Pill 1 240.00 92.900 New.txt")
+Bayer1.240_intl<- Bayer1a [,-c(9:13)] # removing column from 9 to 13
+#changing column names for bayer pill1from 240.00 92.900Peak
+colnames(Bayer1.240_intl) <-c('BlankTime','BlankIntensity','Aliquot1Time',
+                          'Aliquot1Intensity','Aliquot2Time','Aliquot2Intensity',
+                           'Aliquot3Time','Aliquot3Intensity')
+
+#Base R: Plot of Aliquot 1 time and intensity of Bayer pill 1
+par(mfrow= c(2,2)) # representing 3 intensities of Bayer Pill 1
+plot(Bayer1.240_intl$Aliquot1Time,Bayer1.240_intl$Aliquot1Intensity,
+     pch = 16,
+     col = "red",
+     lwd = 3,
+     main = "Aliquot1 Time vs Intensity for Bayer Pill1",
+     xlab = "Aliquot 1 Time",
+     ylab = "Aliquot 1 Intensity",
+     xlim =  c(2.3,3.2))
+#Base R: Plot of Aliquot 2 time and intensity of Bayer pill 1
+plot(Bayer1.240_intl$Aliquot2Time,Bayer1.240_intl$Aliquot2Intensity,
+     pch = 16,
+     col = "green",
+     lwd = 3,
+     main = "Aliquot2 Time vs Intensity for Bayer Pill1",
+     xlab = "Aliquot 2 Time",
+     ylab = "Aliquot 2 Intensity",
+     xlim =  c(2.3,3.2))
+#Base R: Plot of Aliquot 3 time and intensity of Bayer pill 1
+plot(Bayer1.240_intl$Aliquot3Time,Bayer1.240_intl$Aliquot3Intensity,
+     pch = 16,
+     col = "blue",
+     lwd = 3,
+     main = "Aliquot3 Time vs Intensity for Bayer Pill1",
+     xlab = "Aliquot 3 Time",
+     ylab = "Aliquot 3 Intensity",
+     xlim =  c(2.3,3.2))
+```
+
+### Bayer Pill 2 from Peak 240.00 92.900
+
+
+```{r,  echo= FALSE, warning=FALSE}
+#Importing Bayer Pill 2 for Peak 240.00 92.900
+Bayer2.240 <- read.delim("Data Set/The Trimed Datas Work/240.00 92.900/Bayer Pill 2 240.00 92.900 New.txt")
+Bayer2.240_intl<- Bayer2.240 [,-c(9:14)] # removing column from 9 to 14
+
+#changing column names for bayer pill1from 240.00 92.900Peak
+colnames(Bayer2.240_intl) <-c('BlankTime','BlankIntensity','Aliquot1Time',
+                          'Aliquot1Intensity','Aliquot2Time','Aliquot2Intensity',
+                           'Aliquot3Time','Aliquot3Intensity')
+
+#Base R: Plot of Aliquot 1 time and intensity of Bayer pill 2
+par(mfrow= c(2,2)) # representing 3 intensities of Bayer Pill 2
+plot(Bayer2.240_intl$Aliquot1Time,Bayer2.240_intl$Aliquot1Intensity,
+     pch = 16,
+     col = "red",
+     lwd = 3,
+     main = "Aliquot1 Time vs Intensity for Bayer Pill2",
+     xlab = "Aliquot 1 Time",
+     ylab = "Aliquot 1 Intensity",
+     xlim =  c(2.3,3.2))
+#Base R: Plot of Aliquot 2 time and intensity of Bayer pill 2
+plot(Bayer2.240_intl$Aliquot2Time,Bayer2.240_intl$Aliquot2Intensity,
+     pch = 16,
+     col = "green",
+     lwd = 3,
+     main = "Aliquot2 Time vs Intensity for Bayer Pill2",
+     xlab = "Aliquot 2 Time",
+     ylab = "Aliquot 2 Intensity",
+     xlim =  c(2.3,3.2))
+#Base R: Plot of Aliquot 3 time and intensity of Bayer pill 2
+plot(Bayer2.240_intl$Aliquot3Time,Bayer2.240_intl$Aliquot3Intensity,
+     pch = 16,
+     col = "blue",
+     lwd = 3,
+     main = "Aliquot3 Time vs Intensity for Bayer Pill2",
+     xlab = "Aliquot 3 Time",
+     ylab = "Aliquot 3 Intensity",
+     xlim =  c(2.3,3.2))
+
+```
+### Bayer Pill 3 from Peak 240.00 92.900
+
+```{r,  echo= FALSE, warning=FALSE}
+#Importing bayer pill 3 for peak 240.00 92.900
+Bayer3.240 <- read.delim("Data Set/The Trimed Datas Work/240.00 92.900/Bayer Pill 3 240.00 92.900 New.txt")
+Bayer3.240_intl<- Bayer3.240 [,-c(9:14)] # removing column from 9 to 14
+
+#changing column names for bayer pill1from 240.00 92.900Peak
+colnames(Bayer3.240_intl) <-c('BlankTime','BlankIntensity','Aliquot1Time',
+                          'Aliquot1Intensity','Aliquot2Time','Aliquot2Intensity',
+                           'Aliquot3Time','Aliquot3Intensity')
+
+
+#Base R: Plot of Aliquot 1 time and intensity of Bayer pill 3
+par(mfrow= c(2,2)) # representing 3 intensities of Bayer Pill 3
+plot(Bayer3.240_intl$Aliquot1Time,Bayer3.240_intl$Aliquot1Intensity,
+     pch = 16,
+     col = "red",
+     lwd = 3,
+     main = "Aliquot1 Time vs Intensity for Bayer Pill3",
+     xlab = "Aliquot 1 Time",
+     ylab = "Aliquot 1 Intensity",
+     xlim =  c(2.3,3.2))
+#Base R: Plot of Aliquot 2 time and intensity of Bayer pill 3
+plot(Bayer3.240_intl$Aliquot2Time,Bayer3.240_intl$Aliquot2Intensity,
+     pch = 16,
+     col = "green",
+     lwd = 3,
+     main = "Aliquot2 Time vs Intensity for Bayer Pill3",
+     xlab = "Aliquot 2 Time",
+     ylab = "Aliquot 2 Intensity",
+     xlim =  c(2.3,3.2))
+#Base R: Plot of Aliquot 3 time and intensity of Bayer pill 3
+plot(Bayer3.240_intl$Aliquot3Time,Bayer3.240_intl$Aliquot3Intensity,
+     pch = 16,
+     col = "blue",
+     lwd = 3,
+     main = "Aliquot3 Time vs Intensity for Bayer Pill3",
+     xlab = "Aliquot 3 Time",
+     ylab = "Aliquot 3 Intensity",
+     xlim =  c(2.3,3.2))
+
+```
+
+## Average Bayer Pill Intensities
+
+
+```{r,  echo= FALSE, warning=FALSE}
+#Getting Average for Intensities
+#Bayer Pill: Intensity 1
+BP1.ali1.240 <- mean(na.omit(Bayer1.240_intl$Aliquot1Intensity))
+BP2.ali1.240 <- mean(na.omit(Bayer2.240_intl$Aliquot1Intensity))
+BP3.ali1.240 <- mean(na.omit(Bayer3.240_intl$Aliquot1Intensity))
+
+#Bayer Pill: Intensity 2
+BP1.ali2.240 <- mean(na.omit(Bayer1.240_intl$Aliquot2Intensity))
+BP2.ali2.240 <- mean(na.omit(Bayer2.240_intl$Aliquot2Intensity))
+BP3.ali2.240 <- mean(na.omit(Bayer3.240_intl$Aliquot2Intensity))
+#Bayer Pill: Intensity 3
+BP1.ali3.240 <- mean(na.omit(Bayer1.240_intl$Aliquot3Intensity))
+BP2.ali3.240 <- mean(na.omit(Bayer2.240_intl$Aliquot3Intensity))
+BP3.ali3.240 <- mean(na.omit(Bayer3.240_intl$Aliquot3Intensity))
+```
+
+
+## Data Visualization for Bayer Pill Peak 240.00 92.900
+
+```{r,  echo= FALSE, warning=FALSE}
+BP1.240 <- mean(BP1.ali1.240, BP1.ali2.240, BP1.ali3.240)
+BP2.240 <- mean(BP2.ali1.240, BP2.ali2.240, BP2.ali3.240)
+BP3.240 <- mean(BP3.ali1.240, BP3.ali2a, BP3.ali3.240)
+
+BP.240 <- c(BP1.ali1.240, BP1.ali2.240, BP1.ali3.240, 
+            BP2.ali1.240, BP2.ali2.240, BP2.ali3.240, 
+            BP3.ali1.240, BP3.ali2.240, BP3.ali3.240)
+
+BP.240<- as.data.frame(BP.240)
+
+summary(BP.240) # made a data frame
+
+
+#boxplot 
+boxplot(BP.240,
+        horizontal = TRUE,
+        col = rainbow(ncol(BPa)),
+        main = "Boxplot of Bayer Pills: Peak 240.00 92.900")
+
+#Scatter Plot
+smoothScatter(BP.240,
+              main = "Scatterplot for Bayer Pills from Peak 240.00 92.900",
+              xlab = "Time",
+              ylab = "Intensity")
+
+```
+
+
+### PV 1 Pill from Peak 240.00 92.900 
+
+```{r,  echo= FALSE, warning=FALSE}
+#Importing P.V Pill 1 for Peak 240.00 92.900
+PV1.240 <- read.delim("Data Set/The Trimed Datas Work/240.00 92.900/P.V Pill 1 240.00 92.900 New.txt")
+PV1.240_intl<- PV1.240[,-c(9:14)] # removing column from 9 to 14
+
+#changing column names for PV 1 from 240.00 92.900Peak
+colnames(PV1.240_intl) <-c('BlankTime','BlankIntensity','Aliquot1Time',
+                          'Aliquot1Intensity','Aliquot2Time','Aliquot2Intensity',
+                           'Aliquot3Time','Aliquot3Intensity')
+
+#Base R: Plot of Aliquot 1 time and intensity of PV pill 1
+par(mfrow= c(2,2)) # representing 3 intensities of PV Pill 1
+plot(PV1.240_intl$Aliquot1Time,PV1.240_intl$Aliquot1Intensity,
+     pch = 16,
+     col = "red",
+     lwd = 3,
+     main = "Aliquot1 Time vs Intensity for PV Pill1",
+     xlab = "Aliquot 1 Time",
+     ylab = "Aliquot 1 Intensity",
+     xlim =  c(2.3,3.2))
+#Base R: Plot of Aliquot 2 time and intensity of PVpill 1
+plot(PV1.240_intl$Aliquot2Time,PV1.240_intl$Aliquot2Intensity,
+     pch = 16,
+     col = "green",
+     lwd = 3,
+     main = "Aliquot2 Time vs Intensity for PV Pill1",
+     xlab = "Aliquot 2 Time",
+     ylab = "Aliquot 2 Intensity",
+     xlim =  c(2.3,3.2))
+#Base R: Plot of Aliquot 3 time and intensity of PV pill 1
+plot(PV1.240_intl$Aliquot3Time,PV1.240_intl$Aliquot3Intensity,
+     pch = 16,
+     col = "blue",
+     lwd = 3,
+     main = "Aliquot3 Time vs Intensity for PV Pill1",
+     xlab = "Aliquot 3 Time",
+     ylab = "Aliquot 3 Intensity",
+     xlim =  c(2.3,3.2))
+
+```
+
+### PV 2 Pill from Peak 240.00 92.900 
+
+```{r,  echo= FALSE, warning=FALSE}
+PV2.240 <- read.delim("Data Set/The Trimed Datas Work/240.00 92.900/P.V Pill 2 240.00 92.900 New.txt")
+PV2.240_intl<- PV2.240 [,-c(9:13)] # removing column from 9 to 13
+
+#changing column names for PV pill2 from 240.00 92.900Peak
+colnames(PV2.240_intl) <-c('BlankTime','BlankIntensity','Aliquot1Time',
+                          'Aliquot1Intensity','Aliquot2Time','Aliquot2Intensity',
+                           'Aliquot3Time','Aliquot3Intensity')
+
+#Base R: Plot of Aliquot 1 time and intensity of PVpill 2
+par(mfrow= c(2,2)) # representing 3 intensities of PVPill 2
+plot(PV2.240_intl$Aliquot1Time,PV2.240_intl$Aliquot1Intensity,
+     pch = 16,
+     col = "red",
+     lwd = 3,
+     main = "Aliquot1 Time vs Intensity for PVPill2",
+     xlab = "Aliquot 1 Time",
+     ylab = "Aliquot 1 Intensity",
+     xlim =  c(2.3,3.2))
+#Base R: Plot of Aliquot 2 time and intensity of PVpill 2
+plot(PV2.240_intl$Aliquot2Time,PV2.240_intl$Aliquot2Intensity,
+     pch = 16,
+     col = "green",
+     lwd = 3,
+     main = "Aliquot2 Time vs Intensity for PVPill2",
+     xlab = "Aliquot 2 Time",
+     ylab = "Aliquot 2 Intensity",
+     xlim =  c(2.3,3.2))
+#Base R: Plot of Aliquot 3 time and intensity of PVpill 2
+plot(PV2.240_intl$Aliquot3Time,PV2.240_intl$Aliquot3Intensity,
+     pch = 16,
+     col = "blue",
+     lwd = 3,
+     main = "Aliquot3 Time vs Intensity for PVPill2",
+     xlab = "Aliquot 3 Time",
+     ylab = "Aliquot 3 Intensity",
+     xlim =  c(2.3,3.2))
+
+
+```
+
+### PV 3 Pill from Peak 240.00 92.900 
+
+```{r,  echo= FALSE, warning=FALSE}
+PV3.240 <- read.delim("Data Set/The Trimed Datas Work/240.00 92.900/P.V Pill 3 240.00 92.900 New.txt")
+PV3.240_intl<- PV3.240[,-c(9:14)] # removing column from 9 to 13
+
+#changing column names for PV pill2 from 240.00 92.900Peak
+colnames(PV3.240_intl) <-c('BlankTime','BlankIntensity','Aliquot1Time',
+                          'Aliquot1Intensity','Aliquot2Time','Aliquot2Intensity',
+                           'Aliquot3Time','Aliquot3Intensity')
+
+#Base R: Plot of Aliquot 1 time and intensity of PVpill 3
+par(mfrow= c(2,2)) # representing 3 intensities of PVPill 3
+plot(PV3.240_intl$Aliquot1Time,PV3.240_intl$Aliquot1Intensity,
+     pch = 16,
+     col = "red",
+     lwd = 3,
+     main = "Aliquot1 Time vs Intensity for PVPill3",
+     xlab = "Aliquot 1 Time",
+     ylab = "Aliquot 1 Intensity",
+     xlim =  c(2.3,3.2))
+#Base R: Plot of Aliquot 2 time and intensity of PVpill 3
+plot(PV3.240_intl$Aliquot2Time,PV3.240_intl$Aliquot2Intensity,
+     pch = 16,
+     col = "green",
+     lwd = 3,
+     main = "Aliquot2 Time vs Intensity for PVPill3",
+     xlab = "Aliquot 2 Time",
+     ylab = "Aliquot 2 Intensity",
+     xlim =  c(2.3,3.2))
+#Base R: Plot of Aliquot 3 time and intensity of PVpill 3
+plot(PV3.240_intl$Aliquot3Time,PV3.240_intl$Aliquot3Intensity,
+     pch = 16,
+     col = "blue",
+     lwd = 3,
+     main = "Aliquot3 Time vs Intensity for PVPill3",
+     xlab = "Aliquot 3 Time",
+     ylab = "Aliquot 3 Intensity",
+     xlim =  c(2.3,3.2))
+
+```
+
+## Average P.V Pill Intensities
+
+
+```{r,  echo= FALSE, warning=FALSE}
+#Getting Average for Intensities
+#PV Pill: Intensity 1
+PV1.ali1.240 <- mean(na.omit(PV1.240_intl$Aliquot1Intensity))
+PV2.ali1.240 <- mean(na.omit(PV2.240_intl$Aliquot1Intensity))
+PV3.ali1.240 <- mean(na.omit(PV3.240_intl$Aliquot1Intensity))
+
+#PV Pill: Intensity 2
+PV1.ali2.240 <- mean(na.omit(PV1.240_intl$Aliquot2Intensity))
+PV2.ali2.240 <- mean(na.omit(PV2.240_intl$Aliquot2Intensity))
+PV3.ali2.240 <- mean(na.omit(PV3.240_intl$Aliquot2Intensity))
+
+#PV Pill: Intensity 3
+PV1.ali3.240 <- mean(na.omit(PV1.240_intl$Aliquot3Intensity))
+PV2.ali3.240 <- mean(na.omit(PV2.240_intl$Aliquot3Intensity))
+PV3.ali3.240 <- mean(na.omit(PV3.240_intl$Aliquot3Intensity))
+```
+
+
+## Data Visualization for PV Pill Peak 240.00 92.900
+
+```{r,  echo= FALSE, warning=FALSE}
+PV1.240 <- mean(PV1.ali1.240, PV1.ali2.240, PV1.ali3.240)
+PV2.240 <- mean(PV2.ali1.240, PV2.ali2.240, PV2.ali3.240)
+PV3.240 <- mean(PV3.ali1a, PV3.ali2a, PV3.ali3a)
+
+PV.240 <- c(PV1.ali1.240, PV1.ali2.240, PV1.ali3.240, 
+            PV2.ali1.240, PV2.ali2a, PV2.ali3.240, 
+            PV3.ali1.240, PV3.ali2.240, PV3.ali3.240)
+
+PV.240<- as.data.frame(PV.240)
+
+summary(PV.240) # made a data frame
+
+
+#boxplot 
+boxplot(PV.240,
+        horizontal = TRUE,
+        col = rainbow(ncol(PV.199)),
+        main = "Boxplot of PV Pills: Peak 240.00 92.900")
+
+#Scatter Plot
+smoothScatter(PV.240,
+              main = "Scatterplot for PV Pills from Peak 240.00 92.900",
+              xlab = "Time",
+              ylab = "Intensity")
+
+```
+
+### Wal Pill 1 from Peak 240.00 92.900 
+
+```{r,  echo= FALSE, warning=FALSE}
+#Importing WP Pill 1 for Peak 240.00 92.900
+WP1.240<- read.delim("Data Set/The Trimed Datas Work/240.00 92.900/Wal Pill 1 240.00 92.900 New.txt")
+WP1.240_intl<- WP1.240[,-c(9:14)] # removing column from 9 to 14
+
+#changing column names for WP 1 from 240.00 92.900Peak
+colnames(WP1.240_intl) <-c('BlankTime','BlankIntensity','Aliquot1Time',
+                          'Aliquot1Intensity','Aliquot2Time','Aliquot2Intensity',
+                           'Aliquot3Time','Aliquot3Intensity')
+
+#Base R: Plot of Aliquot 1 time and intensity of WP1
+par(mfrow= c(2,2)) # representing 3 intensities of WP1
+plot(WP1.240_intl$Aliquot1Time,WP1.240_intl$Aliquot1Intensity,
+     pch = 16,
+     col = "red",
+     lwd = 3,
+     main = "Aliquot1 Time vs Intensity for Wal Pill1",
+     xlab = "Aliquot 1 Time",
+     ylab = "Aliquot 1 Intensity",
+     xlim =  c(2.3,3.2))
+#Base R: Plot of Aliquot 2 time and intensity of Wal Pill1
+plot(WP1.240_intl$Aliquot2Time,WP1.240_intl$Aliquot2Intensity,
+     pch = 16,
+     col = "green",
+     lwd = 3,
+     main = "Aliquot2 Time vs Intensity for Wal Pill1",
+     xlab = "Aliquot 2 Time",
+     ylab = "Aliquot 2 Intensity",
+     xlim =  c(2.3,3.2))
+#Base R: Plot of Aliquot 3 time and intensity of Wal Pill1
+plot(WP1.240_intl$Aliquot3Time,WP1.240_intl$Aliquot3Intensity,
+     pch = 16,
+     col = "blue",
+     lwd = 3,
+     main = "Aliquot3 Time vs Intensity for Wal Pill1",
+     xlab = "Aliquot 3 Time",
+     ylab = "Aliquot 3 Intensity",
+     xlim =  c(2.3,3.2))
+```
+
+### Wal Pill 2 from Peak 240.00 92.900 
+
+```{r,  echo= FALSE, warning=FALSE}
+#Importing WP Pill 1 for Peak 240.00 92.900
+WP2.240 <- read.delim("Data Set/The Trimed Datas Work/240.00 92.900/Wal Pill 2 240.00 92.900 New.txt")
+WP2.240_intl<- WP2.240[,-c(9:14)] # removing column from 9 to 14
+
+#changing column names for WP 1 from 240.00 92.900Peak
+colnames(WP2.240_intl) <-c('BlankTime','BlankIntensity','Aliquot1Time',
+                          'Aliquot1Intensity','Aliquot2Time','Aliquot2Intensity',
+                           'Aliquot3Time','Aliquot3Intensity')
+
+
+
+#Base R: Plot of Aliquot 1 time and intensity of WP2
+par(mfrow= c(2,2)) # representing 3 intensities of WP2
+plot(WP2.240_intl$Aliquot1Time,WP2.240_intl$Aliquot1Intensity,
+     pch = 16,
+     col = "red",
+     lwd = 3,
+     main = "Aliquot1 Time vs Intensity for Wal Pill2",
+     xlab = "Aliquot 1 Time",
+     ylab = "Aliquot 1 Intensity",
+     xlim =  c(2.3,3.2))
+#Base R: Plot of Aliquot 2 time and intensity of Wal Pill2
+plot(WP2.240_intl$Aliquot2Time,WP2.240_intl$Aliquot2Intensity,
+     pch = 16,
+     col = "green",
+     lwd = 3,
+     main = "Aliquot2 Time vs Intensity for Wal Pill2",
+     xlab = "Aliquot 2 Time",
+     ylab = "Aliquot 2 Intensity",
+     xlim =  c(2.3,3.2))
+#Base R: Plot of Aliquot 3 time and intensity of Wal Pill2
+plot(WP2.240_intl$Aliquot3Time,WP2.240_intl$Aliquot3Intensity,
+     pch = 16,
+     col = "blue",
+     lwd = 3,
+     main = "Aliquot3 Time vs Intensity for Wal Pill2",
+     xlab = "Aliquot 3 Time",
+     ylab = "Aliquot 3 Intensity",
+     xlim =  c(2.3,3.2))
+```
+
+
+### Wal Pill 3 from Peak 240.00 92.900 
+
+```{r,  echo= FALSE, warning=FALSE}
+#Importing WP Pill 1 for Peak 240.00 92.900
+WP3.240 <- read.delim("Data Set/The Trimed Datas Work/240.00 92.900/Wal Pill 3 240.00 92.900 New.txt")
+WP3.240_intl<- WP3.240[,-c(9:14)] # removing column from 9 to 14
+
+#changing column names for WP 1 from 240.00 92.900Peak
+colnames(WP3.240_intl) <-c('BlankTime','BlankIntensity','Aliquot1Time',
+                          'Aliquot1Intensity','Aliquot2Time','Aliquot2Intensity',
+                           'Aliquot3Time','Aliquot3Intensity')
+WP3.240_int <- WP3.240_intl
+#Base R: Plot of Aliquot 1 time and intensity of WP3
+par(mfrow= c(2,2)) # representing 3 intensities of WP3
+plot(WP3.240_int$Aliquot1Time,WP3.240_int$Aliquot1Intensity,
+     pch = 16,
+     col = "red",
+     lwd = 3,
+     main = "Aliquot1 Time vs Intensity for Wal Pill3",
+     xlab = "Aliquot 1 Time",
+     ylab = "Aliquot 1 Intensity",
+     xlim =  c(2.3,3.2))
+#Base R: Plot of Aliquot 2 time and intensity of Wal Pill3
+plot(WP3.240_int$Aliquot2Time,WP3.240_int$Aliquot2Intensity,
+     pch = 16,
+     col = "green",
+     lwd = 3,
+     main = "Aliquot2 Time vs Intensity for Wal Pill3",
+     xlab = "Aliquot 2 Time",
+     ylab = "Aliquot 2 Intensity",
+     xlim =  c(2.3,3.2))
+#Base R: Plot of Aliquot 3 time and intensity of Wal Pill3
+plot(WP3.240_int$Aliquot3Time,WP3.240_int$Aliquot3Intensity,
+     pch = 16,
+     col = "blue",
+     lwd = 3,
+     main = "Aliquot3 Time vs Intensity for Wal Pill3",
+     xlab = "Aliquot 3 Time",
+     ylab = "Aliquot 3 Intensity",
+     xlim =  c(2.3,3.2))
+```
+## Average Wal Pill Intensities
+
+
+```{r,  echo= FALSE, warning=FALSE}
+#Getting Average for Intensities
+#Wal Pill: Intensity 1
+WP1.ali1.240 <- mean(na.omit(WP1.240_intl$Aliquot1Intensity))
+WP2.ali1.240 <- mean(na.omit(WP2.240_intl$Aliquot1Intensity))
+WP3.ali1.240 <- mean(na.omit(WP3.240_int$Aliquot1Intensity))
+
+#Wal Pill: Intensity 2
+WP1.ali2.240 <- mean(na.omit(WP1.240_intl$Aliquot2Intensity))
+WP2.ali2.240 <- mean(na.omit(WP2.240_intl$Aliquot2Intensity))
+WP3.ali2.240 <- mean(na.omit(WP3.240_int$Aliquot2Intensity))
+
+#Wal Pill: Intensity 3
+WP1.ali3.240 <- mean(na.omit(WP1.240_intl$Aliquot3Intensity))
+WP2.ali3.240 <- mean(na.omit(WP2.240_intl$Aliquot3Intensity))
+WP3.ali3.240 <- mean(na.omit(WP3.240_int$Aliquot3Intensity))
+```
+
+
+## Data Visualization for Wal Pill Peak 240.00 92.900
+
+```{r,  echo= FALSE, warning=FALSE}
+WP1.240 <- mean(WP1.ali1.240, WP1.ali2.240, WP1.ali3.240)
+WP2.240 <- mean(WP2.ali1.240, WP2.ali2.240, WP2.ali3.240)
+WP3.240 <- mean(WP3.ali1.240, WP3.ali2.240, WP3.ali3.240)
+
+WP.240 <- c(WP1.ali1.240, WP1.ali2.240, WP1.ali3.240, 
+            WP2.ali1.240, WP2.ali2.240, WP2.ali3.240, 
+            WP3.ali1.240, WP3.ali2.240, WP3.ali3.240)
+
+WP.240<- as.data.frame(WP.240)
+
+summary(WP.240) # made a data frame
+
+
+#boxplot 
+boxplot(WP.240,
+        horizontal = TRUE,
+        col = rainbow(ncol(WPa)),
+        main = "Boxplot of WP Pills: Peak 240.00 92.900")
+
+#Scatter Plot
+smoothScatter(WP.240,
+              main = "Scatterplot for WP Pills from Peak 240.00 92.900",
+              xlab = "Time",
+              ylab = "Intensity")
+
+```
+
+
+## Anova of Peak 240.00 92.900
+
+```{r,  echo= FALSE, warning=FALSE}
+Intensity <- c(BP1.240, BP2.240, BP3.240, PV1.240, PV2.240, PV3.240,WP1.240, WP2.240, WP3.240)
+Type <- c('BP1', 'BP2', 'BP3', 'PV1', 'PV2', 'PV3', 'WL1', 'WL2', 'WL3')
+Pills <- c(1,1,1,2,2,2,3,3,3)
+da.240 <- cbind(Type, Pills, Intensity)
+da.240 <- as.data.frame(da.240)
+anova.240 <- aov(Intensity ~ Pills, data = da.240)
+summary(anova.240)
+par(mfrow=c(2,2))
+plot(anova.240)
+#Post-hoc test
+tukey.240<-TukeyHSD(anova.240)
+tukey.240
+plot(tukey.240, las = 1)
+```
+The p-value of the pills variable is high (p >0.05), For this peak location, it appears that there are no substantial differences between the tablets. According to the findings of the post-hoc test, there are no statistically significant differences (p > 0.05) between pill groups.
+
+
+
+## Loading Data set for Peak 240.00 137.100
+
+### Bayer Pill 1 from Peak 240.00 137.100
+
+```{r,  echo= FALSE, warning=FALSE}
+# Importing data from 240.00 137.100Peak
+#Importing Bayer Pill 1 from 240.00 137.100Peak
+Bayer1.100 <- read.delim("Data Set/The Trimed Datas Work/240.00 137.100/240.00 137.100 Bayer Pill 1 New.txt")
+Bayer1.100_intl<- Bayer1.100 [,-c(9:13)] # removing column from 9 to 13
+#changing column names for bayer pill1from 240.00 137.100Peak
+colnames(Bayer1.100_intl) <-c('BlankTime','BlankIntensity','Aliquot1Time',
+                          'Aliquot1Intensity','Aliquot2Time','Aliquot2Intensity',
+                           'Aliquot3Time','Aliquot3Intensity')
+
+#Base R: Plot of Aliquot 1 time and intensity of Bayer pill 1
+par(mfrow= c(2,2)) # representing 3 intensities of Bayer Pill 1
+plot(Bayer1.100_intl$Aliquot1Time,Bayer1.100_intl$Aliquot1Intensity,
+     pch = 16,
+     col = "red",
+     lwd = 3,
+     main = "Aliquot1 Time vs Intensity for Bayer Pill1",
+     xlab = "Aliquot 1 Time",
+     ylab = "Aliquot 1 Intensity",
+     xlim =  c(2.3,3.2))
+#Base R: Plot of Aliquot 2 time and intensity of Bayer pill 1
+plot(Bayer1.100_intl$Aliquot2Time,Bayer1.100_intl$Aliquot2Intensity,
+     pch = 16,
+     col = "green",
+     lwd = 3,
+     main = "Aliquot2 Time vs Intensity for Bayer Pill1",
+     xlab = "Aliquot 2 Time",
+     ylab = "Aliquot 2 Intensity",
+     xlim =  c(2.3,3.2))
+#Base R: Plot of Aliquot 3 time and intensity of Bayer pill 1
+plot(Bayer1.100_intl$Aliquot3Time,Bayer1.100_intl$Aliquot3Intensity,
+     pch = 16,
+     col = "blue",
+     lwd = 3,
+     main = "Aliquot3 Time vs Intensity for Bayer Pill1",
+     xlab = "Aliquot 3 Time",
+     ylab = "Aliquot 3 Intensity",
+     xlim =  c(2.3,3.2))
+```
+
+### Bayer Pill 2 from Peak 240.00 137.100
+
+
+```{r,  echo= FALSE, warning=FALSE}
+#Importing Bayer Pill 2 for Peak 240.00 137.100
+Bayer2.100 <- read.delim("Data Set/The Trimed Datas Work/240.00 137.100/240.00 137.100 Bayer Pill 2 New.txt")
+Bayer2.100_intl<- Bayer2.100 [,-c(9:14)] # removing column from 9 to 14
+
+#changing column names for bayer pill1from 240.00 137.100Peak
+colnames(Bayer2.100_intl) <-c('BlankTime','BlankIntensity','Aliquot1Time',
+                          'Aliquot1Intensity','Aliquot2Time','Aliquot2Intensity',
+                           'Aliquot3Time','Aliquot3Intensity')
+
+#Base R: Plot of Aliquot 1 time and intensity of Bayer pill 2
+par(mfrow= c(2,2)) # representing 3 intensities of Bayer Pill 2
+plot(Bayer2.100_intl$Aliquot1Time,Bayer2.100_intl$Aliquot1Intensity,
+     pch = 16,
+     col = "red",
+     lwd = 3,
+     main = "Aliquot1 Time vs Intensity for Bayer Pill2",
+     xlab = "Aliquot 1 Time",
+     ylab = "Aliquot 1 Intensity",
+     xlim =  c(2.3,3.2))
+#Base R: Plot of Aliquot 2 time and intensity of Bayer pill 2
+plot(Bayer2.100_intl$Aliquot2Time,Bayer2.100_intl$Aliquot2Intensity,
+     pch = 16,
+     col = "green",
+     lwd = 3,
+     main = "Aliquot2 Time vs Intensity for Bayer Pill2",
+     xlab = "Aliquot 2 Time",
+     ylab = "Aliquot 2 Intensity",
+     xlim =  c(2.3,3.2))
+#Base R: Plot of Aliquot 3 time and intensity of Bayer pill 2
+plot(Bayer2.100_intl$Aliquot3Time,Bayer2.100_intl$Aliquot3Intensity,
+     pch = 16,
+     col = "blue",
+     lwd = 3,
+     main = "Aliquot3 Time vs Intensity for Bayer Pill2",
+     xlab = "Aliquot 3 Time",
+     ylab = "Aliquot 3 Intensity",
+     xlim =  c(2.3,3.2))
+
+```
+### Bayer Pill 3 from Peak 240.00 137.100
+
+```{r,  echo= FALSE, warning=FALSE}
+#Importing bayer pill 3 for peak 240.00 137.100
+Bayer3.100 <- read.delim("Data Set/The Trimed Datas Work/240.00 137.100/240.00 137.100 Bayer Pill 3 New.txt")
+Bayer3.100_intl<- Bayer3.100 [,-c(9:14)] # removing column from 9 to 14
+
+#changing column names for bayer pill1from 240.00 137.100Peak
+colnames(Bayer3.100_intl) <-c('BlankTime','BlankIntensity','Aliquot1Time',
+                          'Aliquot1Intensity','Aliquot2Time','Aliquot2Intensity',
+                           'Aliquot3Time','Aliquot3Intensity')
+
+
+#Base R: Plot of Aliquot 1 time and intensity of Bayer pill 3
+par(mfrow= c(2,2)) # representing 3 intensities of Bayer Pill 3
+plot(Bayer3.100_intl$Aliquot1Time,Bayer3.100_intl$Aliquot1Intensity,
+     pch = 16,
+     col = "red",
+     lwd = 3,
+     main = "Aliquot1 Time vs Intensity for Bayer Pill3",
+     xlab = "Aliquot 1 Time",
+     ylab = "Aliquot 1 Intensity",
+     xlim =  c(2.3,3.2))
+#Base R: Plot of Aliquot 2 time and intensity of Bayer pill 3
+plot(Bayer3.100_intl$Aliquot2Time,Bayer3.100_intl$Aliquot2Intensity,
+     pch = 16,
+     col = "green",
+     lwd = 3,
+     main = "Aliquot2 Time vs Intensity for Bayer Pill3",
+     xlab = "Aliquot 2 Time",
+     ylab = "Aliquot 2 Intensity",
+     xlim =  c(2.3,3.2))
+#Base R: Plot of Aliquot 3 time and intensity of Bayer pill 3
+plot(Bayer3.100_intl$Aliquot3Time,Bayer3.100_intl$Aliquot3Intensity,
+     pch = 16,
+     col = "blue",
+     lwd = 3,
+     main = "Aliquot3 Time vs Intensity for Bayer Pill3",
+     xlab = "Aliquot 3 Time",
+     ylab = "Aliquot 3 Intensity",
+     xlim =  c(2.3,3.2))
+
+```
+
+## Average Bayer Pill Intensities
+
+
+```{r,  echo= FALSE, warning=FALSE}
+#Getting Average for Intensities
+#Bayer Pill: Intensity 1
+BP1.ali1.100 <- mean(na.omit(Bayer1.100_intl$Aliquot1Intensity))
+BP2.ali1.100 <- mean(na.omit(Bayer2.100_intl$Aliquot1Intensity))
+BP3.ali1.100 <- mean(na.omit(Bayer3.100_intl$Aliquot1Intensity))
+
+#Bayer Pill: Intensity 2
+BP1.ali2.100 <- mean(na.omit(Bayer1.100_intl$Aliquot2Intensity))
+BP2.ali2.100 <- mean(na.omit(Bayer2.100_intl$Aliquot2Intensity))
+BP3.ali2.100 <- mean(na.omit(Bayer3.100_intl$Aliquot2Intensity))
+#Bayer Pill: Intensity 3
+BP1.ali3.100 <- mean(na.omit(Bayer1.100_intl$Aliquot3Intensity))
+BP2.ali3.100 <- mean(na.omit(Bayer2.100_intl$Aliquot3Intensity))
+BP3.ali3.100 <- mean(na.omit(Bayer3.100_intl$Aliquot3Intensity))
+```
+
+
+## Data Visualization for Bayer Pill Peak 240.00 137.100
+
+```{r,  echo= FALSE, warning=FALSE}
+BP1.100 <- mean(BP1.ali1.100, BP1.ali2.100, BP1.ali3.100)
+BP2.100 <- mean(BP2.ali1.100, BP2.ali2.100, BP2.ali3.100)
+BP3.100 <- mean(BP3.ali1.100, BP3.ali2a, BP3.ali3.100)
+
+BP.100 <- c(BP1.ali1.100, BP1.ali2.100, BP1.ali3.100, 
+            BP2.ali1.100, BP2.ali2.100, BP2.ali3.100, 
+            BP3.ali1.100, BP3.ali2.100, BP3.ali3.100)
+
+BP.100<- as.data.frame(BP.100)
+
+summary(BP.100)# made a data frame
+
+
+#boxplot 
+boxplot(BP.100,
+        horizontal = TRUE,
+        col = rainbow(ncol(BPa)),
+        main = "Boxplot of Bayer Pills: Peak 240.00 137.100")
+
+#Scatter Plot
+smoothScatter(BP.100,
+              main = "Scatterplot for Bayer Pills from Peak 240.00 137.100",
+              xlab = "Time",
+              ylab = "Intensity")
+
+```
+
+
+### PV 1 Pill from Peak 240.00 137.100 
+
+```{r,  echo= FALSE, warning=FALSE}
+#Importing P.V Pill 1 for Peak 240.00 137.100
+PV1.100 <- read.delim("Data Set/The Trimed Datas Work/240.00 137.100/240.00 137.100 P.V Pill 1 New.txt")
+PV1.100_intl<- PV1.100[,-c(9:14)] # removing column from 9 to 14
+
+#changing column names for PV 1 from 240.00 137.100Peak
+colnames(PV1.100_intl) <-c('BlankTime','BlankIntensity','Aliquot1Time',
+                          'Aliquot1Intensity','Aliquot2Time','Aliquot2Intensity',
+                           'Aliquot3Time','Aliquot3Intensity')
+
+#Base R: Plot of Aliquot 1 time and intensity of PV pill 1
+par(mfrow= c(2,2)) # representing 3 intensities of PV Pill 1
+plot(PV1.100_intl$Aliquot1Time,PV1.100_intl$Aliquot1Intensity,
+     pch = 16,
+     col = "red",
+     lwd = 3,
+     main = "Aliquot1 Time vs Intensity for PV Pill1",
+     xlab = "Aliquot 1 Time",
+     ylab = "Aliquot 1 Intensity",
+     xlim =  c(2.3,3.2))
+#Base R: Plot of Aliquot 2 time and intensity of PVpill 1
+plot(PV1.100_intl$Aliquot2Time,PV1.100_intl$Aliquot2Intensity,
+     pch = 16,
+     col = "green",
+     lwd = 3,
+     main = "Aliquot2 Time vs Intensity for PV Pill1",
+     xlab = "Aliquot 2 Time",
+     ylab = "Aliquot 2 Intensity",
+     xlim =  c(2.3,3.2))
+#Base R: Plot of Aliquot 3 time and intensity of PV pill 1
+plot(PV1.100_intl$Aliquot3Time,PV1.100_intl$Aliquot3Intensity,
+     pch = 16,
+     col = "blue",
+     lwd = 3,
+     main = "Aliquot3 Time vs Intensity for PV Pill1",
+     xlab = "Aliquot 3 Time",
+     ylab = "Aliquot 3 Intensity",
+     xlim =  c(2.3,3.2))
+
+```
+
+### PV 2 Pill from Peak 240.00 137.100 
+
+```{r,  echo= FALSE, warning=FALSE}
+PV2.100 <- read.delim("Data Set/The Trimed Datas Work/240.00 137.100/240.00 137.100 P.V Pill 2 New.txt")
+PV2.100_intl<- PV2.100 [,-c(9:13)] # removing column from 9 to 13
+
+#changing column names for PV pill2 from 240.00 137.100Peak
+colnames(PV2.100_intl) <-c('BlankTime','BlankIntensity','Aliquot1Time',
+                          'Aliquot1Intensity','Aliquot2Time','Aliquot2Intensity',
+                           'Aliquot3Time','Aliquot3Intensity')
+
+#Base R: Plot of Aliquot 1 time and intensity of PVpill 2
+par(mfrow= c(2,2)) # representing 3 intensities of PVPill 2
+plot(PV2.100_intl$Aliquot1Time,PV2.100_intl$Aliquot1Intensity,
+     pch = 16,
+     col = "red",
+     lwd = 3,
+     main = "Aliquot1 Time vs Intensity for PVPill2",
+     xlab = "Aliquot 1 Time",
+     ylab = "Aliquot 1 Intensity",
+     xlim =  c(2.3,3.2))
+#Base R: Plot of Aliquot 2 time and intensity of PVpill 2
+plot(PV2.100_intl$Aliquot2Time,PV2.100_intl$Aliquot2Intensity,
+     pch = 16,
+     col = "green",
+     lwd = 3,
+     main = "Aliquot2 Time vs Intensity for PVPill2",
+     xlab = "Aliquot 2 Time",
+     ylab = "Aliquot 2 Intensity",
+     xlim =  c(2.3,3.2))
+#Base R: Plot of Aliquot 3 time and intensity of PVpill 2
+plot(PV2.100_intl$Aliquot3Time,PV2.100_intl$Aliquot3Intensity,
+     pch = 16,
+     col = "blue",
+     lwd = 3,
+     main = "Aliquot3 Time vs Intensity for PVPill2",
+     xlab = "Aliquot 3 Time",
+     ylab = "Aliquot 3 Intensity",
+     xlim =  c(2.3,3.2))
+
+
+```
+
+### PV 3 Pill from Peak 240.00 137.100 
+
+```{r,  echo= FALSE, warning=FALSE}
+PV3.100 <- read.delim("Data Set/The Trimed Datas Work/240.00 137.100/240.00 137.100 P.V Pill 3 New.txt")
+PV3.100_intl<- PV3.100[,-c(9:14)] # removing column from 9 to 13
+
+#changing column names for PV pill2 from 100.00 137.100Peak
+colnames(PV3.100_intl) <-c('BlankTime','BlankIntensity','Aliquot1Time',
+                          'Aliquot1Intensity','Aliquot2Time','Aliquot2Intensity',
+                           'Aliquot3Time','Aliquot3Intensity')
+
+#Base R: Plot of Aliquot 1 time and intensity of PVpill 3
+par(mfrow= c(2,2)) # representing 3 intensities of PVPill 3
+plot(PV3.100_intl$Aliquot1Time,PV3.100_intl$Aliquot1Intensity,
+     pch = 16,
+     col = "red",
+     lwd = 3,
+     main = "Aliquot1 Time vs Intensity for PVPill3",
+     xlab = "Aliquot 1 Time",
+     ylab = "Aliquot 1 Intensity",
+     xlim =  c(2.3,3.2))
+#Base R: Plot of Aliquot 2 time and intensity of PVpill 3
+plot(PV3.100_intl$Aliquot2Time,PV3.100_intl$Aliquot2Intensity,
+     pch = 16,
+     col = "green",
+     lwd = 3,
+     main = "Aliquot2 Time vs Intensity for PVPill3",
+     xlab = "Aliquot 2 Time",
+     ylab = "Aliquot 2 Intensity",
+     xlim =  c(2.3,3.2))
+#Base R: Plot of Aliquot 3 time and intensity of PVpill 3
+plot(PV3.100_intl$Aliquot3Time,PV3.100_intl$Aliquot3Intensity,
+     pch = 16,
+     col = "blue",
+     lwd = 3,
+     main = "Aliquot3 Time vs Intensity for PVPill3",
+     xlab = "Aliquot 3 Time",
+     ylab = "Aliquot 3 Intensity",
+     xlim =  c(2.3,3.2))
+
+```
+
+## Average P.V Pill Intensities
+
+
+```{r,  echo= FALSE, warning=FALSE}
+#Getting Average for Intensities
+#PV Pill: Intensity 1
+PV1.ali1.100 <- mean(na.omit(PV1.100_intl$Aliquot1Intensity))
+PV2.ali1.100 <- mean(na.omit(PV2.100_intl$Aliquot1Intensity))
+PV3.ali1.100 <- mean(na.omit(PV3.100_intl$Aliquot1Intensity))
+
+#PV Pill: Intensity 2
+PV1.ali2.100 <- mean(na.omit(PV1.100_intl$Aliquot2Intensity))
+PV2.ali2.100 <- mean(na.omit(PV2.100_intl$Aliquot2Intensity))
+PV3.ali2.100 <- mean(na.omit(PV3.100_intl$Aliquot2Intensity))
+
+#PV Pill: Intensity 3
+PV1.ali3.100 <- mean(na.omit(PV1.100_intl$Aliquot3Intensity))
+PV2.ali3.100 <- mean(na.omit(PV2.100_intl$Aliquot3Intensity))
+PV3.ali3.100 <- mean(na.omit(PV3.100_intl$Aliquot3Intensity))
+```
+
+
+## Data Visualization for PV Pill Peak 240.00 137.100
+
+```{r,  echo= FALSE, warning=FALSE}
+PV1.100 <- mean(PV1.ali1.100, PV1.ali2.100, PV1.ali3.100)
+PV2.100 <- mean(PV2.ali1.100, PV2.ali2.100, PV2.ali3.100)
+PV3.100 <- mean(PV3.ali1a, PV3.ali2a, PV3.ali3a)
+
+PV.100 <- c(PV1.ali1.100, PV1.ali2.100, PV1.ali3.100, 
+            PV2.ali1.100, PV2.ali2a, PV2.ali3.100, 
+            PV3.ali1.100, PV3.ali2.100, PV3.ali3.100)
+
+PV.100<- as.data.frame(PV.100)
+
+summary(PV.100) # made a data frame
+
+
+#boxplot 
+boxplot(PV.240,
+        horizontal = TRUE,
+        col = rainbow(ncol(PV.199)),
+        main = "Boxplot of PV Pills: Peak 240.00 137.100")
+
+#Scatter Plot
+smoothScatter(PV.100,
+              main = "Scatterplot for PV Pills from Peak 240.00 137.100",
+              xlab = "Time",
+              ylab = "Intensity")
+
+```
+
+### Wal Pill 1 from Peak 240.00 137.100 
+
+```{r,  echo= FALSE, warning=FALSE}
+#Importing WP Pill 1 for Peak 240.00 137.100
+WP1.100<- read.delim("Data Set/The Trimed Datas Work/240.00 137.100/240.00 137.100 Wal Pill 1 New.txt")
+WP1.100_intl<- WP1.100[,-c(9:14)] # removing column from 9 to 14
+
+#changing column names for WP 1 from 240.00 137.100Peak
+colnames(WP1.100_intl) <-c('BlankTime','BlankIntensity','Aliquot1Time',
+                          'Aliquot1Intensity','Aliquot2Time','Aliquot2Intensity',
+                           'Aliquot3Time','Aliquot3Intensity')
+
+#Base R: Plot of Aliquot 1 time and intensity of WP1
+par(mfrow= c(2,2)) # representing 3 intensities of WP1
+plot(WP1.100_intl$Aliquot1Time,WP1.100_intl$Aliquot1Intensity,
+     pch = 16,
+     col = "red",
+     lwd = 3,
+     main = "Aliquot1 Time vs Intensity for Wal Pill1",
+     xlab = "Aliquot 1 Time",
+     ylab = "Aliquot 1 Intensity",
+     xlim =  c(2.3,3.2))
+#Base R: Plot of Aliquot 2 time and intensity of Wal Pill1
+plot(WP1.100_intl$Aliquot2Time,WP1.100_intl$Aliquot2Intensity,
+     pch = 16,
+     col = "green",
+     lwd = 3,
+     main = "Aliquot2 Time vs Intensity for Wal Pill1",
+     xlab = "Aliquot 2 Time",
+     ylab = "Aliquot 2 Intensity",
+     xlim =  c(2.3,3.2))
+#Base R: Plot of Aliquot 3 time and intensity of Wal Pill1
+plot(WP1.100_intl$Aliquot3Time,WP1.100_intl$Aliquot3Intensity,
+     pch = 16,
+     col = "blue",
+     lwd = 3,
+     main = "Aliquot3 Time vs Intensity for Wal Pill1",
+     xlab = "Aliquot 3 Time",
+     ylab = "Aliquot 3 Intensity",
+     xlim =  c(2.3,3.2))
+```
+
+### Wal Pill 2 from Peak 240.00 137.100 
+
+```{r,  echo= FALSE, warning=FALSE}
+#Importing WP Pill 1 for Peak 240.00 137.100
+WP2.100 <- read.delim("Data Set/The Trimed Datas Work/240.00 137.100/240.00 137.100 Wal Pill 2 New.txt")
+WP2.100_intl<- WP2.100[,-c(9:14)] # removing column from 9 to 14
+
+#changing column names for WP 1 from 240.00 137.100Peak
+colnames(WP2.100_intl) <-c('BlankTime','BlankIntensity','Aliquot1Time',
+                          'Aliquot1Intensity','Aliquot2Time','Aliquot2Intensity',
+                           'Aliquot3Time','Aliquot3Intensity')
+
+
+
+#Base R: Plot of Aliquot 1 time and intensity of WP2
+par(mfrow= c(2,2)) # representing 3 intensities of WP2
+plot(WP2.100_intl$Aliquot1Time,WP2.100_intl$Aliquot1Intensity,
+     pch = 16,
+     col = "red",
+     lwd = 3,
+     main = "Aliquot1 Time vs Intensity for Wal Pill2",
+     xlab = "Aliquot 1 Time",
+     ylab = "Aliquot 1 Intensity",
+     xlim =  c(2.3,3.2))
+#Base R: Plot of Aliquot 2 time and intensity of Wal Pill2
+plot(WP2.100_intl$Aliquot2Time,WP2.100_intl$Aliquot2Intensity,
+     pch = 16,
+     col = "green",
+     lwd = 3,
+     main = "Aliquot2 Time vs Intensity for Wal Pill2",
+     xlab = "Aliquot 2 Time",
+     ylab = "Aliquot 2 Intensity",
+     xlim =  c(2.3,3.2))
+#Base R: Plot of Aliquot 3 time and intensity of Wal Pill2
+plot(WP2.100_intl$Aliquot3Time,WP2.100_intl$Aliquot3Intensity,
+     pch = 16,
+     col = "blue",
+     lwd = 3,
+     main = "Aliquot3 Time vs Intensity for Wal Pill2",
+     xlab = "Aliquot 3 Time",
+     ylab = "Aliquot 3 Intensity",
+     xlim =  c(2.3,3.2))
+```
+
+
+### Wal Pill 3 from Peak 240.00 137.100 
+
+```{r,  echo= FALSE, warning=FALSE}
+#Importing WP Pill 1 for Peak 100.00 137.100
+WP3.100 <- read.delim("Data Set/The Trimed Datas Work/240.00 137.100/240.00 137.100 Wal Pill 3 New.txt")
+WP3.100_intl<- WP3.100[,-c(9:14)] # removing column from 9 to 14
+
+#changing column names for WP 1 from 240.00 137.100Peak
+colnames(WP3.100_intl) <-c('BlankTime','BlankIntensity','Aliquot1Time',
+                          'Aliquot1Intensity','Aliquot2Time','Aliquot2Intensity',
+                           'Aliquot3Time','Aliquot3Intensity')
+WP3.100_int <- WP3.100_intl
+#Base R: Plot of Aliquot 1 time and intensity of WP3
+par(mfrow= c(2,2)) # representing 3 intensities of WP3
+plot(WP3.100_int$Aliquot1Time,WP3.100_int$Aliquot1Intensity,
+     pch = 16,
+     col = "red",
+     lwd = 3,
+     main = "Aliquot1 Time vs Intensity for Wal Pill3",
+     xlab = "Aliquot 1 Time",
+     ylab = "Aliquot 1 Intensity",
+     xlim =  c(2.3,3.2))
+#Base R: Plot of Aliquot 2 time and intensity of Wal Pill3
+plot(WP3.100_int$Aliquot2Time,WP3.100_int$Aliquot2Intensity,
+     pch = 16,
+     col = "green",
+     lwd = 3,
+     main = "Aliquot2 Time vs Intensity for Wal Pill3",
+     xlab = "Aliquot 2 Time",
+     ylab = "Aliquot 2 Intensity",
+     xlim =  c(2.3,3.2))
+#Base R: Plot of Aliquot 3 time and intensity of Wal Pill3
+plot(WP3.100_int$Aliquot3Time,WP3.100_int$Aliquot3Intensity,
+     pch = 16,
+     col = "blue",
+     lwd = 3,
+     main = "Aliquot3 Time vs Intensity for Wal Pill3",
+     xlab = "Aliquot 3 Time",
+     ylab = "Aliquot 3 Intensity",
+     xlim =  c(2.3,3.2))
+```
+## Average Wal Pill Intensities
+
+
+```{r,  echo= FALSE, warning=FALSE}
+#Getting Average for Intensities
+#Wal Pill: Intensity 1
+WP1.ali1.100 <- mean(na.omit(WP1.100_intl$Aliquot1Intensity))
+WP2.ali1.100 <- mean(na.omit(WP2.100_intl$Aliquot1Intensity))
+WP3.ali1.100 <- mean(na.omit(WP3.100_int$Aliquot1Intensity))
+
+#Wal Pill: Intensity 2
+WP1.ali2.100 <- mean(na.omit(WP1.100_intl$Aliquot2Intensity))
+WP2.ali2.100 <- mean(na.omit(WP2.100_intl$Aliquot2Intensity))
+WP3.ali2.100 <- mean(na.omit(WP3.100_int$Aliquot2Intensity))
+
+#Wal Pill: Intensity 3
+WP1.ali3.100 <- mean(na.omit(WP1.100_intl$Aliquot3Intensity))
+WP2.ali3.100 <- mean(na.omit(WP2.100_intl$Aliquot3Intensity))
+WP3.ali3.100 <- mean(na.omit(WP3.100_int$Aliquot3Intensity))
+```
+
+
+## Data Visualization for Wal Pill Peak 240.00 137.100
+
+```{r,  echo= FALSE, warning=FALSE}
+WP1.100 <- mean(WP1.ali1.100, WP1.ali2.100, WP1.ali3.100)
+WP2.100 <- mean(WP2.ali1.100, WP2.ali2.100, WP2.ali3.100)
+WP3.100 <- mean(WP3.ali1.100, WP3.ali2.100, WP3.ali3.100)
+
+WP.100 <- c(WP1.ali1.100, WP1.ali2.100, WP1.ali3.100, 
+            WP2.ali1.100, WP2.ali2.100, WP2.ali3.100, 
+            WP3.ali1.100, WP3.ali2.100, WP3.ali3.100)
+
+WP.100<- as.data.frame(WP.100)
+
+summary(WP.100) # made a data frame
+
+
+#boxplot 
+boxplot(WP.100,
+        horizontal = TRUE,
+        col = rainbow(ncol(WPa)),
+        main = "Boxplot of WP Pills: Peak 240.00 137.100")
+
+#Scatter Plot
+smoothScatter(WP.100,
+              main = "Scatterplot for WP Pills from Peak 240.00 137.100",
+              xlab = "Time",
+              ylab = "Intensity")
+
+```
+
+
+## Anova of Peak 240.00 92.900
+
+```{r,  echo= FALSE, warning=FALSE}
+Intensity <- c(BP1.100, BP2.100, BP3.100, PV1.100, PV2.100, PV3.100,WP1.100, WP2.100, WP3.100)
+Type <- c('BP1', 'BP2', 'BP3', 'PV1', 'PV2', 'PV3', 'WL1', 'WL2', 'WL3')
+Pills <- c(1,1,1,2,2,2,3,3,3)
+da.100 <- cbind(Type, Pills, Intensity)
+da.100 <- as.data.frame(da.100)
+anova.100 <- aov(Intensity ~ Pills, data = da.100)
+summary(anova.100)
+par(mfrow=c(2,2))
+plot(anova.100)
+#Post-hoc test
+tukey.100<-TukeyHSD(anova.100)
+tukey.100
+plot(tukey.100, las = 1)
+```
+The p-value of the pills variable is high (p >0.05), For this peak location, it appears that there are no substantial differences between the tablets. According to the findings of the post-hoc test, there are no statistically significant differences (p > 0.05) between pill groups.
